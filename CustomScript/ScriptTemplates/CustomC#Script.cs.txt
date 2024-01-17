@@ -1,0 +1,16 @@
+/*--------------------------------------------------------------
+ * File: #SCRIPTNAME#.cs
+ * Author: #Author#
+ * Time: #TIME#
+ * Copyright: #Copyright#
+ * Feedback: #Feedback#
+ *--------------------------------------------------------------
+ */
+
+using System;
+using UnityEngine;
+
+public class #SCRIPTNAME# : MonoBehaviour
+{
+    
+}
