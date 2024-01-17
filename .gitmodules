@@ -1,0 +1,3 @@
+[submodule "Assets/WFramework"]
+	path = Assets/WFramework
+	url = https://gitee.com/wang-shaowen/wframework.git
