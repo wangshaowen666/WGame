@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------
  * File: #SCRIPTNAME#.cs
  * Author: #Author#
- * Time: #TIME#
- * Copyright: #Copyright#
+ * Time: #TIME# 
  * Feedback: #Feedback#
+ * Copyright: #Copyright#
  *--------------------------------------------------------------
  */
 
