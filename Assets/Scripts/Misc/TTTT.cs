@@ -8,13 +8,48 @@
  */
 
 using System;
+using System.Diagnostics;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 public class TTTT : MonoBehaviour
 {
-    [ContextMenu("执行")]
+    public int num;
+    
+    [ContextMenu("执行1")]
     private void Excute()
     {
-        Debug.Log(11111);
+        TimeProfiler.LogTime(() =>
+        {
+            for (int i = 0; i < num; i++)
+            {
+                var t = Activator.CreateInstance(typeof(A));
+            }
+        });
     }
+    
+    [ContextMenu("执行2")]
+    private void Excute2()
+    {
+        TimeProfiler.LogTime(() =>
+        {
+            for (int i = 0; i < num; i++)
+            {
+                var t = new A();
+            }
+        });
+    }
+
+    private void Start()
+    {
+       
+    }
+
+
+    public class A
+    {
+        private string m = "jslkdfjlskjflksjlfkslflskflsldfksgfdhd";
+        private int a = 999454;
+    }
+   
 }

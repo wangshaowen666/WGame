@@ -8,9 +8,23 @@
  */
 
 using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 public class LoadDll : MonoBehaviour
 {
-    
+    private void Start()
+    {
+#if UNITY_EDITOR
+        Assembly hotUpdateAss =
+            System.AppDomain.CurrentDomain.GetAssemblies().First(a => a.GetName().Name == "HotUpdate");
+#else
+        Assembly hotUpdateAss = Assembly.Load(File.ReadAllBytes($"{Application.streamingAssetsPath}/HotUpdate.dll.bytes"));
+#endif
+
+        Type type = hotUpdateAss.GetType("HotUpdateTest");
+        type.GetMethod("Run").Invoke(null, null);
+    }
 }
