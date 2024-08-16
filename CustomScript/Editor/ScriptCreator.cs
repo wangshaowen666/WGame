@@ -81,7 +81,7 @@ public class CreateCustomScriptAction : EndNameEditAction
         content = content.Replace("#SCRIPTNAME#", Path.GetFileNameWithoutExtension(pathName));
         content = content.Replace("#Author#", "Wang ShaoWen");
         content = content.Replace("#TIME#", DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"));
-        content = content.Replace("#Copyright#", "Copyright © 2024 wangshaowen. All rights reserved.");
+        //content = content.Replace("#Copyright#", "Copyright © 2024 wangshaowen. All rights reserved.");
         content = content.Replace("#Feedback#", "614270423@qq.com");
         
         // 将修改后的内容写入新创建的文件
