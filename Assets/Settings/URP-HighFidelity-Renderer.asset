@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-1878332245247344467
+--- !u!114 &-8038777141512884464
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9,32 +9,90 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f62c9c65cf3354c93be831c8bc075510, type: 3}
-  m_Name: SSAO
+  m_Script: {fileID: 11500000, guid: 9c48192d2176b405d91ea290572bca07, type: 3}
+  m_Name: ColorAdjustmentsRF
   m_EditorClassIdentifier: 
-  m_Active: 1
-  m_Settings:
-    AOMethod: 1
-    Downsample: 0
-    AfterOpaque: 0
-    Source: 1
-    NormalSamples: 1
-    Intensity: 0.5
-    DirectLightingStrength: 0.25
-    Radius: 0.25
-    Samples: 0
-    BlurQuality: 0
-    Falloff: 100
-    SampleCount: -1
-  m_BlueNoise256Textures:
-  - {fileID: 2800000, guid: 36f118343fc974119bee3d09e2111500, type: 3}
-  - {fileID: 2800000, guid: 4b7b083e6b6734e8bb2838b0b50a0bc8, type: 3}
-  - {fileID: 2800000, guid: c06cc21c692f94f5fb5206247191eeee, type: 3}
-  - {fileID: 2800000, guid: cb76dd40fa7654f9587f6a344f125c9a, type: 3}
-  - {fileID: 2800000, guid: e32226222ff144b24bf3a5a451de54bc, type: 3}
-  - {fileID: 2800000, guid: 3302065f671a8450b82c9ddf07426f3a, type: 3}
-  - {fileID: 2800000, guid: 56a77a3e8d64f47b6afe9e3c95cb57d5, type: 3}
-  m_Shader: {fileID: 4800000, guid: 0849e84e3d62649e8882e9d6f056a017, type: 3}
+  m_Active: 0
+  shader: {fileID: 4800000, guid: fcd182c383ea24a68b694e80a66c766b, type: 3}
+  "\u540E\u66DD\u5149":
+    m_OverrideState: 0
+    m_Value: 0
+  "\u5BF9\u6BD4\u5EA6":
+    m_OverrideState: 0
+    m_Value: 0
+  "\u989C\u8272\u6EE4\u955C":
+    m_OverrideState: 0
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+  "\u8272\u76F8\u504F\u79FB":
+    m_OverrideState: 0
+    m_Value: 0
+  "\u9971\u548C\u5EA6":
+    m_OverrideState: 0
+    m_Value: 0
+  passEvent: 550
+--- !u!114 &-4700010120130800311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: RenderObjects
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  settings:
+    passTag: RenderObjects
+    Event: 550
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 16
+      PassNames: []
+    overrideMaterial: {fileID: 2100000, guid: 6359e0bad724f42e098d9eb5a8dfbe3b, type: 2}
+    overrideMaterialPassIndex: 0
+    overrideShader: {fileID: 4800000, guid: a873847f7b37042b0a0c7b6301232bc3, type: 3}
+    overrideShaderPassIndex: 0
+    overrideMode: 2
+    overrideDepthState: 0
+    depthCompareFunction: 4
+    enableWrite: 1
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
+--- !u!114 &-1086824375589544342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b49c1079d6ba145cbb8e475e50d1675b, type: 3}
+  m_Name: OutLineRF
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  setting:
+    shader: {fileID: 4800000, guid: a873847f7b37042b0a0c7b6301232bc3, type: 3}
+    passEvent: 600
+    outLineColor: {r: 1, g: 1, b: 1, a: 1}
+    outLinePixelWidth: 4
+    layerToRender:
+      serializedVersion: 2
+      m_Bits: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -52,8 +110,13 @@ MonoBehaviour:
       type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
-  - {fileID: -1878332245247344467}
-  m_RendererFeatureMap: adc0de57c6d2eee5
+  - {fileID: 9051450041881269728}
+  - {fileID: 8771337885102114684}
+  - {fileID: 3772048754889196164}
+  - {fileID: -8038777141512884464}
+  - {fileID: -1086824375589544342}
+  - {fileID: -4700010120130800311}
+  m_RendererFeatureMap: e0158740db359d7d7c07707e550dba798402a07e5b025934102f98f3c78670906adebf17fdd2eaf049d5dc8cb235c6be
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -93,6 +156,60 @@ MonoBehaviour:
   m_ShadowTransparentReceive: 1
   m_RenderingMode: 0
   m_DepthPrimingMode: 0
-  m_CopyDepthMode: 0
+  m_CopyDepthMode: 1
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &3772048754889196164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a854e1d4a80204f2aaa2bbb29642919e, type: 3}
+  m_Name: ColorBlitRF
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  shader: {fileID: 4800000, guid: d0d4e8ef2b8884be6a8b2464fa8d8ac4, type: 3}
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.25
+  passEvent: 550
+--- !u!114 &8771337885102114684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3645824d603c0487dae50136ce584736, type: 3}
+  m_Name: OutlineMeshesInLayerFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    isEnabled: 1
+    outlineMaterial: {fileID: 2100000, guid: 6359e0bad724f42e098d9eb5a8dfbe3b, type: 2}
+    outlineColor: {r: 0.20392154, g: 0.2588057, b: 0.8509804, a: 1}
+    outlinePixelWidth: 8
+    renderPassEvent: 1000
+    layerToRender:
+      serializedVersion: 2
+      m_Bits: 16
+    useSeperableAxisMethod: 1
+--- !u!114 &9051450041881269728
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9f261dc42911495cadcbcc8892becee, type: 3}
+  m_Name: CustomPostProcessingFeature
+  m_EditorClassIdentifier: 
+  m_Active: 0

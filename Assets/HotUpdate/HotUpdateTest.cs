@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HotUpdateTest 
+public class HotUpdateTest
 {
     public static void Run()
     {
@@ -21,7 +21,7 @@ public class HotUpdateTest
         go.AddComponent<Print>();
 
         TT t = new TT {a = 1, b = "ee"};
-        List<TT> tLst = new List<TT>{t};
+        List<TT> tLst = new List<TT> {t};
 
         foreach (var _t in tLst)
         {
@@ -34,7 +34,7 @@ public class HotUpdateTest
             Debug.Log("[List<float>]:" + i);
         }
     }
-    
+
     public class TT
     {
         public int a;
