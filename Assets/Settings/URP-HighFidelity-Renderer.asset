@@ -87,12 +87,12 @@ MonoBehaviour:
   m_Active: 0
   setting:
     shader: {fileID: 4800000, guid: a873847f7b37042b0a0c7b6301232bc3, type: 3}
-    passEvent: 600
-    outLineColor: {r: 1, g: 1, b: 1, a: 1}
-    outLinePixelWidth: 4
+    passEvent: 1000
+    outLineColor: {r: 0.20155624, g: 0.2581829, b: 0.8549927, a: 1}
+    outLinePixelWidth: 8
     layerToRender:
       serializedVersion: 2
-      m_Bits: 0
+      m_Bits: 16
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
