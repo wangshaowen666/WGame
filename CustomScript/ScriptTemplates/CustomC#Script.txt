@@ -2,7 +2,6 @@
  * File: #SCRIPTNAME#.cs
  * Author: #Author#
  * Time: #TIME# 
- * Feedback: #Feedback#
  *--------------------------------------------------------------
  */
 
