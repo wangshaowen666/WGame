@@ -87,7 +87,6 @@ public class ClassPool
         info.useCount++;
         info.activeCount++;
 #endif
-        ret?.Init();
         return ret;
     }
 
@@ -116,7 +115,6 @@ public class ClassPool
         info.useCount++;
         info.activeCount++;
 #endif
-        ret?.Init();
         return ret;
     }
     
@@ -174,10 +172,6 @@ public class ClassPool
 #if UNITY_EDITOR
             info.poolCount++;
 #endif
-        }
-        else
-        {
-            item.Clean();
         }
 #if UNITY_EDITOR
         info.activeCount--;

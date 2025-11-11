@@ -15,18 +15,14 @@ using UnityEngine;
 /// </summary>
 public interface IClass
 {
-    /// <summary>
-    /// 初始化，每次从对象池获取时都会调用，整个生命周期只需要执行一次的可放在构造函数执行
-    /// </summary>
-    public void Init();
+    // 通常初始化需要0或不等的参数，这里无法传递
+    //public void Init();
     
     /// <summary>
     /// 重置，被对象池回收时执行
     /// </summary>
     public void Reset();
     
-    /// <summary>
-    /// 销毁
-    /// </summary>
-    public void Clean();
+    // 销毁直接置为null即可
+    //public void Clean();
 }

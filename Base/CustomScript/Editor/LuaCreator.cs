@@ -11,7 +11,7 @@ using UnityEngine;
 
 public class LuaCreator 
 {
-    private static readonly string ScriptTemplatePath = "Assets/WFramework/CustomScript/ScriptTemplates/CustomLuaScript.txt";
+    private static readonly string ScriptTemplatePath = "Assets/WFramework/Base/CustomScript/ScriptTemplates/CustomLuaScript.txt";
     
     [MenuItem("Assets/Create/Custom Lua Script", false, 71)]
     private static void CreateCustomCSharpScript()

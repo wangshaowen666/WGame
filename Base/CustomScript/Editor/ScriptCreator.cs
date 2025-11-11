@@ -17,7 +17,7 @@ using Object = UnityEngine.Object;
 
 public class ScriptCreator 
 {
-    private static readonly string ScriptTemplatePath = "Assets/WFramework/CustomScript/ScriptTemplates/CustomC#Script.txt";
+    private static readonly string ScriptTemplatePath = "Assets/WFramework/Base/CustomScript/ScriptTemplates/CustomC#Script.txt";
     
     [MenuItem("Assets/Create/Custom C# Script", false, 70)]
     private static void CreateCustomCSharpScript()
