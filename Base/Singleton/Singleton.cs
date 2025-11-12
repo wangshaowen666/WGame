@@ -26,7 +26,6 @@ public class Singleton<T> where T:Singleton<T>
                 if (instance == null)
                 {
                     var ctors = typeof(T).GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic);
-
                     var ctor = Array.Find(ctors, c => c.GetParameters().Length == 0);
 
                     if (ctor == null)

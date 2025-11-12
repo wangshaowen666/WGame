@@ -28,7 +28,7 @@ public abstract class FsmState
     {
     }
 
-    public virtual void OnUpdate()
+    public virtual void OnUpdate(float deltaTime, float realDeltaTime)
     {
     }
 

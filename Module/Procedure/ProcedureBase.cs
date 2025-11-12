@@ -1,14 +1,12 @@
 /*--------------------------------------------------------------
- * File: FsmMgr.cs
+ * File: ProcedureBase.cs
  * Author: Wang ShaoWen
- * Time: 2025/11/07 17:04:32 
+ * Time: 2025/11/12 15:35:03 
  *--------------------------------------------------------------
  */
 
-using System;
-using UnityEngine;
 
-public class FsmMgr : MonoBehaviour
+public class ProcedureBase : FsmState
 {
     
 }

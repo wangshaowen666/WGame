@@ -6,99 +6,77 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UnitTest : MonoBehaviour
 {
-    private int count = 100000;
-    private float time = 0;
-    
+    private TestA a;
+    private TestB b;
     void Start()
     {
+        var a = CoroutineRunner.Instance.Run(T());
+        CoroutineRunner.Instance.Stop(a);
+    }
+
+    private IEnumerator T()
+    {
+        yield return new WaitForSeconds(1);
     }
 
     void Update()
     {
-        time += Time.deltaTime;
-        TimeProfiler.RecordTimeStart("List");
-        T1();
-        TimeProfiler.RecordTimeStop("List");
-        
-        TimeProfiler.RecordTimeStart("LinkedList");
-        T2();
-        TimeProfiler.RecordTimeStop("LinkedList");
+        UpdateMgr.Update(Time.deltaTime, Time.deltaTime);
 
-        if (time > 5)
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            UpdateMgr.UnRegisterUpdate(a);
+        }
+        
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            UpdateMgr.RegisterUpdate(a);
+        }
+        
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            a = new TestA();
+            b = new TestB();
+            
+            UpdateMgr.RegisterUpdate(a);
+            UpdateMgr.RegisterUpdate(b);
+        }
+    }
+}
+
+public class TestA : IUpdateable
+{
+    private float time;
+
+    public void Update(float logicTime, float realTime)
+    {
+        time += logicTime;
+        if (time > 1)
         {
             time = 0;
-            TimeProfiler.DebugRecordTime(true, true, true);
+            Log.Info("TestA执行Update");
         }
     }
+}
 
-    private void T1()
+public class TestB : IUpdateable
+{
+    private float time;
+
+    public void Update(float logicTime, float realTime)
     {
-        List<int> a = new List<int> { 5, 1, 4, 12, 65, 2, 8, 45, 96, 7, 85, 22, 1 };
-        List<int> list = new List<int>();
-        for (int _ = 0; _ < 100; _++)
+        time += logicTime;
+        if (time > 1)
         {
-            for (int i = 0; i < a.Count; i++)
-            {
-                if (list.Count > 1)
-                {
-                    for (int j = 0; j < list.Count; j++)
-                    {
-                        if (list[j] > a[i])
-                        {
-                            list.Insert(j, a[i]);
-                            break;
-                        }
-                    }
-                
-                    list.Add(a[i]);
-                }
-                else
-                {
-                    list.Add(a[i]);
-                }
-            }
+            time = 0;
+            Log.Info("TestB执行Update");
         }
-    }
-    
-    private void T2()
-    {
-        List<int> a = new List<int> { 5, 1, 4, 12, 65, 2, 8, 45, 96, 7, 85, 22, 1 };
-        LinkedList<int> list = new LinkedList<int>();
-        
-        for (int _ = 0; _ < 100; _++)
-        {
-            for (int i = 0; i < a.Count; i++)
-            {
-                var m = list.First;
-                while (m != null)
-                {
-                    if (m.Value > a[i])
-                    {
-                        break;
-                    }
-
-                    m = m.Next;
-                }
-
-                if (m != null)
-                {
-                    list.AddBefore(m, a[i]);
-                }
-                else
-                {
-                    list.AddLast(a[i]);
-                }
-            }
-        }
-    }
-
-    private void T3()
-    {
-        List<int> list = new List<int>();
     }
 }

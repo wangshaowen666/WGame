@@ -20,44 +20,19 @@ public class Fsm : IClass
     {
         get { return _curState; }
     }
-    
-    public void Init(params FsmState[] states)
-    {
-        if (states == null || states.Length == 0)
-        {
-            Log.Error("状态机拥有状体不可为空");
-            return;
-        }
 
-        Init(states.ToList());
-    }
-    
-    public void Init(List<FsmState> states)
+    public static Fsm Create<T>(params T[] states) where T : FsmState
     {
-        if (states == null || states.Count == 0)
-        {
-            Log.Error("状态机拥有状体不可为空");
-            return;
-        }
-        
-        foreach (var state in states)
-        {
-            if (state == null)
-            {
-                Log.Error("无效的状态");
-                return;
-            }
-            
-            Type type = state.GetType();
-            if (_states.ContainsKey(type))
-            {
-                Log.Error("状态已经存在：", type.Name);
-                return;
-            }
-            
-            _states.Add(type, state);
-            state.OnInit(this);
-        }
+        Fsm fsm = ClassPoolFactory.Get<Fsm>();
+        fsm.Init(states.ToList());
+        return fsm;
+    }
+
+    public static Fsm Create<T>(List<T> states) where T : FsmState
+    {
+        Fsm fsm = ClassPoolFactory.Get<Fsm>();
+        fsm.Init(states.ToList());
+        return fsm;
     }
 
     public void ChangeState<T>() where T : FsmState
@@ -131,6 +106,34 @@ public class Fsm : IClass
         _curState = null;
         _datas.Clear();
         _states.Clear();
+    }
+    
+    private void Init<T>(List<T> states) where T : FsmState
+    {
+        if (states == null || states.Count == 0)
+        {
+            Log.Error("状态机拥有状体不可为空");
+            return;
+        }
+        
+        foreach (var state in states)
+        {
+            if (state == null)
+            {
+                Log.Error("无效的状态");
+                return;
+            }
+            
+            Type type = state.GetType();
+            if (_states.ContainsKey(type))
+            {
+                Log.Error("状态已经存在, 不可重复添加：", type.Name);
+                return;
+            }
+            
+            _states.Add(type, state);
+            state.OnInit(this);
+        }
     }
 
     private FsmState GetState(Type type)
