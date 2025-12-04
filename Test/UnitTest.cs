@@ -9,6 +9,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Analytics;
+using UnityEngine.Profiling;
 using UnityEngine.UI;
 
 public class UnitTest : MonoBehaviour
@@ -28,26 +30,54 @@ public class UnitTest : MonoBehaviour
 
     void Update()
     {
-        UpdateMgr.Update(Time.deltaTime, Time.deltaTime);
-
-        if (Input.GetKeyDown(KeyCode.A))
+        if (Time.time - lastCheckTime > checkInterval)
         {
-            UpdateMgr.UnRegisterUpdate(a);
+            CheckGC();
+            lastCheckTime = Time.time;
         }
+    }
+    
+    
+    [Header("监控配置")]
+    [SerializeField] private float checkInterval = 1f;
+    [SerializeField] private long gcThresholdBytes = 1024 * 1024; // 1MB
+    [SerializeField] private bool enableAlert = true;
+    
+    private long lastTotalMemory;
+    private int gcCountPerSecond;
+    private float lastCheckTime;
+    
+    void CheckGC()
+    {
+        // 累积分配的托管内存总量，包含已回收的
+        long currentMemory = Profiler.GetTotalAllocatedMemoryLong();
+        // 当前实际占用内存大小
+        //long currentMemory = Profiler.GetTotalReservedMemoryLong();
         
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            UpdateMgr.RegisterUpdate(a);
-        }
+        long allocatedSinceLastCheck = currentMemory - lastTotalMemory;
         
-        if (Input.GetKeyDown(KeyCode.C))
+        if (allocatedSinceLastCheck > gcThresholdBytes && enableAlert)
         {
-            a = new TestA();
-            b = new TestB();
+            Debug.LogWarning($"[GCMonitor] 检测到大量内存分配: {allocatedSinceLastCheck / 1024f / 1024f:F2}MB");
             
-            UpdateMgr.RegisterUpdate(a);
-            UpdateMgr.RegisterUpdate(b);
+            // 发送到监控后端
+            SendGCAlert(allocatedSinceLastCheck);
         }
+        
+        lastTotalMemory = currentMemory;
+        
+        // 统计GC次数
+        // （需要使用Profiler API或自定义计数）
+    }
+    
+    void SendGCAlert(long bytes)
+    {
+        // 集成监控系统（如Sentry、Firebase）
+        // Analytics.LogEvent("gc_alert", new Dictionary<string, object>
+        // {
+        //     { "allocated_mb", bytes / 1024f / 1024f },
+        //     { "scene", UnityEngine.SceneManagement.SceneManager.GetActiveScene().name }
+        // });
     }
 }
 

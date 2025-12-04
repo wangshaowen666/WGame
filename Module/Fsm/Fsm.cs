@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public class Fsm : IClass
+public class Fsm : IResetable
 {
     private readonly Dictionary<Type, FsmState> _states = new Dictionary<Type, FsmState>();
     // 序号比较会将字符串视为一系列的UTF-16代码单元进行精确的二进制比较,只严格检查每个字符的编码值是否完全一致,性能最高
@@ -23,14 +23,14 @@ public class Fsm : IClass
 
     public static Fsm Create<T>(params T[] states) where T : FsmState
     {
-        Fsm fsm = ClassPoolFactory.Get<Fsm>();
+        Fsm fsm = ClassFactory.Get<Fsm>();
         fsm.Init(states.ToList());
         return fsm;
     }
 
     public static Fsm Create<T>(List<T> states) where T : FsmState
     {
-        Fsm fsm = ClassPoolFactory.Get<Fsm>();
+        Fsm fsm = ClassFactory.Get<Fsm>();
         fsm.Init(states.ToList());
         return fsm;
     }
@@ -95,7 +95,7 @@ public class Fsm : IClass
         Variable oldV = GetData(name);
         if (oldV != null)
         {
-            ClassPoolFactory.Recycle(oldV);
+            ClassFactory.Recycle(oldV);
         }
         
         _datas[name] = value;

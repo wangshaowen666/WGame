@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 /// <summary>
@@ -17,6 +18,12 @@ public class _02ForAndForeach : MonoBehaviour
 {
     private List<ForAndForeachTest> _modules;
     private float _time;
+
+
+    private List<ForAndForeachTest> _modules2;
+    
+    public static readonly ProfilerMarker Test1 = new ProfilerMarker("Test.Test1");
+    public static readonly ProfilerMarker Test2 = new ProfilerMarker("Test.Test2");
 
     private void Start()
     {
@@ -31,6 +38,12 @@ public class _02ForAndForeach : MonoBehaviour
         _modules.Add(new ForAndForeachTest());
         _modules.Add(new ForAndForeachTest());
         _modules.Add(new ForAndForeachTest());
+
+        _modules2 = new List<ForAndForeachTest>();
+        for (int i = 0; i < 100; i++)
+        {
+            _modules2.Add(new ForAndForeachTest());
+        }
     }
 
     private void Update()
@@ -55,6 +68,28 @@ public class _02ForAndForeach : MonoBehaviour
         {
             _time = 0;
             TimeProfiler.DebugRecordTime();
+        }
+        
+        GCTest();
+    }
+
+    // 经测试，foreach不会生成迭代器引起gc
+    private void GCTest()
+    {
+        using (Test1.Auto())
+        {
+            for (int i = 0; i < _modules2.Count; i++)
+            {
+                _modules2[i].Run();
+            }
+        }
+
+        using (Test2.Auto())
+        {
+            foreach (var m in _modules2)
+            {
+                m.Run();
+            }
         }
     }
 }

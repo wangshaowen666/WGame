@@ -7,13 +7,10 @@
  *--------------------------------------------------------------
  */
 
-using System;
-using UnityEngine;
-
 /// <summary>
 /// 被类对象池管理的 都需要继承此接口
 /// </summary>
-public interface IClass
+public interface IResetable
 {
     // 通常初始化需要0或不等的参数，这里无法传递
     //public void Init();
