@@ -8,6 +8,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 public static class Timer
 {
@@ -22,6 +23,20 @@ public static class Timer
     {
         CancellationTokenSource cts = new CancellationTokenSource();
         UniTaskUtil.DelayInvoke(delayMs, action, cts.Token, inMainThread, ignoreTimeScale).Forget();
+        return cts;
+    }
+    
+    /// <summary>
+    /// 等待指定秒后执行，推荐使用StartDelay毫秒方法，少一点运算量
+    /// </summary>
+    /// <param name="delaySd">等待秒</param>
+    /// <param name="action">要执行的方法</param>
+    /// <param name="inMainThread">是否在主线程执行</param>
+    /// <param name="ignoreTimeScale">是否忽略时间缩放</param>
+    public static CancellationTokenSource StartSecondDelay(float delaySd, Action<int> action, bool inMainThread = true, bool ignoreTimeScale = false)
+    {
+        CancellationTokenSource cts = new CancellationTokenSource();
+        UniTaskUtil.DelayInvoke((int)(delaySd / 1000f), action, cts.Token, inMainThread, ignoreTimeScale).Forget();
         return cts;
     }
     
