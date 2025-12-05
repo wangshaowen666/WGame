@@ -36,7 +36,7 @@ public static class Log
     public static void Info(LogColor color, params object[] msgs)
     {
         var msg = DealMsg(false, msgs);
-        Debug.Log(string.Format("<color={0}>{1}</color>", color, msg));
+        Debug.Log($"<color={color}>{msg}</color>");
     }
     
     [Conditional("LOG_ON")]
@@ -49,7 +49,7 @@ public static class Log
     public static void InfoLine(LogColor color, params object[] msgs)
     {
         var msg = DealMsg(true, msgs);
-        Debug.Log(string.Format("<color={0}>{1}</color>", color, msg));
+        Debug.Log($"<color={color}>{msg}</color>");
     }
     
     [Conditional("LOG_ON")]
@@ -62,7 +62,7 @@ public static class Log
     public static void Warning(LogColor color, params object[] msgs)
     {
         var msg = DealMsg(false, msgs);
-        Debug.LogWarning(string.Format("<color={0}>{1}</color>", color, msg));
+        Debug.LogWarning($"<color={color}>{msg}</color>");
     }
     
     [Conditional("LOG_ON")]
@@ -75,7 +75,7 @@ public static class Log
     public static void WarningLine(LogColor color, params object[] msgs)
     {
         var msg = DealMsg(true, msgs);
-        Debug.LogWarning(string.Format("<color={0}>{1}</color>", color, msg));
+        Debug.LogWarning($"<color={color}>{msg}</color>");
     }
     
     [Conditional("LOG_ON")]
@@ -88,7 +88,7 @@ public static class Log
     public static void Error(LogColor color, params object[] msgs)
     {
         var msg = DealMsg(false, msgs);
-        Debug.LogError(string.Format("<color={0}>{1}</color>", color, msg));
+        Debug.LogError($"<color={color}>{msg}</color>");
     }
     
     [Conditional("LOG_ON")]
@@ -101,7 +101,7 @@ public static class Log
     public static void ErrorLine(LogColor color, params object[] msgs)
     {
         var msg = DealMsg(true, msgs);
-        Debug.LogError(string.Format("<color={0}>{1}</color>", color, msg));
+        Debug.LogError($"<color={color}>{msg}</color>");
     }
 
     private static string DealMsg(bool lineBreak, params object[] msgs)

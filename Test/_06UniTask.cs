@@ -16,6 +16,8 @@ using UnityEngine.UI;
 #pragma warning disable CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
 
 /*
+ * 协程是一种在多帧间执行代码的机制，同步写出异步的效果，通过yield return暂停，下一帧循环到了再次执行然后暂停
+ * 
  * 永远不要使用async void，异常无法被捕获，难以调试
  * 从非异步方法调用异步方法且不关注返回值，用async UniTaskVoid
  * 需要等待结果用 async UniTask或者async UniTask<T>
@@ -26,6 +28,12 @@ using UnityEngine.UI;
  *
  * await的机制是非阻塞的。当主线程执行到 await Test3()时，它并不会傻等着，而是会挂起当前方法，将控制权返回给Unity的游戏引擎主循环。
  * 这样，主线程就可以去处理渲染新的一帧、响应玩家输入等其他重要工作，从而保证了游戏的流畅性
+ *
+ * 线程切换是“线程本地”的，只影响它所在的那个异步方法的后续执行流程。它并不会改变整个应用程序的“当前线程”全局状态 *
+ *
+ * UniTask.Delay依赖于Unity的PlayerLoop,它会切回主线程
+ * Thread.CurrentThread.ManagedThreadId 获取线程id
+ * Thread.CurrentThread.IsThreadPoolThread 判断是否在线程池，为false则在主线程
  */
 
 public class _06UniTask : MonoBehaviour
@@ -215,7 +223,7 @@ public class _06UniTask : MonoBehaviour
 
     async UniTaskVoid Test5()
     {
-        while (true)
+        while (btn != null)
         {
             await btn.OnClickAsync();
             Log.Info("按钮被点击");
