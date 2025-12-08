@@ -8,6 +8,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using MiniJSON;
 using UnityEngine;
 using UnityEngine.Analytics;
 using UnityEngine.Profiling;
@@ -17,24 +19,14 @@ public class UnitTest : MonoBehaviour
 {
     private TestA a;
     private TestB b;
-    void Start()
-    {
-        var a = CoroutineRunner.Instance.Run(T());
-        CoroutineRunner.Instance.Stop(a);
-    }
-
-    private IEnumerator T()
-    {
-        yield return new WaitForSeconds(1);
-    }
 
     void Update()
     {
-        if (Time.time - lastCheckTime > checkInterval)
-        {
-            CheckGC();
-            lastCheckTime = Time.time;
-        }
+        // if (Time.time - lastCheckTime > checkInterval)
+        // {
+        //     CheckGC();
+        //     lastCheckTime = Time.time;
+        // }
     }
     
     

@@ -85,6 +85,15 @@ public static class Timer
         UniTaskUtil.RepeatFrameInvoke(intervalFrame, action, repeatCount, cts.Token, isImmediately, inMainThread).Forget();
         return cts;
     }
+
+    /// <summary>
+    /// 结束计时
+    /// </summary>
+    /// <param name="cts">取消令牌</param>
+    public static void Stop(CancellationTokenSource cts)
+    {
+        cts.Cancel();
+    }
 }
 
 
