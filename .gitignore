@@ -6,7 +6,6 @@
 [Bb]uilds/
 [Ll]ogs/
 [Uu]nityGenerated/
-[Pp]ackages/
 
 # Unity 项目文件
 *.csproj
@@ -16,7 +15,7 @@
 *.user
 *.userprefs
 *.pidb
-*.pdb
+*.pdb 
 *.opendb
 *.VC.db
 
@@ -25,12 +24,6 @@
 *.aab
 *.ipa
 *.unitypackage
-
-# 保留必要的配置文件
-!Packages/manifest.json
-!Packages/NuGetPackages/NuGet.config
-!Packages/NuGetPackages/package.json
-!Packages/NuGetPackages/packages.config
 
 # 系统文件
 .DS_Store
@@ -45,3 +38,9 @@ Desktop.ini
 # 用户特定文件
 *.private
 *.private.meta
+
+# Packages 文件夹：只忽略自动生成的内容，保留配置文件
+Packages/nuget-packages/*
+!Packages/nuget-packages/NuGet.config
+!Packages/nuget-packages/package.json
+!Packages/nuget-packages/packages.config
