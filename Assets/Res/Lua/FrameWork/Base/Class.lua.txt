@@ -1,0 +1,70 @@
+--[[*-------------------------------------------------------------- 
+ * File: Class.lua.txt
+ * Author: Wang ShaoWen
+ * Time: 2025/08/29 16:43:44 
+ *--------------------------------------------------------------]]
+
+--保存类类型的虚表
+local _class = {}
+
+local class = function(name, super)    
+    local class_type = {}
+    
+    class_type.ctor = false
+    class_type.super = super
+    class_type._cName = name
+    
+    class_type.New = function(...)
+        local obj = {}
+        do
+            local create
+            create = function(c, ...)
+                if c.super then
+                    create(c.super, ...)
+                end
+
+                if c.ctor then
+                    c.ctor(obj, ...)
+                end
+            end
+            
+            create(class_type, ...)
+        end
+
+        -- 字符串做key比table做key更有效率
+        setmetatable(obj, {__index = _class[name]})
+        --setmetatable(obj, {__index = _class[class_type]})
+        return obj
+    end
+    
+    -- 所有实例共享同一个vbtl(类的虚拟方法表)
+    -- 通过查找子类的缓存，优化了继承链上的查找效率
+    local vtbl = {}
+    _class[name] = vtbl
+    
+    -- 定义类之后的所有变量都写进vtbl中，直接用类是无法访问的
+    setmetatable(class_type, {
+        __newindex = function(t, k, v)
+            vtbl[k] = v
+        end
+    })
+
+    if super then
+        -- 缓存，从子类找到后缓存进vtbl
+        setmetatable(vtbl,{__index=
+                           function(t,k)
+                               local ret=_class[super][k]
+                               vtbl[k]=ret
+                               return ret
+                           end
+        })
+    end
+
+    return class_type
+end
+--[[
+字符串做key 与 table做key 比较
+查找效率    高 (短字符串内部化，指针比较)    低 (需计算哈希值并递归比较内容)
+内存开销    相对较低 (内部化机制减少重复字符串存储)   较高 (每个 Table Key 都是独立对象，占用更多内存)
+哈希计算    一次计算，多次使用 (字符串创建时即计算并缓存哈希值)     每次查找都需重新计算 (使用地址或内容计算，开销较大)
+--]]

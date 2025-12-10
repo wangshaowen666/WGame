@@ -1,0 +1,17 @@
+{
+    "name": "Lua",
+    "rootNamespace": "",
+    "references": [
+        "GUID:d347d220a7f5d4a33906369e7d6c1d96",
+        "GUID:02fa88a03e5d84dd9b07cca91717fc2a"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,19 @@
+--[[*-------------------------------------------------------------- 
+ * File: TTT.lua.txt
+ * Author: Wang ShaoWen
+ * Time: 2025/08/29 18:43:11 
+ *--------------------------------------------------------------]]
+
+
+print("执行lua TTT1111")
+
+local a = {}
+local b = {}
+
+setmetatable(a, {__newindex = function(t, k, v)
+    b[k] = v
+end})
+
+a.m = 1
+print(b.m)
+print(a.m)

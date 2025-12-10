@@ -30,48 +30,6 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: 0
   passEvent: 550
---- !u!114 &-4700010120130800311
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
-  m_Name: RenderObjects
-  m_EditorClassIdentifier: 
-  m_Active: 0
-  settings:
-    passTag: RenderObjects
-    Event: 550
-    filterSettings:
-      RenderQueueType: 0
-      LayerMask:
-        serializedVersion: 2
-        m_Bits: 16
-      PassNames: []
-    overrideMaterial: {fileID: 2100000, guid: 6359e0bad724f42e098d9eb5a8dfbe3b, type: 2}
-    overrideMaterialPassIndex: 0
-    overrideShader: {fileID: 4800000, guid: a873847f7b37042b0a0c7b6301232bc3, type: 3}
-    overrideShaderPassIndex: 0
-    overrideMode: 2
-    overrideDepthState: 0
-    depthCompareFunction: 4
-    enableWrite: 1
-    stencilSettings:
-      overrideStencilState: 0
-      stencilReference: 0
-      stencilCompareFunction: 8
-      passOperation: 0
-      failOperation: 0
-      zFailOperation: 0
-    cameraSettings:
-      overrideCamera: 0
-      restoreCamera: 1
-      offset: {x: 0, y: 0, z: 0, w: 0}
-      cameraFieldOfView: 60
 --- !u!114 &-1086824375589544342
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -109,14 +67,8 @@ MonoBehaviour:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7,
       type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
-  m_RendererFeatures:
-  - {fileID: 9051450041881269728}
-  - {fileID: 8771337885102114684}
-  - {fileID: 3772048754889196164}
-  - {fileID: -8038777141512884464}
-  - {fileID: -1086824375589544342}
-  - {fileID: -4700010120130800311}
-  m_RendererFeatureMap: e0158740db359d7d7c07707e550dba798402a07e5b025934102f98f3c78670906adebf17fdd2eaf049d5dc8cb235c6be
+  m_RendererFeatures: []
+  m_RendererFeatureMap: 
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -138,6 +90,12 @@ MonoBehaviour:
     objectMotionVector: {fileID: 4800000, guid: 7b3ede40266cd49a395def176e1bc486,
       type: 3}
     dataDrivenLensFlare: {fileID: 4800000, guid: 6cda457ac28612740adb23da5d39ea92,
+      type: 3}
+    terrainDetailLitPS: {fileID: 4800000, guid: f6783ab646d374f94b199774402a5144,
+      type: 3}
+    terrainDetailGrassPS: {fileID: 4800000, guid: e507fdfead5ca47e8b9a768b51c291a1,
+      type: 3}
+    terrainDetailGrassBillboardPS: {fileID: 4800000, guid: 29868e73b638e48ca99a19ea58c48d90,
       type: 3}
   m_AssetVersion: 2
   m_OpaqueLayerMask:

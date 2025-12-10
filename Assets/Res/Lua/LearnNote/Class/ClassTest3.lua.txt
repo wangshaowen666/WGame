@@ -1,0 +1,80 @@
+--[[*-------------------------------------------------------------- 
+ * File: ClassTest3.lua.txt
+ * Author: Wang ShaoWen
+ * Time: 2025/08/05 19:27:51 
+ *--------------------------------------------------------------]]
+
+local _class={}
+
+function class(super)
+    local class_type={}
+    class_type.ctor=false
+    class_type.super=super
+    class_type.new=function(...)
+        --new的时候obj只有一个
+        local obj={}
+        -- create仅在do end块内有效，外部无法调用
+        do
+            local create
+            create = function(c,...)
+                if c.super then
+                    create(c.super,...)
+                end
+                if c.ctor then
+                    -- 所有继承类的ctor的self都是子类实例
+                    c.ctor(obj,...)
+                end
+            end
+
+            create(class_type,...)
+        end
+        setmetatable(obj,{ __index=_class[class_type] })
+        return obj
+    end
+    local vtbl={}
+    _class[class_type]=vtbl
+
+    setmetatable(class_type,{__newindex=
+                             function(t,k,v)
+                                 vtbl[k]=v
+                             end
+    })
+
+    if super then
+        setmetatable(vtbl,{__index=
+                           function(t,k)
+                               local ret=_class[super][k]
+                               vtbl[k]=ret
+                               return ret
+                           end
+        })
+    end
+
+    return class_type
+end
+
+-- 两次构造的self是同一个对象，b.a也能打印出1
+local A = class()
+function A:ctor()
+    print("A初始化", self)
+    self.a = 1
+end
+
+function A:printA()
+    print("打印A", self)
+end
+
+local B = class(A)
+function B:ctor()
+    print("B初始化", self)
+end
+
+function B:printA()
+    B.super.printA(self)
+    print('打印B', self)
+end
+
+local b = B.new()
+print(b.a)
+b:printA()
+

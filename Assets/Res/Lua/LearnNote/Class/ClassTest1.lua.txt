@@ -1,0 +1,45 @@
+--[[*-------------------------------------------------------------- 
+ * File: Class.lua.txt
+ * Author: Wang ShaoWen
+ * Time: 2025/08/05 15:49:53 
+ *--------------------------------------------------------------]]
+
+-- 面向对象实现第一步
+local class = {}
+class.A = 1
+
+function class:new()
+    local obj = {}
+
+    --Lua在访问表中不存在的键时的行为是分步骤的：首先会在表自身查找；如果找不到且表有元表，会检查元表是否有__index元方法；
+    --如果没有__index元方法，即使设置了元表，也不会去元表里查找。
+    self.__index = self    
+    setmetatable(obj, self)
+    
+    return obj
+end
+
+function class:printA()
+    print("AAA", self.A)
+    self.A = self.A + 1
+end
+
+local c = class:new()
+c:printA()
+
+-- 这种实现方式无法满足 多态，要么执行父类，要么被子类完成重写，调不到父类了。
+function c:printA()
+    print("子类AAA", self.A)
+end
+
+c:printA()
+
+-- 这里新new的类打印依然是1是因为，printA中的self是c、d本身，c是给自身也定义了A值为2，并没有影响到元表中的class的A值
+local d = class:new()
+d:printA()      --输出1
+class.A = 10
+d:printA()      --输出2
+
+local f = class:new()
+f:printA()      --输出10
+

@@ -1,0 +1,78 @@
+--[[*-------------------------------------------------------------- 
+ * File: ClassTest2.lua.txt
+ * Author: Wang ShaoWen
+ * Time: 2025/08/05 18:39:06 
+ *--------------------------------------------------------------]]
+
+
+local class = function(base)
+    local cls = {}
+    cls.__index = cls
+    if base then
+        setmetatable(cls, {__index = base})
+        cls.super = base
+    end
+    
+    function cls:new(...)
+        -- 只设置元表而不实现任何元方法，与无元表一致
+        -- 但是cls有__index元方法
+        -- 构造函数执行顺序为先执行父类，后执行子类
+        local obj = setmetatable({}, cls)
+        if cls.super then
+            cls.super.new(obj, ...)
+        end
+
+        -- 问题在这里 父类的构造用了父类的变量去调用
+        if obj.ctor then
+            obj.ctor(...)
+        end
+        
+        return obj
+    end
+    
+    return cls
+end
+
+local A = class()
+
+-- A类作为父类，
+function A:ctor()
+    self.index = 0
+    print('A执行构造', self.index, self)
+end
+
+function A:printA()   
+    print("打印A", self)
+    self.index = self.index + 1
+    print('打印A', self.index)
+end
+
+--local a1 = A:new()
+
+local B = class(A)
+function B:ctor()
+    print('B执行构造', self)
+end
+
+local b = B:new()
+-- 这里调用后，方法内的self为B的实例，它的元表为B类，B类的元表为A类，而A构造中定义的index为A实例的对象，所以B的实例找不到index字段而报错。
+-- 继承应该让B的实例可以访问A的实例的内容
+-- 以类为元表，通过super字段，实现了多态
+b:printA()
+b:printA()
+b:printA()
+
+function B:printA()
+    print('B执行A')
+    B.super.printA(B)
+end
+
+b:printA()
+b:printA()
+b:printA()
+b.super:printA()
+
+local a = A:new()
+a:printA()
+a:printA()
+a:printA()
