@@ -47,8 +47,14 @@
 # 包目录（Unity Package Manager）
 [Pp]ackages/
 
-# 但保留 manifest.json 文件
+# 但保留重要的配置文件
 !Packages/manifest.json
+
+# NuGet 包管理相关的重要配置文件
+!Packages/NuGetPackages/
+!Packages/NuGetPackages/NuGet.config
+!Packages/NuGetPackages/package.json
+!Packages/NuGetPackages/packages.config
 
 # ================
 # 操作系统文件
@@ -146,8 +152,11 @@ pids
 !ProjectSettings/
 !Assets/
 
-# 保留 Packages 目录下的 manifest.json
+# 保留 Packages 目录下的重要配置文件
 !Packages/manifest.json
+!Packages/NuGetPackages/NuGet.config
+!Packages/NuGetPackages/package.json
+!Packages/NuGetPackages/packages.config
 
 # 保留自定义的 .gitee 目录（如果需要）
 !.gitee/
@@ -162,5 +171,6 @@ pids
 # 特殊说明
 # ================
 
-# 注意：此文件会自动忽略 packages 文件夹，但保留 Packages/manifest.json
+# 注意：此文件会自动忽略 packages 文件夹，但保留重要的配置文件
 # Unity 会根据 manifest.json 自动恢复所有依赖包
+# NuGet 相关的配置文件也需要保留
