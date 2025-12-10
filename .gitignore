@@ -1,8 +1,4 @@
-# ================
-# Unity 项目专用
-# ================
-
-# Unity 生成的目录和文件
+# Unity 核心忽略规则
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -10,167 +6,42 @@
 [Bb]uilds/
 [Ll]ogs/
 [Uu]nityGenerated/
+[Pp]ackages/
 
-# 自动生成的 VS/MD 解决方案和项目文件
+# Unity 项目文件
 *.csproj
 *.unityproj
 *.sln
 *.suo
-*.tmp
 *.user
 *.userprefs
 *.pidb
-*.booproj
-*.svd
 *.pdb
 *.opendb
 *.VC.db
 
-# Unity3D 生成的 meta 文件
-*.pidb.meta
-*.pdb.meta
-
-# Unity3D 临时文件
+# 构建输出
 *.apk
+*.aab
+*.ipa
 *.unitypackage
 
-# 崩溃日志
-[Cc]rash/
-
-# 编译结果
-[Bb]uilds/
-
-# ================
-# 包管理
-# ================
-
-# 包目录（Unity Package Manager）
-[Pp]ackages/
-
-# 但保留重要的配置文件
+# 保留必要的配置文件
 !Packages/manifest.json
-
-# NuGet 包管理相关的重要配置文件
-!Packages/NuGetPackages/
 !Packages/NuGetPackages/NuGet.config
 !Packages/NuGetPackages/package.json
 !Packages/NuGetPackages/packages.config
 
-# ================
-# 操作系统文件
-# ================
-
-# macOS
+# 系统文件
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
-
-# Windows
 Desktop.ini
-$RECYCLE.BIN/
 
-# Linux
-*~
-
-# ================
-# 编辑器文件
-# ================
-
-# VS Code
-.vscode/
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-*.code-workspace
-
-# Rider
-.idea/
-*.sln.iml
-*.DotSettings
-
-# Visual Studio
+# 编辑器缓存
 .vs/
+.vscode/
+.idea/
 
-# ================
-# 其他开发工具
-# ================
-
-# 缓存目录
-.cache/
-[Nn]ode_modules/
-
-# 日志文件
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# 运行时数据
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# ================
-# 项目特定文件
-# ================
-
-# 用户特定设置
+# 用户特定文件
 *.private
 *.private.meta
-
-# 备份文件
-*.backup
-*.backup.meta
-
-# 临时文件
-*.tmp
-*.tmp.meta
-
-# 大型二进制文件（如果有）
-*.bin
-*.bundle
-
-# ================
-# 版本控制
-# ================
-
-# Git
-.gitignore
-.gitattributes
-
-# ================
-# 配置文件例外规则
-# ================
-
-# 重要：保留必要的配置文件
-!ProjectSettings/
-!Assets/
-
-# 保留 Packages 目录下的重要配置文件
-!Packages/manifest.json
-!Packages/NuGetPackages/NuGet.config
-!Packages/NuGetPackages/package.json
-!Packages/NuGetPackages/packages.config
-
-# 保留自定义的 .gitee 目录（如果需要）
-!.gitee/
-
-# 保留必要的文档文件
-!README*
-!LICENSE*
-!CHANGELOG*
-!CONTRIBUTING*
-
-# ================
-# 特殊说明
-# ================
-
-# 注意：此文件会自动忽略 packages 文件夹，但保留重要的配置文件
-# Unity 会根据 manifest.json 自动恢复所有依赖包
-# NuGet 相关的配置文件也需要保留
