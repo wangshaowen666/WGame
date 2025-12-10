@@ -142,6 +142,8 @@ public class HotUpdater : MonoBehaviour
         {
             Log.Info("需要热更");
             _state = UpdateState.Update;
+            // 第一个参数表示自动清理旧的AssetBundle缓存，是指远程的
+            //AsyncOperationHandle<List<IResourceLocator>> updateHandle1 = Addressables.UpdateCatalogs(true, checkHandle.Result, false);
             AsyncOperationHandle<List<IResourceLocator>> updateHandle = Addressables.UpdateCatalogs(checkHandle.Result, false);
             yield return updateHandle;
             if (updateHandle.Status != AsyncOperationStatus.Succeeded)
@@ -171,6 +173,7 @@ public class HotUpdater : MonoBehaviour
             }
         }
 
+        // 资源分高、中、低，根据配置下载对应标签资源，不需要全下
         AsyncOperationHandle<long> sizeHandle = Addressables.GetDownloadSizeAsync(_updateKeys as IEnumerable<object>);
         yield return sizeHandle;
         Log.Info("热更资源总大小：" + sizeHandle.Result);

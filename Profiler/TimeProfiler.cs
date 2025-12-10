@@ -13,6 +13,10 @@ public static class TimeProfiler
 {
     private static readonly Dictionary<string, RTime> recordTDic = new Dictionary<string, RTime>(); //记录调试时间字典
     
+    /// <summary>
+    /// 测试发现这里统计的不太准确，推荐用RecordTimeStart
+    /// </summary>
+    /// <param name="cb"></param>
     public static void LogTime(Action cb)
     {
         var sw = new Stopwatch();

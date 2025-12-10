@@ -6,9 +6,8 @@
  */
 
 using System;
-using System.Collections;
 using System.Security.Cryptography;
-using System.Text;
+using MemoryPack;
 using MiniJSON;
 
 /*
@@ -36,20 +35,59 @@ public static class ParseUtil
         return destString;
     }
 
-
-    
-    
-    public static string ToJson(this object obj)
+    /// <summary>
+    /// MemoryPack转换成二进制，测试比自带的BinaryFormatter性能提升15倍
+    /// </summary>
+    /// <param name="t"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static byte[] ToBinary<T>(T t)
     {
-        return Json.Serialize(obj);
+        try
+        {
+            var bytes = MemoryPackSerializer.Serialize(t);
+            return bytes;
+        }
+        catch (Exception e)
+        {
+            Log.Error("Binary序列化出错：", e);
+            return null;
+        }
+    }
+
+    public static T DeBinary<T>(byte[] bytes)
+    {
+        try
+        {
+            T ret = MemoryPackSerializer.Deserialize<T>(bytes);
+            return ret;
+        }
+        catch (Exception e)
+        {
+            Log.Error("Binary反序列化出错：", e);
+            return default;
+        }
+    }
+    
+    public static string ToJson<T>(T t)
+    {
+        try
+        {
+            return Json.Serialize(t);
+        }
+        catch (Exception e)
+        {
+            Log.Error("Json序列化出错：", e);
+            return null;
+        }
     }
 
     /// <summary>
-    /// Json转换成obj，复杂结构只支持Dictionary(string,object)和List(object),需自行转化
+    /// MiniJson轻量级转换成obj，复杂结构只支持Dictionary(string,object)和List(object),需自行转化
     /// </summary>
     /// <param name="json"></param>
     /// <returns></returns>
-    public static object ToObj(this string json)
+    public static object DeJson(string json)
     {
         try
         {
@@ -57,7 +95,7 @@ public static class ParseUtil
         }
         catch (Exception e)
         {
-            Log.Error("解析出错：", json);
+            Log.Error("Json反序列化出错：", json);
             return null;
         }
     }
