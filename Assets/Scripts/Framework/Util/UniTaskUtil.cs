@@ -198,11 +198,6 @@ public static class UniTaskUtil
             {
                 await UniTask.Delay(intervalMs, ignoreTimeScale, cancellationToken: token);
                 if (token.IsCancellationRequested) continue;
-
-                if (!Thread.CurrentThread.IsThreadPoolThread)
-                {
-                    Log.Info("在主线程了");
-                }
                 
                 if (!inMainThread)
                     await UniTask.SwitchToThreadPool();
