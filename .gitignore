@@ -6,6 +6,7 @@
 [Bb]uilds/
 [Ll]ogs/
 [Uu]nityGenerated/
+[Ss]erverData/
 
 # Unity 项目文件
 *.csproj
