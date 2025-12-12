@@ -11,12 +11,10 @@ using UnityEngine;
 
 public class LuaCreator 
 {
-    private static readonly string ScriptTemplatePath = "Assets/WFramework/Base/CustomScript/ScriptTemplates/CustomLuaScript.txt";
-    
     [MenuItem("Assets/Create/Custom Lua Script", false, 71)]
     private static void CreateCustomCSharpScript()
     {
-        Create(ScriptTemplatePath, "NewLuaScript.lua.txt");
+        Create(Config.LuaTemplatePath, "NewLuaScript.lua.txt");
     }
 
     private static void Create(string path, string defaultName)

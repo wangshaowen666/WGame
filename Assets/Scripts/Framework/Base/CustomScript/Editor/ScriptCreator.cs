@@ -15,14 +15,12 @@ using UnityEditor.ProjectWindowCallback;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-public class ScriptCreator 
+public class ScriptCreator
 {
-    private static readonly string ScriptTemplatePath = "Assets/WFramework/Base/CustomScript/ScriptTemplates/CustomC#Script.txt";
-    
     [MenuItem("Assets/Create/Custom C# Script", false, 70)]
     private static void CreateCustomCSharpScript()
     {
-        Create(ScriptTemplatePath, "NewCSharpScript.cs");
+        Create(Config.ScriptTemplatePath, "NewCSharpScript.cs");
     }
 
     private static void Create(string path, string defaultName)

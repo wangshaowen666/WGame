@@ -196,6 +196,8 @@ public static class UniTaskUtil
 
             while (!token.IsCancellationRequested && (repeatCount == -1 || count < repeatCount))
             {
+                // 底层依赖Unity的PlayLoop判断时间到期，所以依然无法突破帧率限制
+                // DelayType.Realtime不依赖Unity的帧时间，可以突破帧率
                 await UniTask.Delay(intervalMs, ignoreTimeScale, cancellationToken: token);
                 if (token.IsCancellationRequested) continue;
                 
@@ -234,9 +236,6 @@ public static class UniTaskUtil
             Log.Error("间隔必须大于0");
             return;
         }
-
-        if (!inMainThread)
-            await UniTask.SwitchToThreadPool();
 
         try
         {

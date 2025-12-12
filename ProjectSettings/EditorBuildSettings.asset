@@ -17,4 +17,6 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Temp/TestB.unity
     guid: 9596a9c91d27e49198cc0a5043f1b790
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: b4ebd563574884c42baaeb969d69d551,
+      type: 2}
