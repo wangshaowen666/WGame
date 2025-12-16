@@ -171,12 +171,41 @@ public class HotUpdater : MonoBehaviour
             {
                 _updateKeys.AddRange(locator.Keys);
             }
+            
+            
+            // 添加详细调试信息
+            Debug.LogWarning("未检测到catalog更新，可能原因:");
+            // 获取所有已加载的资源定位器（Resource Locators）
+            // var locators = Addressables.ResourceLocators;
+            // foreach (var locator in locators)
+            // {
+            //     Debug.Log($"--- Locator ID: {locator.LocatorId} ---");
+            //     // 遍历该定位器中的所有Key（通常是资源的地址或标签）
+            //     foreach (var key in locator.Keys)
+            //     {
+            //         // 尝试通过Key定位资源位置
+            //         if (locator.Locate(key, typeof(object), out var locations))
+            //         {
+            //             foreach (var location in locations)
+            //             {
+            //                 // 打印资源的关键信息
+            //                 Debug.Log($"Key: {key}");
+            //                 Debug.Log($"  InternalId (加载路径): {location.InternalId}");
+            //                 Debug.Log($"  PrimaryKey: {location.PrimaryKey}");
+            //                 Debug.Log($"  ResourceType: {location.ResourceType}");
+            //                 // 可以根据需要打印更多信息，如Dependencies
+            //             }
+            //         }
+            //     }
+            // }
+            
         }
 
         // 资源分高、中、低，根据配置下载对应标签资源，不需要全下
         AsyncOperationHandle<long> sizeHandle = Addressables.GetDownloadSizeAsync(_updateKeys as IEnumerable<object>);
         yield return sizeHandle;
-        Log.Info("热更资源总大小：" + sizeHandle.Result);
+        float size = sizeHandle.Result / (1024f * 1024f);
+        Log.Info($"热更资源总大小：{size:F1}MB");
 
         if (sizeHandle.Result > 0)
         {
@@ -225,6 +254,8 @@ public class HotUpdater : MonoBehaviour
             Addressables.Release(downHandle);
             UpdateFinish();
         }
+        
+        
     }
 
     private void StartDownload()

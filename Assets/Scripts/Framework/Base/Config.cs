@@ -13,8 +13,8 @@ public static class Config
 {
 #if UNITY_EDITOR
     // 自定义C#脚本文件路径
-    public const string ScriptTemplatePath = "Assets/Scripts/Framework/Base/CustomScript/ScriptTemplates/CustomC#Script.txt";
+    public const string ScriptTemplatePath = "Assets/Scripts/Framework/Base/ScriptTemplates/CustomC#Script.txt";
     // 自定义Lua脚本文件路径
-    public const string LuaTemplatePath = "Assets/Scripts/Framework/Base/CustomScript/ScriptTemplates/CustomLuaScript.txt";
+    public const string LuaTemplatePath = "Assets/Scripts/Framework/Base/ScriptTemplates/CustomLuaScript.txt";
 #endif
 }

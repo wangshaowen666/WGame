@@ -14,7 +14,7 @@ using UnityEngine.Networking;
 
 public class _03WebHttp : MonoBehaviour
 {
-    private const string url = "http://localhost/MyServer";
+    private const string url = "http://localhost:80/MyServer";
     
     [ContextMenu("下载")]
     private void Test()
@@ -30,8 +30,8 @@ public class _03WebHttp : MonoBehaviour
 
     private IEnumerator DownloadTest()
     {
-        string fileNm = "耗时统计.txt";
-        string filePath = Path.Combine(url, fileNm);
+        string fileNm = "catalog_0.1.0.json";
+        string filePath = Path.Combine(url, "Android/catalog/" + fileNm);
         string saveDirectory = Path.Combine(Application.persistentDataPath, "Downloads");
         string fullPath = Path.Combine(saveDirectory, fileNm);
 

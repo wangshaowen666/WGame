@@ -26,6 +26,7 @@ public class LuaLaunch : MonoBehaviour
     {
         // Addressable的异步加载与AddLoader注册的自定义同步加载有冲突
         // 先异步加载完所有lua文件后再注册AddLoader
+        // 所以lua想使用前，必须预加载完成，否则就会找不到
         ResMgr.Instance.LoadResWithLabel("lua");
         
         _luaEnv = new LuaEnv();

@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: 1e727bc51648d45788aec4d5b93e2933
   m_currentHash:
     serializedVersion: 2
-    Hash: 00000000000000000000000000000000
+    Hash: 1375e15a2b4fbefa7e8a7dbd9f711acb
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 1
   m_BundleLocalCatalog: 0
@@ -45,6 +45,8 @@ MonoBehaviour:
   m_overridePlayerVersion: '[UnityEditor.PlayerSettings.bundleVersion]'
   m_GroupAssets:
   - {fileID: 11400000, guid: 6b27232cc8d7d499a91a532da2272c1b, type: 2}
+  - {fileID: 11400000, guid: 620bff508277b4863a4ba056205fb6a7, type: 2}
+  - {fileID: 11400000, guid: ebc7b5a822beb44a38bd69b6575ee2c8, type: 2}
   - {fileID: 11400000, guid: c874c21703955406dacce03541203fd8, type: 2}
   - {fileID: 11400000, guid: a46e78fb8d8e04c48abe2ec079f46d9a, type: 2}
   - {fileID: 11400000, guid: a13d47efbe30f4ffbb9c8df18fea20a1, type: 2}
@@ -81,11 +83,11 @@ MonoBehaviour:
       - m_Id: 1078d2e8e847a439496542a08ac4babc
         m_Value: ServerData/[BuildTarget]/catalog
       - m_Id: 1634da84a222e4ef0975fc399f7e7dc5
-        m_Value: http://localhost:80/MyServer/[BuildTarget]/catalog
+        m_Value: http://192.168.3.72:80/MyServer/[BuildTarget]/catalog
       - m_Id: 69edce6a2fe2449e28db832aafb4a908
         m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/[BuildTarget]'
       - m_Id: 6b27b574154414a75bfc90db34088ee3
-        m_Value: http://localhost:80/MyServer/[BuildTarget]
+        m_Value: http://192.168.3.72:80/MyServer/[BuildTarget]
       - m_Id: ad97362cbb9a247b38d06532d9374b44
         m_Value: ServerData/[BuildTarget]
       - m_Id: b315a1fb503e74e499e9068711f5e43d
@@ -118,6 +120,10 @@ MonoBehaviour:
   m_LabelTable:
     m_LabelNames:
     - default
+    - hd
+    - ld
+    - common
+    - 7034
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: b6dc6c2bad1484e7f8a7568872b8bd93, type: 2}
@@ -140,7 +146,7 @@ MonoBehaviour:
         m_SerializedData:
         - m_AssemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
           m_ClassName: System.Int32
-          m_Data: 0
+          m_Data: 52394
           m_Key: HostingServicePort
         - m_AssemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
           m_ClassName: System.Int32

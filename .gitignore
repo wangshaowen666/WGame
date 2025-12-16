@@ -7,6 +7,9 @@
 [Ll]ogs/
 [Uu]nityGenerated/
 [Ss]erverData/
+WGame_BurstDebugInformation_DoNotShip/
+mono_crash.0.0.json
+UserSettings/Layouts/default-2022.dwlt
 
 # Unity 项目文件
 *.csproj

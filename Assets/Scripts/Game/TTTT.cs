@@ -13,10 +13,25 @@ using UnityEngine;
 
 public class TTTT : MonoBehaviour
 {
+    private string str;
+    private List<string> hashNmd = new List<string>();
+    
     private void Start()
     {
         Procedure.Instance.RunProcedure<ProcedureVersionCheck>();
         
        
+    }
+
+    [ContextMenu("执行")]
+    void Execute()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            str = i.ToString();
+            hashNmd.Add(str);
+        }
+        
+        Log.Info("结果", ParseUtil.ToJson(hashNmd));
     }
 }
