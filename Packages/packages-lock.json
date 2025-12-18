@@ -14,6 +14,14 @@
       "dependencies": {},
       "hash": "73a63b7f672b88f7e9992f6917eb458a8cbb6fa9"
     },
+    "com.esotericsoftware.spine.urp-shaders": {
+      "version": "file:com.esotericsoftware.spine.urp-shaders-4.1-2019.1",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.render-pipelines.universal": "7.1.5"
+      }
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,

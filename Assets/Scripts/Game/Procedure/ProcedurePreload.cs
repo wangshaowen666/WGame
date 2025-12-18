@@ -10,5 +10,9 @@ using UnityEngine;
 
 public class ProcedurePreload : ProcedureBase
 {
-    
+    public override void OnEnter()
+    {
+        base.OnEnter();
+        Log.Info("进入预加载流程");
+    }
 }

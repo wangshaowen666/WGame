@@ -28,7 +28,7 @@ public class ProcedureVersionCheck : ProcedureBase
     {
         if (true)
         {
-            Procedure.Instance.RunProcedure<ProcedureResCheck>();
+            Procedure.Instance.RunProcedure<ProcedureResCheck_AA>();
             return;
         }
         
@@ -39,7 +39,7 @@ public class ProcedureVersionCheck : ProcedureBase
         switch (state)
         {
             case 1:
-                Procedure.Instance.RunProcedure<ProcedureResCheck>();
+                Procedure.Instance.RunProcedure<ProcedureResCheck_AA>();
                 break;
             case 2:
                 Log.Info("游戏维护中");

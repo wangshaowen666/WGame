@@ -13,7 +13,7 @@ using UnityEngine;
 /// </summary>
 public abstract class FsmState
 {
-    private Fsm _fsm;
+    protected Fsm _fsm;
     
     /// <summary>
     /// 状态初始化时调用
