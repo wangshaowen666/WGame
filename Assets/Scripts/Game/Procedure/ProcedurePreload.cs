@@ -14,5 +14,7 @@ public class ProcedurePreload : ProcedureBase
     {
         base.OnEnter();
         Log.Info("进入预加载流程");
+        var panel = _fsm.GetObj("loginPanel").GetComponent<LoginPanel>();
+        panel.SetTip("编译着色器中...", 0.9f);
     }
 }

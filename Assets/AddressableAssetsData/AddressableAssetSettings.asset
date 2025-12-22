@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: 1e727bc51648d45788aec4d5b93e2933
   m_currentHash:
     serializedVersion: 2
-    Hash: ba7d2e62c2ead7c5b03aa500bf485788
+    Hash: 2b22d1e604480b6d1f9e78d7b572f92f
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 1
   m_BundleLocalCatalog: 0
@@ -125,6 +125,7 @@ MonoBehaviour:
     - ld
     - common
     - 7034
+    - lua
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: b6dc6c2bad1484e7f8a7568872b8bd93, type: 2}

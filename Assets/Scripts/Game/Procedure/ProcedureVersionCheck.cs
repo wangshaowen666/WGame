@@ -28,6 +28,9 @@ public class ProcedureVersionCheck : ProcedureBase
     {
         if (true)
         {
+            var panel = _fsm.GetObj("loginPanel").GetComponent<LoginPanel>();
+            panel.SetTip("获取服务器信息...", 0.2f);
+            
             Procedure.Instance.RunProcedure<ProcedureResCheck_AA>();
             return;
         }

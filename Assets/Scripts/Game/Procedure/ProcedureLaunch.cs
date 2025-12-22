@@ -13,11 +13,12 @@ public class ProcedureLaunch : ProcedureBase
     public override void OnEnter()
     {
         base.OnEnter();
-        Log.Info("进入启动流程");
+        
+        var panel = PanelCtr.Instance.LoadLoginPanel();
+        panel.SetTip("游戏启动中...", 0.1f);
+        
+        _fsm.SetObj("loginPanel", panel.gameObject);
+        Procedure.Instance.RunProcedure<ProcedureVersionCheck>();
     }
 
-    public override void OnUpdate(float deltaTime, float realDeltaTime)
-    {
-        base.OnUpdate(deltaTime, realDeltaTime);
-    }
 }

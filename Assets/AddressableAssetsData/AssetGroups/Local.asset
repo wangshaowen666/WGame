@@ -17,8 +17,8 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 1e727bc51648d45788aec4d5b93e2933
   m_SerializeEntries:
-  - m_GUID: 0355760fea24048e89d373c96d0661a4
-    m_Address: Class.lua
+  - m_GUID: 68af2a688a597483baeacc5177fd0ad1
+    m_Address: Square
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

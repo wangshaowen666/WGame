@@ -19,11 +19,12 @@ using UnityEngine.ResourceManagement.ResourceLocations;
 public class AddressableHelper
 {
     public event Action<int> OnLoadFail;
+    public event Action<float, long, long> OnDownloadProgress;
     
     private const string BundleExtension = ".bundle";
     // 远端AB包的前缀
     private const string RemoteBundlePrefix = "remote_";
-    private static List<string> LoginDownloadLabels = new List<string> { "common", "hd" };
+    private static List<string> LoginDownloadLabels = new List<string> { "common", "hd", "lua"};
     
     private List<IResourceLocation> _totalLocation = new List<IResourceLocation>();
     private float _fileSize;
@@ -122,7 +123,14 @@ public class AddressableHelper
             return;
         
         AsyncOperationHandle downHandle = Addressables.DownloadDependenciesAsync(_totalLocation, false);
-        await downHandle;
+        var state = downHandle.GetDownloadStatus();
+        while (!downHandle.IsDone)
+        {
+            OnDownloadProgress?.Invoke(state.Percent, state.DownloadedBytes, state.TotalBytes);
+            Log.Info("下载呢", state.Percent, state.DownloadedBytes, state.TotalBytes);
+            state = downHandle.GetDownloadStatus();
+            await UniTask.Yield();
+        }
         
         if (downHandle.Status != AsyncOperationStatus.Succeeded)
         {
@@ -160,6 +168,7 @@ public class AddressableHelper
             var fileName = Path.GetFileName(path);
             if (string.IsNullOrEmpty(fileName)) continue;
                 
+            Log.Info("缓存目录", path);
             var cachedVersions = new List<Hash128>();
             Caching.GetCachedVersions(fileName, cachedVersions);
             foreach (var version in cachedVersions)

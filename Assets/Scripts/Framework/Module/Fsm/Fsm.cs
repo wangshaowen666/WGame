@@ -8,12 +8,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class Fsm : IResetable
 {
     private readonly Dictionary<Type, FsmState> _states = new Dictionary<Type, FsmState>();
     // 序号比较会将字符串视为一系列的UTF-16代码单元进行精确的二进制比较,只严格检查每个字符的编码值是否完全一致,性能最高
     private Dictionary<string, Variable> _datas = new Dictionary<string, Variable>(StringComparer.Ordinal);
+    // GameObject以及相关属性、类在这里缓存，设置主要用来避免值类型的装拆箱
+    private Dictionary<string, GameObject> _objs = new Dictionary<string, GameObject>(StringComparer.Ordinal);
     private FsmState _curState;
 
     public FsmState CurState
@@ -65,18 +68,12 @@ public class Fsm : IResetable
 
     public Variable GetData(string name)
     {
-        if (string.IsNullOrEmpty(name))
-        {
-            Log.Error("变量名不可为空");
-            return null;
-        }
+        return _datas.GetValueOrDefault(name);
+    }
 
-        if (_datas.TryGetValue(name, out var variable))
-        {
-            return variable;
-        }
-
-        return null;
+    public GameObject GetObj(string name)
+    {
+        return _objs.GetValueOrDefault(name);
     }
 
     public void SetData<T>(string name, T value) where T : Variable
@@ -86,12 +83,6 @@ public class Fsm : IResetable
 
     public void SetData(string name, Variable value)
     {
-        if (string.IsNullOrEmpty(name))
-        {
-            Log.Error("变量名不可为空");
-            return;
-        }
-
         Variable oldV = GetData(name);
         if (oldV != null)
         {
@@ -100,11 +91,17 @@ public class Fsm : IResetable
         
         _datas[name] = value;
     }
+
+    public void SetObj(string name, GameObject obj)
+    {
+        _objs[name] = obj;
+    }
     
     public void Reset()
     {
         _curState = null;
         _datas.Clear();
+        _objs.Clear();
         _states.Clear();
     }
     
