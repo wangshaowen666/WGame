@@ -15,14 +15,11 @@ public class Fsm : IResetable
     private readonly Dictionary<Type, FsmState> _states = new Dictionary<Type, FsmState>();
     // 序号比较会将字符串视为一系列的UTF-16代码单元进行精确的二进制比较,只严格检查每个字符的编码值是否完全一致,性能最高
     private Dictionary<string, Variable> _datas = new Dictionary<string, Variable>(StringComparer.Ordinal);
-    // GameObject以及相关属性、类在这里缓存，设置主要用来避免值类型的装拆箱
-    private Dictionary<string, GameObject> _objs = new Dictionary<string, GameObject>(StringComparer.Ordinal);
+    // 引用类型存储，不存存放值类型，Variable主要用来避免值类型的装拆箱
+    private Dictionary<string, object> _objs = new Dictionary<string, object>(StringComparer.Ordinal);
     private FsmState _curState;
 
-    public FsmState CurState
-    {
-        get { return _curState; }
-    }
+    public FsmState CurState => _curState;
 
     public static Fsm Create<T>(params T[] states) where T : FsmState
     {
@@ -40,15 +37,10 @@ public class Fsm : IResetable
 
     public void ChangeState<T>() where T : FsmState
     {
-        ChangeState(typeof(T));
-    }
-
-    public void ChangeState(Type type)
-    {
-        var state = GetState(type);
+        var state = GetState(typeof(T));
         if (state == null)
         {
-            Log.Error("无效的状态类型", type.Name);
+            Log.Error("无效的状态类型", typeof(T).Name);
             return;
         }
         
@@ -63,27 +55,17 @@ public class Fsm : IResetable
 
     public T GetData<T>(string name) where T : Variable
     {
-        return GetData(name) as T;
+        return _datas.GetValueOrDefault(name) as T;
     }
-
-    public Variable GetData(string name)
+    
+    public T GetObj<T>(string name) where T : class
     {
-        return _datas.GetValueOrDefault(name);
-    }
-
-    public GameObject GetObj(string name)
-    {
-        return _objs.GetValueOrDefault(name);
+        return _objs.GetValueOrDefault(name) as T;
     }
 
     public void SetData<T>(string name, T value) where T : Variable
     {
-        SetData(name, value as Variable);
-    }
-
-    public void SetData(string name, Variable value)
-    {
-        Variable oldV = GetData(name);
+        T oldV = GetData<T>(name);
         if (oldV != null)
         {
             ClassFactory.Recycle(oldV);
@@ -92,7 +74,7 @@ public class Fsm : IResetable
         _datas[name] = value;
     }
 
-    public void SetObj(string name, GameObject obj)
+    public void SetObj<T>(string name, T obj) where T : class
     {
         _objs[name] = obj;
     }
@@ -140,11 +122,6 @@ public class Fsm : IResetable
             return null;
         }
 
-        if (!_states.TryGetValue(type, out FsmState state))
-        {
-            return null;
-        }
-        
-        return state;
+        return _states.GetValueOrDefault(type);
     }
 }

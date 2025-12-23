@@ -29,7 +29,7 @@ public class Singleton<T> where T:Singleton<T>
                     var ctor = Array.Find(ctors, c => c.GetParameters().Length == 0);
 
                     if (ctor == null)
-                        throw new Exception(typeof(T).Name + "缺少无参的私有构造函数，请私有化构造");
+                        throw new GameException(typeof(T).Name + "缺少无参的私有构造函数，请私有化构造");
 
                     instance = ctor.Invoke(null) as T;
                 }

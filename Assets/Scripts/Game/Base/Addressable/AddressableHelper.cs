@@ -168,7 +168,6 @@ public class AddressableHelper
             var fileName = Path.GetFileName(path);
             if (string.IsNullOrEmpty(fileName)) continue;
                 
-            Log.Info("缓存目录", path);
             var cachedVersions = new List<Hash128>();
             Caching.GetCachedVersions(fileName, cachedVersions);
             foreach (var version in cachedVersions)

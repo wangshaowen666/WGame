@@ -29,7 +29,7 @@ public class ProcedureResCheck_AA : ProcedureBase
     {
         base.OnEnter();
         
-        _loginPanel = _fsm.GetObj("loginPanel").GetComponent<LoginPanel>();
+        _loginPanel = _fsm.GetObj<LoginPanel>("loginPanel");
         _tokenSource = new CancellationTokenSource();
         AsyncRun().Forget();
     }
