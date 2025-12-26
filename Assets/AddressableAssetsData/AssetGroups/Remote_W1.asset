@@ -16,42 +16,7 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: 966504515b61a4dea9aa0572b4b64f32
-  m_SerializeEntries:
-  - m_GUID: 20ace2161ef4b4e2fac3a5713065993f
-    m_Address: img_acti7008_main_door1
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - common
-    - ld
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 471eaceb4db374c3aab34a8264dbbcf2
-    m_Address: img_acti7008_main_card02
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - common
-    - ld
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6a0334b192387464ba91e37983dd6697
-    m_Address: Triangle
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - common
-    - ld
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cd6a0f6e6c33b4ba4bafc2727f619c96
-    m_Address: Mat1
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - common
-    - hd
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e290bbf618e934163b52c7a27e44d345
-    m_Address: Sphere
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - common
-    - hd
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 887a2619f93d5433294a38258012af01, type: 2}
   m_SchemaSet:

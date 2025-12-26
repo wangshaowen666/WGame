@@ -1,0 +1,115 @@
+/*--------------------------------------------------------------
+ * File: AssetBundleTool.cs
+ * Author: Wang ShaoWen
+ * Time: 2025/12/26 10:51:41 
+ *--------------------------------------------------------------
+ */
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using Sirenix.OdinInspector;
+using Sirenix.OdinInspector.Editor;
+using Sirenix.Utilities;
+using Sirenix.Utilities.Editor;
+using UnityEditor;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
+using UnityEngine;
+using UnityEngine.Serialization;
+
+public class AssetBundleWindow : OdinEditorWindow
+{
+    [MenuItem("Tools/Odin/AssetBundle处理", false, 10)]
+    private static void OpenWindow()
+    {
+        var window = GetWindow<AssetBundleWindow>();
+        window.position = GUIHelper.GetEditorWindowRect().AlignCenter(700, 700);
+    }
+
+    [FolderPath(AbsolutePath = true)]
+    public string remotePath = "/Library/WebServer/Documents/MyServer";
+
+    public bool clearBeforeCopy = true;
+    
+    [Title("Log Info")]
+    [HideLabel]
+    [MultiLineProperty]
+    public string logInfoTextField;
+    
+    [ButtonGroup]
+    [Button("清理无效Bundle", ButtonSizes.Large)]
+    public void ClearInvalidBundle()
+    {
+        AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+        string activeProfileId = settings.activeProfileId;
+        string remoteBuildPath = settings.profileSettings.GetValueByName(activeProfileId, "Remote.BuildPath");
+        string resolvedPath = remoteBuildPath.Replace("[BuildTarget]", EditorUserBuildSettings.activeBuildTarget.ToString());
+        string absolutePath = Path.GetFullPath(resolvedPath);
+        
+        string version = PlayerSettings.bundleVersion;
+        string catalogPath = Path.Combine(absolutePath, $"catalog/catalog_{version}.json");
+
+        var content = File.ReadAllText(catalogPath);
+        Dictionary<string, object> dict = ParseUtil.DeJson(content) as Dictionary<string, object>;
+        List<object> fileNms = dict["m_InternalIds"] as List<object>;
+        
+        List<string> remoteBundleNames = fileNms
+            .Select(f => f.ToString())
+            .Where(f => Path.GetFileName(f).EndsWith(".bundle") && Path.GetFileName(f).StartsWith("remote_"))
+            .Select(f => Path.GetFileName(f))
+            .ToList();
+        
+        
+        string[] allFiles = Directory.GetFiles(absolutePath, "*", SearchOption.TopDirectoryOnly);
+        foreach (var nm in allFiles)
+        {
+            var fNm = Path.GetFileName(nm);
+            if (fNm.EndsWith(".bundle") && !remoteBundleNames.Contains(fNm))
+            {
+                AddLogInfo("删除文件:" + nm);
+                File.Delete(nm);
+            }
+        }
+        AddLogInfo("清除无效Bundle完成");
+    }
+
+    [ButtonGroup]
+    [Button("拷贝Bundle")]
+    public void CopyBundle()
+    {
+        AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+        string activeProfileId = settings.activeProfileId;
+        string remoteBuildPath = settings.profileSettings.GetValueByName(activeProfileId, "Remote.BuildPath");
+        string resolvedPath = remoteBuildPath.Replace("[BuildTarget]", EditorUserBuildSettings.activeBuildTarget.ToString());
+        string absolutePath = Path.GetFullPath(resolvedPath);
+
+        string remoteTarget = Path.Combine(remotePath, EditorUserBuildSettings.activeBuildTarget.ToString());
+        
+        FileUtil.CopyDirectory(absolutePath, remoteTarget);
+        AddLogInfo("拷贝完成");
+    }
+    
+    [ButtonGroup]
+    [Button("清除并拷贝")]
+    [GUIColor(0, 1, 0)]
+    public void ClearAndCopyBundle()
+    {
+        ClearInvalidBundle();
+        CopyBundle();
+    }
+    
+    [ButtonGroup]
+    [Button("清除日志")]
+    public void ClearLog()
+    {
+        logInfoTextField = "";
+    }
+
+    private void AddLogInfo(string str)
+    {
+        logInfoTextField = (str + "\n") + logInfoTextField;
+    }
+}

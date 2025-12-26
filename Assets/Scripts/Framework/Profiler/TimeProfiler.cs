@@ -9,12 +9,15 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
+/// <summary>
+/// 耗时不能说明全部，同一个代码块重复测试三次，打印时间会出现其中一次和另外两次差距挺大的情况，可能是内存扩容集中发生
+/// </summary>
 public static class TimeProfiler 
 {
-    private static readonly Dictionary<string, RTime> recordTDic = new Dictionary<string, RTime>(); //记录调试时间字典
+    private static readonly Dictionary<string, StopwatchItem> _timeMap = new Dictionary<string, StopwatchItem>();
     
     /// <summary>
-    /// 测试发现这里统计的不太准确，推荐用RecordTimeStart
+    /// 微秒级精度，更准确
     /// </summary>
     /// <param name="cb"></param>
     public static void LogTime(Action cb)
@@ -25,67 +28,58 @@ public static class TimeProfiler
         sw.Stop();
         Log.Info(Log.LogColor.Cyan, "共耗时", sw.Elapsed.TotalMilliseconds, "毫秒");
     }
-    
+
     /// <summary>
-    /// 开始记录
+    /// 真实开销会略小于这里记录的，回调执行的方式占用了一点点开销，不受帧率影响
     /// </summary>
-    /// <param name="key">关键帧名字</param>
+    /// <param name="key"></param>
+    /// <param name="cb"></param>
+    public static void RecordTime(string key, Action cb)
+    {
+        if (!_timeMap.TryGetValue(key, out var r))
+        {
+            r = new StopwatchItem(key);
+            _timeMap[key] = r;
+        }
+        
+        r.Start();
+        cb.Invoke();
+        r.Stop();
+    }
+
     public static void RecordTimeStart(string key)
     {
-        var startTime = DateTime.UtcNow.Ticks;
-        if (recordTDic.TryGetValue(key, out var r))
+        if (!_timeMap.TryGetValue(key, out var r))
         {
-            r.startTime = startTime;
+            r = new StopwatchItem(key);
+            _timeMap[key] = r;
         }
-        else
-        {
-            RTime t = new RTime
-            {
-                startTime = startTime
-            };
-            recordTDic[key] = t;
-        }
+        
+        r.Start();
     }
 
-    /// <summary>
-    /// 结束记录
-    /// </summary>
-    /// <param name="key">关键帧名字</param>
     public static void RecordTimeStop(string key)
     {
-        var stopTime = DateTime.UtcNow.Ticks;
-        if (recordTDic.TryGetValue(key, out var r))
-        {
-            stopTime -= r.startTime;
-            r.count++;
-            r.allTime += stopTime;
-        }
+        // 不做key是否存在检查，尽量避免非测试逻辑开销
+        var item = _timeMap[key];
+        item.Stop();
     }
-
-    /// <summary>
-    /// 输出统计
-    /// </summary>
-    /// <param name="isClear">是否清除缓存</param>
-    /// <param name="isMs">true为毫秒，否则为秒</param>
-    /// <param name="isSaveLocal">是否存储到本地</param>
-    public static void DebugRecordTime(bool isClear = true, bool isMs = true, bool isSaveLocal = false)
+    
+    public static void LogDurationTime(bool isClear = true, bool isSaveLocal = false)
     {
         string ret = "";
-        foreach (var kv in recordTDic)
+        foreach (var kv in _timeMap)
         {
-            var mul = isMs ? 10000 : 10000000;
-            var str = $"记录耗时: {kv.Key}  {kv.Value.allTime / mul}  执行次数: {kv.Value.count}";
-            Log.Info(Log.LogColor.Cyan, str);
-
+            var str = kv.Value.LogTime();
             if (isSaveLocal)
             {
                 ret += str + "\n";
             }
         }
-
+        
         if (isClear)
         {
-            recordTDic.Clear();
+            _timeMap.Clear();
         }
 
         if (isSaveLocal)
@@ -95,9 +89,36 @@ public static class TimeProfiler
     }
 }
 
-public class RTime
+public class StopwatchItem
 {
-    public long allTime;
-    public long startTime;
-    public int count;
+    private readonly Stopwatch _sw;
+    private readonly string _key;
+    private int _count;
+
+    public StopwatchItem(string key)
+    {
+        _key = key;
+        _sw = new Stopwatch();
+    }
+
+    public void Start()
+    {
+        _count++;
+        _sw.Start();
+    }
+
+    public void Stop()
+    {
+        _sw.Stop();
+    }
+
+    public string LogTime(bool reset = true)
+    {
+        var str = $"记录耗时: {_key}  {_sw.Elapsed.TotalMilliseconds}毫秒  执行次数: {_count}";
+        Log.Info(Log.LogColor.Cyan, str);
+        
+        if (reset) _sw.Reset();
+        
+        return str;
+    }
 }

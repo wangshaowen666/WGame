@@ -16,31 +16,7 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: 8e32f6a495d064f88917e1e196a1f195
-  m_SerializeEntries:
-  - m_GUID: 04682f02bb5954e0491760b03b5a74d9
-    m_Address: Assets/Res/HotTest/Cube3.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - 7034
-    - hd
-    - ld
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8e0bd69a7551e48bc8f8b6aac27e3291
-    m_Address: Assets/Res/HotTest/Cube4.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - 7034
-    - hd
-    - ld
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f75180faa80084a138202e533bff56c9
-    m_Address: Assets/Res/HotTest/Cube5.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - 7034
-    - hd
-    - ld
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 887a2619f93d5433294a38258012af01, type: 2}
   m_SchemaSet:
