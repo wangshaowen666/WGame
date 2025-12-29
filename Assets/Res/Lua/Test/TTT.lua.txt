@@ -18,7 +18,10 @@ a.m = 1
 print(b.m)
 print(a.m)
 
-local resMgr = CS.ResMgr.Instance
+Global("c", 2)
+print(c)
+
+Global("resMgr", CS.ResMgr.Instance)
 
 --resMgr:LoadAsync("Cube", function(prefab)
 --    local go = CS.UnityEngine.GameObject.Instantiate(prefab)

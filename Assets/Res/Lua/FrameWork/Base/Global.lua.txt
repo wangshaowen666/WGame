@@ -1,0 +1,29 @@
+--[[*-------------------------------------------------------------- 
+ * File: Global.lua.txt
+ * Author: Wang ShaoWen
+ * Time: 2025/12/29 20:45:55 
+ *--------------------------------------------------------------]]
+
+local declaredNames = {}
+
+setmetatable(_G, {
+    __newindex = function(t, name, value)
+        if not declaredNames[name] then
+            error("不可直接声明全局变量，请使用Global接口")
+        end
+        rawset(t, name, value)
+    end,
+
+    __index = function(t, name)
+        if not declaredNames[name] then
+            error("正在访问不存在的全局变量:" .. name)
+        end
+        return rawget(t, name)
+    end
+})
+
+declaredNames.Global = 1
+function Global(name, initialValue)
+    declaredNames[name] = true
+    rawset(_G, name, initialValue or false)
+end

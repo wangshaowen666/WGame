@@ -12,6 +12,7 @@ if false then
     dbg.tcpConnect('localhost', 9966)
 end
 
+require('Global')
 require('TTT')
 
 
