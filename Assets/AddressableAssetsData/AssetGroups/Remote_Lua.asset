@@ -23,6 +23,18 @@ MonoBehaviour:
     m_SerializedLabels:
     - lua
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6907fcb6e7cf54846bd91597ebd2541c
+    m_Address: TTT.lua
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - lua
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0735bc92bda24430a90b7222e36c639
+    m_Address: Main.lua
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - lua
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 887a2619f93d5433294a38258012af01, type: 2}
   m_SchemaSet:

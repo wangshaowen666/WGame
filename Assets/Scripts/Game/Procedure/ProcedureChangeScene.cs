@@ -8,6 +8,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class ProcedureChangeScene : ProcedureBase
 {
@@ -22,6 +23,13 @@ public class ProcedureChangeScene : ProcedureBase
     {
         var nm = _fsm.GetObj<string>("sceneNm");
         await SceneCtr.Instance.LoadScene(nm);
-        
+
+        switch (nm)
+        {
+            case "Main":
+                LuaCtr.Instance.InitLuaEnv();
+               
+                break;
+        }
     }
 }

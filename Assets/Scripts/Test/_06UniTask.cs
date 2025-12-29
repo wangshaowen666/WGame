@@ -13,8 +13,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-#pragma warning disable CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
-
 /*
  * 协程是一种在多帧间执行代码的机制，同步写出异步的效果，通过yield return暂停，下一帧循环到了再次执行然后暂停
  * 
@@ -28,6 +26,7 @@ using UnityEngine.UI;
  *
  * await的机制是非阻塞的。当主线程执行到 await Test3()时，它并不会傻等着，而是会挂起当前方法，将控制权返回给Unity的游戏引擎主循环。
  * 这样，主线程就可以去处理渲染新的一帧、响应玩家输入等其他重要工作，从而保证了游戏的流畅性
+ * 只有标记了async的异步方法才可以使用await，await不会阻塞主线程，只会将这个异步方法挂起
  *
  * 线程切换是“线程本地”的，只影响它所在的那个异步方法的后续执行流程。它并不会改变整个应用程序的“当前线程”全局状态 *
  *
@@ -45,34 +44,40 @@ public class _06UniTask : MonoBehaviour
     private bool _isFinish;
     void Start()
     {
-        //AsyncStart();
-        AsyncTimeTest();
+        AsyncStart();
+        //AsyncTimeTest().Forget();
     }
 
     async UniTaskVoid AsyncStart()
     {
         // 取消的token，当gameObject销毁时取消任务
-        var cancellationToken = this.GetCancellationTokenOnDestroy();
+        // var cancellationToken = this.GetCancellationTokenOnDestroy();
+        //
+        // // 一个task不能await两次
+        // UniTask task = Test();
+        // //await task;
+        // Log.Info(1111);
+        //
+        // var str = await Test();
+        // Log.Info(str);
+        //
+        // // 如果Test3在主线程执行，虽然3 4都不需要等待，但是3的计算耗时太久会卡住整个线程，等3计算完了 4和Update才开始继续计时
+        // Test4();
+        // Test3();
+        //
+        // Test5();
+        //
+        // Log.Info("并行开始");
+        // UniTask task2 = Test2(cancellationToken);
+        // await UniTask.WhenAll(task, task2);
+        // Log.Info("并行完成");
         
-        // 一个task不能await两次
-        UniTask task = Test();
-        //await task;
-        Log.Info(1111);
         
-        var str = await Test();
-        Log.Info(str);
-
-        // 如果Test3在主线程执行，虽然3 4都不需要等待，但是3的计算耗时太久会卡住整个线程，等3计算完了 4和Update才开始继续计时
-        Test4();
-        Test3();
-
-        Test5();
-        
-        Log.Info("并行开始");
-        UniTask task2 = Test2(cancellationToken);
-        await UniTask.WhenAll(task, task2);
-        Log.Info("并行完成");
-       
+        Log.Info(111);
+        TestAwait().Forget();
+        Log.Info(222);
+        await TestAwait();
+        Log.Info(333);
     }
 
     async UniTaskVoid AsyncTimeTest()
@@ -112,6 +117,11 @@ public class _06UniTask : MonoBehaviour
         TimeProfiler.RecordTimeStop("执行耗时方法4");
         
         TimeProfiler.LogDurationTime();
+    }
+
+    async UniTask TestAwait()
+    {
+        await UniTask.Delay(5000);
     }
     
     async UniTask<string> Test()
@@ -155,11 +165,11 @@ public class _06UniTask : MonoBehaviour
         if (_timer - _temp > 1)
         {
             _temp = _timer;
-            //Log.Info("Update 1s打印");
+            Log.Info("Update 1s打印");
         }
         
         
-        if (_timer > 8f && !_isFinish)
+        if (_timer > 80f && !_isFinish)
         {
             _isFinish = true;
         }

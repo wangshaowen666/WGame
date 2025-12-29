@@ -24,7 +24,7 @@ public class AddressableHelper
     private const string BundleExtension = ".bundle";
     // 远端AB包的前缀
     private const string RemoteBundlePrefix = "remote_";
-    private static List<string> LoginDownloadLabels = new List<string> { "common", "hd", "lua"};
+    private static List<string> LoginDownloadLabels = new List<string> { "common", "lua"};
     
     private List<IResourceLocation> _totalLocation = new List<IResourceLocation>();
     private float _fileSize;
@@ -119,6 +119,22 @@ public class AddressableHelper
 
     public async UniTask Download(CancellationToken token)
     {
+        var allKeys = Addressables.ResourceLocators?
+            .Where(locator => locator?.Keys != null)
+            .SelectMany(locator => locator.Keys);
+
+        if (allKeys != null)
+        {
+            foreach (var key in allKeys)
+            {
+                Debug.Log($"Key: {key}");
+            }
+            Debug.Log($"总共找到 {allKeys.Count()} 个 Key。");
+        }
+        
+        
+        
+        
         if (_fileSize == 0 || _totalLocation.Count == 0)
             return;
         

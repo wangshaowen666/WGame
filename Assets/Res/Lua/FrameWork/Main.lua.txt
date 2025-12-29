@@ -6,7 +6,8 @@
 
 -- 开启断点
 if false then
-    package.cpath = package.cpath .. ';/Volumes/shaowen/Library/Application Support/JetBrains/Rider2021.1/plugins/EmmyLua/debugger/emmy/mac/emmy_core.dylib'
+    package.cpath = package.cpath .. ';/Volumes/shaowen/Library/Application Support/JetBrains/Rider2021.1/plugins/EmmyLua/debugger/emmy/mac/emmy_core.dylib'   --改成自己的emmy_core.dylib路径
+
     local dbg = require('emmy_core')
     dbg.tcpConnect('localhost', 9966)
 end

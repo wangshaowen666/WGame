@@ -5,11 +5,9 @@
  *--------------------------------------------------------------
  */
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
@@ -17,8 +15,6 @@ using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
-using UnityEngine;
-using UnityEngine.Serialization;
 
 public class AssetBundleWindow : OdinEditorWindow
 {
@@ -43,12 +39,7 @@ public class AssetBundleWindow : OdinEditorWindow
     [Button("清理无效Bundle", ButtonSizes.Large)]
     public void ClearInvalidBundle()
     {
-        AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
-        string activeProfileId = settings.activeProfileId;
-        string remoteBuildPath = settings.profileSettings.GetValueByName(activeProfileId, "Remote.BuildPath");
-        string resolvedPath = remoteBuildPath.Replace("[BuildTarget]", EditorUserBuildSettings.activeBuildTarget.ToString());
-        string absolutePath = Path.GetFullPath(resolvedPath);
-        
+        string absolutePath = GetBundleBuildPath();
         string version = PlayerSettings.bundleVersion;
         string catalogPath = Path.Combine(absolutePath, $"catalog/catalog_{version}.json");
 
@@ -80,13 +71,13 @@ public class AssetBundleWindow : OdinEditorWindow
     [Button("拷贝Bundle")]
     public void CopyBundle()
     {
-        AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
-        string activeProfileId = settings.activeProfileId;
-        string remoteBuildPath = settings.profileSettings.GetValueByName(activeProfileId, "Remote.BuildPath");
-        string resolvedPath = remoteBuildPath.Replace("[BuildTarget]", EditorUserBuildSettings.activeBuildTarget.ToString());
-        string absolutePath = Path.GetFullPath(resolvedPath);
-
+        string absolutePath = GetBundleBuildPath();
         string remoteTarget = Path.Combine(remotePath, EditorUserBuildSettings.activeBuildTarget.ToString());
+
+        if (clearBeforeCopy)
+        {
+            Directory.Delete(remoteTarget, true);
+        }
         
         FileUtil.CopyDirectory(absolutePath, remoteTarget);
         AddLogInfo("拷贝完成");
@@ -111,5 +102,16 @@ public class AssetBundleWindow : OdinEditorWindow
     private void AddLogInfo(string str)
     {
         logInfoTextField = (str + "\n") + logInfoTextField;
+    }
+
+    private string GetBundleBuildPath()
+    {
+        AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+        string activeProfileId = settings.activeProfileId;
+        string remoteBuildPath = settings.profileSettings.GetValueByName(activeProfileId, "Remote.BuildPath");
+        string resolvedPath = remoteBuildPath.Replace("[BuildTarget]", EditorUserBuildSettings.activeBuildTarget.ToString());
+        string absolutePath = Path.GetFullPath(resolvedPath);
+        
+        return absolutePath;
     }
 }

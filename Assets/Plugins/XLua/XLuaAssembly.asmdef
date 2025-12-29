@@ -1,7 +1,9 @@
 {
     "name": "XLuaAssembly",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:d347d220a7f5d4a33906369e7d6c1d96"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
