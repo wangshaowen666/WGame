@@ -28,12 +28,12 @@ Global("resMgr", CS.ResMgr.Instance)
 --    print("加载成功！")
 --end)
 
-resMgr:LoadPrefab("Triangle",function(prefab) 
-    local go = CS.UnityEngine.GameObject.Instantiate(prefab)
-    local sp = go:GetComponent("SpriteRenderer")
-    
-    resMgr:LoadRes("Sprite", "img_acti7086_common_get_s6078", function(obj)
-        sp.sprite = obj
-    end)
-end)
+--resMgr:LoadPrefab("Triangle",function(prefab) 
+--    local go = CS.UnityEngine.GameObject.Instantiate(prefab)
+--    local sp = go:GetComponent("SpriteRenderer")
+--    
+--    resMgr:LoadRes("Sprite", "img_acti7086_common_get_s6078", function(obj)
+--        sp.sprite = obj
+--    end)
+--end)
 

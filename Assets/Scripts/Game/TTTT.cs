@@ -13,14 +13,17 @@ using UnityEngine;
 
 public class TTTT : MonoBehaviour
 {
+    private enum MyEnum
+    {
+        OnLevelUp = 1,
+    }
+    
     private string str;
     private List<string> hashNmd = new List<string>();
     
     private void Start()
     {
         Procedure.Instance.RunProcedure<ProcedureVersionCheck>();
-        
-       
     }
 
     [ContextMenu("执行")]

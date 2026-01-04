@@ -27,7 +27,7 @@ public class AddressableHelper
     private static List<string> LoginDownloadLabels = new List<string> { "common", "lua"};
     
     private List<IResourceLocation> _totalLocation = new List<IResourceLocation>();
-    private float _fileSize;
+    private long _fileSize;
 
     public async UniTask InitAsync()
     {
@@ -106,11 +106,8 @@ public class AddressableHelper
         }
         else
         {
-            // float size = sizeHandle.Result / (1024f * 1024f);
-            // Log.Info($"热更资源总大小：{size:F1}MB");
-            
-            _fileSize = sizeHandle.Result / (1024f);
-            Log.Info($"热更资源总大小：{_fileSize:F0}KB");
+            _fileSize = sizeHandle.Result;
+            Log.Info("热更资源总大小:", FileUtil.GetFileLength(_fileSize));
         
             Addressables.Release(locationHandle);
             Addressables.Release(sizeHandle);
@@ -119,21 +116,18 @@ public class AddressableHelper
 
     public async UniTask Download(CancellationToken token)
     {
-        var allKeys = Addressables.ResourceLocators?
-            .Where(locator => locator?.Keys != null)
-            .SelectMany(locator => locator.Keys);
-
-        if (allKeys != null)
-        {
-            foreach (var key in allKeys)
-            {
-                Debug.Log($"Key: {key}");
-            }
-            Debug.Log($"总共找到 {allKeys.Count()} 个 Key。");
-        }
-        
-        
-        
+        // var allKeys = Addressables.ResourceLocators?
+        //     .Where(locator => locator?.Keys != null)
+        //     .SelectMany(locator => locator.Keys);
+        //
+        // if (allKeys != null)
+        // {
+        //     foreach (var key in allKeys)
+        //     {
+        //         Debug.Log($"Key: {key}");
+        //     }
+        //     Debug.Log($"总共找到 {allKeys.Count()} 个 Key。");
+        // }
         
         if (_fileSize == 0 || _totalLocation.Count == 0)
             return;

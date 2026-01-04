@@ -17,58 +17,8 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: b0aff8f7d755e4f56a5fe72bc1a581b7
   m_SerializeEntries:
-  - m_GUID: 19c77ffa523c74ea096144dd30eaccdc
-    m_Address: img_acti7086_common_currency_di_s6078
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 604f2372fe1904e3baee3f883d88d6e3
-    m_Address: img_acti7086_common_btn_yelow_s6078
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 66c74a48f68bc4491b2961a580d4ad95
-    m_Address: img_acti7086_common_btn_pur_s6078
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6c0683c6108754ab9854aef3a9349651
-    m_Address: img_acti7086_common_icon_s6078
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 754e3ab5b0d7d4f9bb2f55ad63ed761a
-    m_Address: Cube
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 769937abca9f84cd3a5ebabd896f537f
-    m_Address: img_acti7086_common_btn_info_s6078
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 79409e3ec4ac64103a4ff1740a78a6ac
-    m_Address: img_acti7086_common_btn_green_s6078
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7ef8fe70e79af490289ad7b6dcb13457
-    m_Address: Assets/Res/TestPrefab/Mat1.mat
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8f8cd02406a2f4238b86c6644276b3ba
-    m_Address: img_acti7086_common_btn_close_s6078
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b274a0c4ecf874fb4967874f5c1db3d6
-    m_Address: img_acti7086_common_get_s6078
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c691857a0ad4248eba721ad1b953d3a0
-    m_Address: Triangle
+  - m_GUID: 43a531b438ee440018f1c973fea5aa37
+    m_Address: button-outline
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

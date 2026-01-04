@@ -9,7 +9,7 @@ using System;
 using UnityEngine;
 using TMPro;
 
-public class LoginPanel : MonoBehaviour
+public class LoginPanel : UIPanelBase
 {
     public TextMeshProUGUI tipText;
     public SlicedFilledImage progressImg;

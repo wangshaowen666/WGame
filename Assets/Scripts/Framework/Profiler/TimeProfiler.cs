@@ -84,7 +84,7 @@ public static class TimeProfiler
 
         if (isSaveLocal)
         {
-            FileUtil.WriteText(ret, "耗时统计.txt");
+            FileUtil.WriteFile(ret, "耗时统计.txt");
         }
     }
 }

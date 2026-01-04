@@ -23,6 +23,11 @@ MonoBehaviour:
     m_SerializedLabels:
     - lua
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 68f72885f328246728da91c39bcdc8e3
+    m_Address: Global.lua
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6907fcb6e7cf54846bd91597ebd2541c
     m_Address: TTT.lua
     m_ReadOnly: 0

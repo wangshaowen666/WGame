@@ -14,13 +14,13 @@ public static class FileUtil
     // 输出路径
     private const string OUT_PATH = "/Users/wangshaowen/Desktop";
     
-    public static void WriteText(string content, string fileName)
+    public static void WriteFile(string content, string fileName)
     {
         string path = Path.Combine(OUT_PATH, fileName);
         File.WriteAllText(path, content);
     }
 
-    public static string ReadJsonFile(string path)
+    public static string ReadFile(string path)
     {
         try
         {
@@ -68,5 +68,25 @@ public static class FileUtil
             string destSubDir = Path.Combine(destinationDir, dirName);
             CopyDirectory(subDir, destSubDir); 
         }
+    }
+
+    public static string GetFileLength(long byteLength)
+    {
+        if (byteLength < 1024L)
+        {
+            return $"{byteLength} B";
+        }
+        
+        if (byteLength < 1048576L)
+        {
+            return $"{byteLength / 1024f:F2} KB";
+        }
+        
+        if (byteLength < 1073741824L) // 2 ^ 30
+        {
+            return $"{byteLength / 1048576f:F2} MB";
+        }
+        
+        return $"{byteLength / 1073741824f:F2} GB";
     }
 }

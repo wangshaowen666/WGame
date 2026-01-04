@@ -30,13 +30,9 @@ public class Singleton<T> where T:Singleton<T>
 
                     if (ctor == null)
                         throw new GameException(typeof(T).Name + "缺少无参的私有构造函数，请私有化构造");
-
-                    Log.Info("实例化：", typeof(T).Name);
                     instance = ctor.Invoke(null) as T;
                 }
             }
-            
-            Log.Info("获取单例：", typeof(T).Name);
             return instance;
         }
     }

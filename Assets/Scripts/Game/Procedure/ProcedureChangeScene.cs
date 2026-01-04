@@ -16,6 +16,8 @@ public class ProcedureChangeScene : ProcedureBase
     {
         base.OnEnter();
         
+        // todo 释放资源等
+        
         AsyncRun().Forget();
     }
 
@@ -27,9 +29,24 @@ public class ProcedureChangeScene : ProcedureBase
         switch (nm)
         {
             case "Main":
-                LuaCtr.Instance.InitLuaEnv();
-               
-                break;
+               GotoMainScene();
+               break;
         }
+    }
+
+    private void GotoMainScene()
+    {
+        // 首次登陆
+        var panel = _fsm.GetObj<LoginPanel>("loginPanel");
+        if (panel != null)
+        {
+            _fsm.RemoveObj("loginPanel");
+            Object.Destroy(panel.gameObject);
+                    
+            LuaCtr.Instance.InitLuaEnv();
+        }
+                
+        ScreenCtr.Instance.SetMainCamera(GameConfig.MapCamera);
+        PanelCtr.Instance.PanelOn("MainPanel", UILayer.BOTTOM_2, null);
     }
 }

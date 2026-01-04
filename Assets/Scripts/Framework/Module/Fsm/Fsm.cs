@@ -78,6 +78,16 @@ public class Fsm : IResetable
     {
         _objs[name] = obj;
     }
+
+    public void RemoveData(string name)
+    {
+        _datas.Remove(name);
+    }
+    
+    public void RemoveObj(string name)
+    {
+        _objs.Remove(name);
+    }
     
     public void Reset()
     {
