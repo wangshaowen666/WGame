@@ -11,6 +11,9 @@ using UnityEngine;
 
 public static class GameConfig
 {
+    // 单机模式
+    public static bool Standalone = true;
+    
     // 屏幕标准尺寸
     public static Vector2Int ScreenSize = new Vector2Int(1080, 1920);
 

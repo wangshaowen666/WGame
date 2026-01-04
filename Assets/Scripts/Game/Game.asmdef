@@ -2,13 +2,15 @@
     "name": "Game",
     "rootNamespace": "",
     "references": [
+        "GUID:24248ba87ffaf463ab22492ca837fdba",
         "GUID:d347d220a7f5d4a33906369e7d6c1d96",
         "GUID:9e24947de15b9834991c9d8411ea37cf",
         "GUID:84651a3751eca9349aac36a66bba901b",
         "GUID:f51ebe6a0ceec4240a699833d6309b23",
         "GUID:6055be8ebefd69e48b49212b09b47b2f",
         "GUID:02fa88a03e5d84dd9b07cca91717fc2a",
-        "GUID:15fc0a57446b3144c949da3e2b9737a9"
+        "GUID:15fc0a57446b3144c949da3e2b9737a9",
+        "GUID:75469ad4d38634e559750d17036d5f7c"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

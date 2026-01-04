@@ -38,7 +38,7 @@ public class PanelCtr : Singleton<PanelCtr>
         }
     }
 
-    public void PanelOn(string key, UILayer layer, Action<GameObject> callback)
+    public void PanelOn(string key, UILayer layer = UILayer.BOTTOM_2, Action<GameObject> callback = null)
     {
         ResMgr.Instance.LoadPrefab(key, o =>
         {

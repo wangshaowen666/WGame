@@ -1,0 +1,100 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Remote_Setting
+  m_EditorClassIdentifier: 
+  m_GroupName: Remote_Setting
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 14d242190bf7f4e59ac2d45a08af2939
+  m_SerializeEntries:
+  - m_GUID: 0179316b5fc7c2946a67c5877c02fc30
+    m_Address: info
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0a65a68c01a76ea4b8b574827a6467aa
+    m_Address: dialog-title-background
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 156d241f796508c4da4fc354a7fbf5a8
+    m_Address: progressbar-background
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 236433a27ce40a7429b87d14d8fa3035
+    m_Address: progress-conner
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 24ca310f92a6796408f1db7647ec4e55
+    m_Address: circle
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3f54fcfdac53aec42ae18a6a1c6d8cb1
+    m_Address: checked
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6cbc2c323b77f804fb958fa4eca33998
+    m_Address: line
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ab45c3f613f388d43bbf43ec05eb92e2
+    m_Address: dialog-background
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bbfd75fe6fe00e1448fe988173ede7f9
+    m_Address: SettingPanel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cadd0764941c8b646ae79b51d0ea8285
+    m_Address: background
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: db58965402f12ed47b4dad61a9e48c9d
+    m_Address: world
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e5ca26c53b6ab8a46b52817008d7c7fa
+    m_Address: sound
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e82837c9099f69a48b48fc44eb8d119d
+    m_Address: progressbar
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f2f4df0b7211e4c42a5638273525d8ee
+    m_Address: box
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f438a72a91e1c3c4a9ced40888ffec96
+    m_Address: music
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 887a2619f93d5433294a38258012af01, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 5cb44ba1b8acb483fa8c9d9ea74cd5f0, type: 2}
+    - {fileID: 11400000, guid: 09de779f600614e499d936bb05b07c10, type: 2}

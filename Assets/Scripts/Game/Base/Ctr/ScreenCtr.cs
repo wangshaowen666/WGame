@@ -7,6 +7,7 @@
 
 using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
@@ -88,6 +89,7 @@ public class ScreenCtr : Singleton<ScreenCtr>
         canvas.worldCamera = UICamera;
         
         InitCanvasScaler(obj);
+        InitEventSystem(obj.transform);
         
         Object.DontDestroyOnLoad(obj);
         UICanvas = canvas;
@@ -101,5 +103,14 @@ public class ScreenCtr : Singleton<ScreenCtr>
         scaler.referenceResolution = model;
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         scaler.matchWidthOrHeight = Screen.width * 1.0f / Screen.height > model.x * 1.0f / model.y ? 1 : 0;
+    }
+
+    private void InitEventSystem(Transform parent)
+    {
+        if (Object.FindObjectOfType<InputSystemUIInputModule>()) return;
+
+        var obj = new GameObject("EventSystem");
+        obj.AddComponent<InputSystemUIInputModule>();
+        obj.transform.SetParent(parent, false);
     }
 }
