@@ -7,7 +7,6 @@
 
 using System;
 using System.IO;
-using UnityEngine;
 
 public static class FileUtil
 {
@@ -68,6 +67,23 @@ public static class FileUtil
             string destSubDir = Path.Combine(destinationDir, dirName);
             CopyDirectory(subDir, destSubDir); 
         }
+    }
+
+    public static void CopyFile(string sourceFilePath, string destFilePath, bool overwrite = true)
+    {
+        if (!File.Exists(sourceFilePath))
+        {
+            Log.Error("源文件不存在：", sourceFilePath);
+            return;
+        }
+
+        var folderPath = Path.GetDirectoryName(destFilePath);
+        if (folderPath != null && !Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
+        
+        File.Copy(sourceFilePath, destFilePath, overwrite);
     }
 
     public static string GetFileLength(long byteLength)

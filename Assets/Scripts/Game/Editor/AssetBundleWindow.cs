@@ -27,12 +27,18 @@ public class AssetBundleWindow : OdinEditorWindow
 
     [FolderPath(AbsolutePath = true)]
     public string remotePath = "/Library/WebServer/Documents/MyServer";
+    
+    [FolderPath(AbsolutePath = true)]
+    public string dllSourcePath = "/Users/wangshaowen/wgame/HybridCLRData/HotUpdateDlls";
+    
+    [FolderPath(AbsolutePath = true)]
+    public string dllTargetPath = "/Users/wangshaowen/wgame/Assets/Res/Dll";
 
     public bool clearBeforeCopy = true;
     
     [Title("Log Info")]
     [HideLabel]
-    [MultiLineProperty]
+    [MultiLineProperty(lines:6)]
     public string logInfoTextField;
     
     [ButtonGroup]
@@ -90,6 +96,20 @@ public class AssetBundleWindow : OdinEditorWindow
     {
         ClearInvalidBundle();
         CopyBundle();
+    }
+    
+    [ButtonGroup]
+    [Button("同步dll")]
+    public void CopyDll()
+    {
+        string source = Path.Combine(dllSourcePath, EditorUserBuildSettings.activeBuildTarget.ToString());
+        List<string> dlls = new List<string> { "Game.dll", "Framework.JIT.dll" };
+        foreach (var dll in dlls)
+        {
+            FileUtil.CopyFile(Path.Combine(source, dll), Path.Combine(dllTargetPath, dll + ".bytes"));
+            AddLogInfo("同步dll：" + dll);
+        }
+        AssetDatabase.Refresh();
     }
     
     [ButtonGroup]

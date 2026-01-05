@@ -16,7 +16,12 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: 5c978866dcbb34130ba2a126b8dc1cac
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 1fdd63ee14f164eb6bf0481094b6324c
+    m_Address: Framework.JIT.dll
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 887a2619f93d5433294a38258012af01, type: 2}
   m_SchemaSet:
