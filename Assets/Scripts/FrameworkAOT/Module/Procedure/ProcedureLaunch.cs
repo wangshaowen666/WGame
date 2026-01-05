@@ -14,15 +14,13 @@ public class ProcedureLaunch : ProcedureBase
     {
         base.OnEnter();
         
-        //ScreenCtr.Instance.Init();
-        
         var panel = LoadLoginPanel();
         panel.SetTip("游戏启动中...", 0.1f);
         _fsm.SetObj("loginPanel", panel);
 
         if (AOTConfig.Standalone)
         {
-            Procedure.Instance.RunProcedure<ProcedurePreload>();
+            Procedure.Instance.RunProcedure<ProcedureLoadDll>();
         }
         else
         {

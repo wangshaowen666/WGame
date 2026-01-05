@@ -53,6 +53,18 @@ public class Fsm : IResetable
         state.OnEnter();
     }
 
+    public void AddState<T>(T state) where T : FsmState
+    {
+        Type type = state.GetType();
+        if (!_states.TryAdd(type, state))
+        {
+            Log.Error("状态已经存在, 不可重复添加：", type.Name);
+            return;
+        }
+
+        state.OnInit(this);
+    }
+
     public T GetData<T>(string name) where T : Variable
     {
         return _datas.GetValueOrDefault(name) as T;

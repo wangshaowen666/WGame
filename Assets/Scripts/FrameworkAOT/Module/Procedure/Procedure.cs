@@ -19,10 +19,22 @@ public class Procedure : Singleton<Procedure>, IUpdateable
 
     private Procedure()
     {
-        var procedures = GetAllProcedures();
+        // 原本是通过反射自动收集所有流程，用华佗热更拆分程序集后，反射拿不到热更程序集中的流程
+        var procedures = new List<ProcedureBase>
+        {
+            new ProcedureLaunch(),
+            new ProcedureVersionCheck(),
+            new ProcedureResCheck_AA(),
+            new ProcedureLoadDll()
+        };
         _fsm = Fsm.Create(procedures);
         
         UpdateMgr.RegisterUpdate(this);
+    }
+    
+    public void AddProcedure(ProcedureBase procedure)
+    {
+        _fsm.AddState(procedure);
     }
 
     public void RunProcedure<T>() where T : ProcedureBase

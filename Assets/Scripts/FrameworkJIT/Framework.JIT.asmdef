@@ -1,5 +1,5 @@
 {
-    "name": "WFramework",
+    "name": "Framework.JIT",
     "rootNamespace": "",
     "references": [
         "GUID:24248ba87ffaf463ab22492ca837fdba",

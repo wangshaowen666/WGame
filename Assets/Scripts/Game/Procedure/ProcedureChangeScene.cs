@@ -24,6 +24,9 @@ public class ProcedureChangeScene : ProcedureBase
     private async UniTaskVoid AsyncRun()
     {
         var nm = _fsm.GetObj<string>("sceneNm");
+        if (string.IsNullOrEmpty(nm))
+            nm = "Main";
+        
         await SceneCtr.Instance.LoadScene(nm);
 
         switch (nm)
@@ -37,14 +40,7 @@ public class ProcedureChangeScene : ProcedureBase
     private void GotoMainScene()
     {
         // 首次登陆
-        var panel = _fsm.GetObj<LoginPanel>("loginPanel");
-        if (panel != null)
-        {
-            _fsm.RemoveObj("loginPanel");
-            Object.Destroy(panel.gameObject);
-                    
-            LuaCtr.Instance.InitLuaEnv();
-        }
+        ScreenCtr.Instance.Init();
                 
         ScreenCtr.Instance.SetMainCamera(GameConfig.MapCamera);
         PanelCtr.Instance.PanelOn("MainPanel", UILayer.BOTTOM_2, null);

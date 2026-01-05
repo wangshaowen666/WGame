@@ -23,21 +23,6 @@ public class PanelCtr : Singleton<PanelCtr>
         CreateUILayers();
     }
 
-    public LoginPanel LoadLoginPanel()
-    {
-        GameObject loginPrefab = Resources.Load<GameObject>("LoginPanel/LoginPanel");
-        if (loginPrefab != null)
-        {
-            GameObject loginInstance = Object.Instantiate(loginPrefab, _layerMap[UILayer.BOTTOM_2]);
-            loginInstance.name = "LoginPanel";
-            return loginInstance.GetComponent<LoginPanel>();
-        }
-        else
-        {
-            throw new GameException("Failed to load LoginRoot prefab from Resources/LoginPanel/");
-        }
-    }
-
     public void PanelOn(string key, UILayer layer = UILayer.BOTTOM_2, Action<GameObject> callback = null)
     {
         ResMgr.Instance.LoadPrefab(key, o =>

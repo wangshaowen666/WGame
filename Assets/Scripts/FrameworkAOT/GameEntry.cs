@@ -7,11 +7,10 @@
 
 using UnityEngine;
 
-public class GameLaunch : MonoBehaviour
+public class GameEntry : MonoBehaviour
 {
     void Start()
     {
-        //DontDestroyOnLoad(gameObject);
         Procedure.Instance.RunProcedure<ProcedureLaunch>();
     }
     

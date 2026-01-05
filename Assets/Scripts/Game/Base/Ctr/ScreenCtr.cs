@@ -25,7 +25,6 @@ public class ScreenCtr : Singleton<ScreenCtr>
 
     public Canvas UICanvas { get; private set; }
     public Camera UICamera { get; private set; }
-
     public Camera MainCamera { get; private set; }
 
     public void SetMainCamera(string cameraName)
@@ -107,7 +106,7 @@ public class ScreenCtr : Singleton<ScreenCtr>
 
     private void InitEventSystem(Transform parent)
     {
-        if (Object.FindObjectOfType<InputSystemUIInputModule>()) return;
+        //if (Object.FindObjectOfType<InputSystemUIInputModule>()) return;
 
         var obj = new GameObject("EventSystem");
         obj.AddComponent<InputSystemUIInputModule>();
