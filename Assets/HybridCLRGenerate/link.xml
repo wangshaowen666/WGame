@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <linker>
   <assembly fullname="Framework.AOT">
+    <type fullname="AOTConfig" preserve="all" />
     <type fullname="ClassFactory" preserve="all" />
     <type fullname="Fsm" preserve="all" />
     <type fullname="FsmState" preserve="all" />
@@ -13,7 +14,6 @@
     <type fullname="ProcedureVersionCheck" preserve="all" />
     <type fullname="ResMgr" preserve="all" />
     <type fullname="Singleton`1" preserve="all" />
-    <type fullname="UIPanelBase" preserve="all" />
   </assembly>
   <assembly fullname="MiniJSON">
     <type fullname="MiniJSON.Json" preserve="all" />

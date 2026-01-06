@@ -15,6 +15,8 @@ public class GameLaunch
 {
     public static void StartGame()
     {
+        Application.targetFrameRate = 60;
+        
         InitGameProcedure();
         Procedure.Instance.RunProcedure<ProcedurePreload>();
     }
@@ -23,5 +25,7 @@ public class GameLaunch
     {
         Procedure.Instance.AddProcedure(new ProcedureChangeScene());
         Procedure.Instance.AddProcedure(new ProcedurePreload());
+        Procedure.Instance.AddProcedure(new ProcedureMain());
+        Procedure.Instance.AddProcedure(new ProcedureBattle());
     }
 }

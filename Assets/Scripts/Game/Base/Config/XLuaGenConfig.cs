@@ -23,7 +23,7 @@ public static class XLuaGenConfig
     [LuaCallCSharp] 
     public static List<Type> LuaCallCSharp = new List<Type>()
     {
-        typeof(ResMgr),
+        //typeof(ResMgr),
     };
     
     //黑名单

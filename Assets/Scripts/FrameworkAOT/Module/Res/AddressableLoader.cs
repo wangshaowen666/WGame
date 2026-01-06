@@ -30,7 +30,7 @@ public class AddressableLoader : IResLoader
         }
 
         var ret = handle.WaitForCompletion();
-        Addressables.Release(handle);
+        //Addressables.Release(handle);
         return ret;
     }
 

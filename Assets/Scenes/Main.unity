@@ -216,7 +216,7 @@ GameObject:
   - component: {fileID: 674636103}
   - component: {fileID: 674636106}
   - component: {fileID: 674636105}
-  - component: {fileID: 674636104}
+  - component: {fileID: 674636107}
   m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
@@ -240,20 +240,6 @@ Transform:
   - {fileID: 1656238738}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
---- !u!114 &674636104
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 674636102}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 50796d338e1b44a81a675732234697d2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _scrollSpeed: -0.25
-  _tileSize: 30
 --- !u!33 &674636105
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -304,6 +290,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &674636107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 674636102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50796d338e1b44a81a675732234697d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _scrollSpeed: -0.25
+  _tileSize: 30
 --- !u!1 &1226839129
 GameObject:
   m_ObjectHideFlags: 0
