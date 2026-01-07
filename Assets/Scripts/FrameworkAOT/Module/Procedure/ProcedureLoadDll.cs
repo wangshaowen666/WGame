@@ -9,6 +9,8 @@ using System;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class ProcedureLoadDll : ProcedureBase
 {
@@ -16,13 +18,26 @@ public class ProcedureLoadDll : ProcedureBase
     {
         base.OnEnter();
 #if !UNITY_EDITOR
-        Assembly.Load(ResMgr.Instance.LoadSync<TextAsset>("Framework.JIT.dll").bytes);
-        Assembly hotUpdateAss = Assembly.Load(ResMgr.Instance.LoadSync<TextAsset>("Game.dll").bytes);
+        // 这里单独实现的脚本加载没走资源管理系统，因为资源管理本身属于热更脚本
+        Assembly.Load(LoadDllBytes("Framework.JIT.dll"));
+        Assembly hotUpdateAss = Assembly.Load(LoadDllBytes("Game.dll"));
 #else
         // Editor下无需加载，直接查找获得HotUpdate程序集
         Assembly hotUpdateAss = AppDomain.CurrentDomain.GetAssemblies().First(a => a.GetName().Name == "Game");
 #endif
         Type type = hotUpdateAss.GetType("GameLaunch");
         type.GetMethod("StartGame").Invoke(null, null);
+    }
+    
+    private byte[] LoadDllBytes(string key)
+    {
+        AsyncOperationHandle<TextAsset> handle = Addressables.LoadAssetAsync<TextAsset>(key);
+        if (handle.IsDone)
+        {
+            return handle.Result.bytes;
+        }
+
+        var ret = handle.WaitForCompletion();
+        return ret.bytes;
     }
 }

@@ -10,6 +10,6 @@ dotnet $LUBAN_DLL \
     -d bin \
     -d json \
     --conf $CONF_ROOT/luban.conf \
-    -x cs-bin.outputDataDir=$WORKSPACE/Assets/Res/LubanData/Bin \
+    -x bin.outputDataDir=$WORKSPACE/Assets/Res/LubanData/Bin \
     -x json.outputDataDir=$WORKSPACE/Assets/Res/LubanData/Json \
     -x outputCodeDir=$WORKSPACE/Assets/Scripts/Game/DataTable \
