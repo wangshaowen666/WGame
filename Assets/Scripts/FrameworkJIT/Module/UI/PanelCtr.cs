@@ -12,24 +12,33 @@ using Object = UnityEngine.Object;
 
 public class PanelCtr : Singleton<PanelCtr>
 {
-    private Dictionary<UILayer, Transform> _layerMap;
-    private int _uiLayerId;
+    private readonly Dictionary<UILayer, Transform> _layerMap;
+    private readonly Dictionary<UILayer, UIGroup> _layerGroupMap;
+    private readonly int _uiLayerId;
     
     private PanelCtr()
     {
         _layerMap = new Dictionary<UILayer, Transform>();
+        _layerGroupMap = new Dictionary<UILayer, UIGroup>();
         _uiLayerId = LayerMask.NameToLayer("UI");
-        
-        CreateUILayers();
     }
 
-    public void PanelOn(string key, UILayer layer = UILayer.BOTTOM_2, Action<GameObject> callback = null)
+    public void PanelOn(int id, Action<UIPanelBase> callback = null)
     {
-        ResMgr.Instance.LoadPrefab(key, o =>
-        {
-            var panel = Object.Instantiate(o, _layerMap[layer]);
-            callback?.Invoke(panel);
-        });
+        //var cfg =
+        
+        // if (!_layerMap.TryGetValue(layer, out var group))
+        // {
+        //     group = new UIGroup(_layerMap[layer]);
+        //     _layerGroupMap.Add(layer, group);
+        // }
+        //
+        // group.PanelOn(key, callback);
+    }
+
+    public void PanelOff(string key, UILayer layer = UILayer.BOTTOM_2)
+    {
+        
     }
 
     private void CreateUILayers()

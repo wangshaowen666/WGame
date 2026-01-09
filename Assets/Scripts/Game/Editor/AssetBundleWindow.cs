@@ -34,6 +34,9 @@ public class AssetBundleWindow : OdinEditorWindow
     [FolderPath(AbsolutePath = true)]
     public string dllTargetPath = "/Users/wangshaowen/wgame/Assets/Res/Dll";
 
+    [Sirenix.OdinInspector.FilePath(AbsolutePath = true)]
+    public string excelShellPath = "/Users/wangshaowen/wgame/DataTables/gen.sh";
+
     public bool clearBeforeCopy = true;
     
     [Title("Log Info")]
@@ -110,6 +113,13 @@ public class AssetBundleWindow : OdinEditorWindow
             AddLogInfo("同步dll：" + dll);
         }
         AssetDatabase.Refresh();
+    }
+    
+    [ButtonGroup]
+    [Button("导表")]
+    public void ImportExcel()
+    {
+        ShellUtil.Run(excelShellPath);
     }
     
     [ButtonGroup]

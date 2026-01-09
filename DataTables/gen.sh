@@ -1,7 +1,9 @@
 #!/bin/bash
 
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+#这里不设置，unity内通过工具执行shell会报错 dotnet找不到
+export PATH="$PATH:/usr/local/share/dotnet"
 
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 WORKSPACE=$(dirname "$SCRIPT_DIR")
 
 CONF_ROOT="$WORKSPACE/DataTables"

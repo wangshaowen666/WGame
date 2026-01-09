@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "name": "MainPanel",
+    "group": 2,
+    "allowMult": false,
+    "hideCovered": false
+  },
+  {
+    "id": 2,
+    "name": "SettingPanel",
+    "group": 2,
+    "allowMult": false,
+    "hideCovered": true
+  }
+]

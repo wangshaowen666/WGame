@@ -19,6 +19,10 @@
     <type fullname="Luban.BeanBase" preserve="all" />
     <type fullname="Luban.ByteBuf" preserve="all" />
   </assembly>
+  <assembly fullname="MemoryPack.Core">
+    <type fullname="MemoryPack.MemoryPackSerializer" preserve="all" />
+    <type fullname="MemoryPack.MemoryPackSerializerOptions" preserve="all" />
+  </assembly>
   <assembly fullname="MiniJSON">
     <type fullname="MiniJSON.Json" preserve="all" />
   </assembly>
@@ -86,6 +90,7 @@
     <type fullname="UnityEngine.Quaternion" preserve="all" />
     <type fullname="UnityEngine.Rect" preserve="all" />
     <type fullname="UnityEngine.RectTransform" preserve="all" />
+    <type fullname="UnityEngine.RequireComponent" preserve="all" />
     <type fullname="UnityEngine.SceneManagement.LoadSceneMode" preserve="all" />
     <type fullname="UnityEngine.SceneManagement.Scene" preserve="all" />
     <type fullname="UnityEngine.Screen" preserve="all" />
@@ -94,6 +99,8 @@
     <type fullname="UnityEngine.TextAsset" preserve="all" />
     <type fullname="UnityEngine.Time" preserve="all" />
     <type fullname="UnityEngine.Transform" preserve="all" />
+    <type fullname="UnityEngine.U2D.SpriteAtlas" preserve="all" />
+    <type fullname="UnityEngine.U2D.SpriteAtlasManager" preserve="all" />
     <type fullname="UnityEngine.Vector2" preserve="all" />
     <type fullname="UnityEngine.Vector2Int" preserve="all" />
     <type fullname="UnityEngine.Vector3" preserve="all" />
@@ -115,6 +122,7 @@
   </assembly>
   <assembly fullname="UnityEngine.UIModule">
     <type fullname="UnityEngine.Canvas" preserve="all" />
+    <type fullname="UnityEngine.CanvasGroup" preserve="all" />
     <type fullname="UnityEngine.RenderMode" preserve="all" />
   </assembly>
   <assembly fullname="UnityEngine.UnityWebRequestModule">
@@ -142,6 +150,7 @@
     <type fullname="System.Action`3" preserve="all" />
     <type fullname="System.Action`5" preserve="all" />
     <type fullname="System.Array" preserve="all" />
+    <type fullname="System.Boolean" preserve="all" />
     <type fullname="System.Byte" preserve="all" />
     <type fullname="System.Collections.Generic.Dictionary`2" preserve="all" />
     <type fullname="System.Collections.Generic.Dictionary`2/Enumerator" preserve="all" />
@@ -172,6 +181,7 @@
     <type fullname="System.Math" preserve="all" />
     <type fullname="System.Object" preserve="all" />
     <type fullname="System.OperationCanceledException" preserve="all" />
+    <type fullname="System.ReadOnlySpan`1" preserve="all" />
     <type fullname="System.Reflection.Assembly" preserve="all" />
     <type fullname="System.Reflection.DefaultMemberAttribute" preserve="all" />
     <type fullname="System.Reflection.MethodBase" preserve="all" />

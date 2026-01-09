@@ -7,7 +7,7 @@
 
 using System;
 using System.Security.Cryptography;
-//using MemoryPack;
+using MemoryPack;
 using MiniJSON;
 
 /*
@@ -17,7 +17,6 @@ using MiniJSON;
 
 public static class ParseUtil 
 {
-    
     public static string MD5Str(string source)
     {
         MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
@@ -45,7 +44,7 @@ public static class ParseUtil
     {
         try
         {
-            byte[] bytes = null;//MemoryPackSerializer.Serialize(t);
+            byte[] bytes = MemoryPackSerializer.Serialize(t);
             return bytes;
         }
         catch (Exception e)
@@ -59,7 +58,7 @@ public static class ParseUtil
     {
         try
         {
-            T ret = default;//MemoryPackSerializer.Deserialize<T>(bytes);
+            T ret = MemoryPackSerializer.Deserialize<T>(bytes);
             return ret;
         }
         catch (Exception e)

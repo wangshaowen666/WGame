@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.U2D;
 using Object = UnityEngine.Object;
 
 public class ResMgr : Singleton<ResMgr>
@@ -21,6 +22,20 @@ public class ResMgr : Singleton<ResMgr>
     {
         _resLoader = new AddressableLoader();
         _genericMap = new Dictionary<string, MethodInfo>();
+        
+        // 图集有不同配置的时候使用
+        // SpriteAtlasManager.atlasRequested -= RequestAtlas;
+        // SpriteAtlasManager.atlasRequested += RequestAtlas;
+    }
+
+    private void RequestAtlas(string tag, Action<SpriteAtlas> callback)
+    {
+        Log.Info("要加载图集了：", tag);
+        var b = LoadSync<SpriteAtlas>(tag);
+        Timer.StartDelay(5000, i =>
+        {
+            callback(b);
+        });
     }
 
     public T LoadSync<T>(string key)
