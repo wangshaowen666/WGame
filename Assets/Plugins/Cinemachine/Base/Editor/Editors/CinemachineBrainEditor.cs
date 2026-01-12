@@ -147,21 +147,22 @@ namespace Cinemachine.Editor
         {
             static InstallGizmos()
             {
-                string srcFile = ScriptableObjectUtility.CinemachineInstallPath + "/Gizmos/" + kGizmoFileName;
-                if (File.Exists(srcFile))
-                {
-                    string dstFile = Application.dataPath + "/Gizmos";
-                    if (!Directory.Exists(dstFile))
-                        Directory.CreateDirectory(dstFile);
-                    dstFile += "/" + kGizmoFileName;
-                    if (!File.Exists(dstFile) 
-                        || File.GetCreationTime(dstFile) < File.GetCreationTime(srcFile))
-                    {
-                        if (!Directory.Exists(Path.GetDirectoryName(dstFile)))
-                            Directory.CreateDirectory(Path.GetDirectoryName(dstFile));
-                        File.Copy(srcFile, dstFile, true);
-                    }
-                }
+                // string srcFile = ScriptableObjectUtility.CinemachineInstallPath + "/Gizmos/" + kGizmoFileName;
+                // Debug.Log("路径：" + srcFile);
+                // if (File.Exists(srcFile))
+                // {
+                //     string dstFile = Application.dataPath + "/Gizmos";
+                //     if (!Directory.Exists(dstFile))
+                //         Directory.CreateDirectory(dstFile);
+                //     dstFile += "/" + kGizmoFileName;
+                //     if (!File.Exists(dstFile) 
+                //         || File.GetCreationTime(dstFile) < File.GetCreationTime(srcFile))
+                //     {
+                //         if (!Directory.Exists(Path.GetDirectoryName(dstFile)))
+                //             Directory.CreateDirectory(Path.GetDirectoryName(dstFile));
+                //         File.Copy(srcFile, dstFile, true);
+                //     }
+                // }
             }
         }
     }

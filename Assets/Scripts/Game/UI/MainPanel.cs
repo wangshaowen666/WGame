@@ -16,12 +16,13 @@ public class MainPanel : UIPanelBase
 
     private void Awake()
     {
+        Log.Info("进入主界面");
         btnSetting.onClick.AddListener(OnClickSetting);
     }
 
     private void OnClickSetting()
     {
-        //ResMgr.Instance.LoadSync<SpriteAtlas>("atlas_acti7086_main_s6091_hd");
-        //PanelCtr.Instance.PanelOn("SettingPanel");
+        // ResMgr.Instance.LoadSync<SpriteAtlas>("atlas_acti7086_main_s6091_hd");
+        // PanelCtr.Instance.PanelOn("SettingPanel");
     }
 }
