@@ -17,8 +17,8 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 14d242190bf7f4e59ac2d45a08af2939
   m_SerializeEntries:
-  - m_GUID: 60f6886eee87c498388b43ad7c73342e
-    m_Address: atlas_acti7086_main_s6091_ld
+  - m_GUID: 22df6a9e8a35a4b48b04af5c436212ce
+    m_Address: atlas_acti7086_main_s6091_hd
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

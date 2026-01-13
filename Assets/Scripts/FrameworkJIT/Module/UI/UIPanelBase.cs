@@ -5,6 +5,7 @@
  *--------------------------------------------------------------
  */
 
+using cfg;
 using UnityEngine;
 using DG.Tweening;
 
@@ -18,19 +19,26 @@ public enum PanelState
 }
 
 [RequireComponent(typeof(CanvasGroup))]
-public class UIPanelBase : MonoBehaviour, IUIPanel
+public class UIPanelBase : MonoBehaviour
 {
-    private const float FadeTime = 0.3f;
-    private CanvasGroup _canvasGroup;
-
     public PanelState State { get; private set; }
+    public DPnlId PnlId => _cfg.Id;
+    public bool IsHideCovered => _cfg.HideCovered;
+    
+    private const float FadeTime = 0.3f;
+    
+    private CanvasGroup _canvasGroup;
+    private DUIPanel _cfg;
 
-    public virtual void OnInit()
+   
+
+    public virtual void OnInit(DUIPanel cfg)
     {
         _canvasGroup = GetComponent<CanvasGroup>();
+        _cfg = cfg;
     }
 
-    public virtual void OnOpen()
+    public virtual void OnOpen(int serialId, object userData)
     {
         _canvasGroup.alpha = 0;
         _canvasGroup.DOFade(1, FadeTime);
@@ -54,7 +62,7 @@ public class UIPanelBase : MonoBehaviour, IUIPanel
         switch (State)
         {
             case PanelState.Hide:
-                _canvasGroup.alpha = 1;
+                _canvasGroup.DOFade(1, FadeTime);
                 break;
         }
         

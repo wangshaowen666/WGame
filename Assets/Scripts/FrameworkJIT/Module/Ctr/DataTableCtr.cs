@@ -11,13 +11,31 @@ using UnityEngine;
 
 public class DataTableCtr : Singleton<DataTableCtr>
 {
-    private bool _isLoaded = false;
-    // _tables下面会自动补全Tables中包含的配置表;
     private cfg.Tables _tables;
+    private bool _isLoaded = false;
+
     public TbUIPanel TbUIPanel => _tables.TbUIPanel;
     
     private DataTableCtr()
     {
+    }
+    
+    /// <summary>
+    /// 初始化方法，在单例实例化时调用
+    /// </summary>
+    protected override void OnInit()
+    {
+        // 可以在这里添加初始化逻辑
+    }
+    
+    /// <summary>
+    /// 释放资源方法，在单例被释放时调用
+    /// </summary>
+    protected override void OnDispose()
+    {
+        // 释放资源
+        _tables = null;
+        _isLoaded = false;
     }
 
     public void LoadTable()
@@ -36,7 +54,7 @@ public class DataTableCtr : Singleton<DataTableCtr>
     }
     
     /// <summary>
-    /// 重新加载配置表，热重载
+    /// 重新加载数据表
     /// </summary>
     public void ReloadTable()
     {
@@ -45,15 +63,14 @@ public class DataTableCtr : Singleton<DataTableCtr>
         LoadTable();
     }
     
-    protected override void OnDispose()
-    {
-        _tables = null;
-        _isLoaded = false;
-    }
-    
     private static ByteBuf LoadByteBuf(string file)
     {
         var cfg = ResMgr.Instance.LoadSync<TextAsset>($"Bin/{file}.bytes");
         return new ByteBuf(cfg.bytes);
     }
+    
+    /// <summary>
+    /// 检查数据表是否已加载
+    /// </summary>
+    public bool IsLoaded => _isLoaded;
 }

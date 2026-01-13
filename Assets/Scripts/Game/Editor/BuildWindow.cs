@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using HybridCLR.Editor.Settings;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
@@ -20,7 +21,6 @@ using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
-using UnityEditor.Build.Content;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 
@@ -65,6 +65,7 @@ public class BuildWindow : OdinEditorWindow
     public void ImportExcel()
     {
         ShellUtil.Run(buildConfig.excelShellPath);
+        AddLogInfo("导表完成");
         AutoCompleteDataTableCtrProperties();
     }
     
@@ -107,20 +108,15 @@ public class BuildWindow : OdinEditorWindow
     {
         try
         {
-            // 检查编译状态
             if (EditorApplication.isCompiling)
             {
                 AddLogInfo("错误：代码正在编译中，请等待编译完成后再进行构建");
                 return;
             }
             
-            // 获取项目根路径
             string projectRootPath = Directory.GetParent(Application.dataPath)?.FullName;
-            
-            // 获取当前构建目标
             BuildTarget buildTarget = EditorUserBuildSettings.activeBuildTarget;
             
-            // 根据不同平台生成合适的输出文件名
             string outputFileName = "Game";
             switch (buildTarget)
             {
@@ -145,10 +141,8 @@ public class BuildWindow : OdinEditorWindow
                     break;
             }
             
-            // 构建完整的输出路径
             string outputPath = Path.Combine(projectRootPath, "Builds", buildTarget.ToString(), outputFileName);
             
-            // 确保输出目录存在
             string outputDir = Path.GetDirectoryName(outputPath);
             if (!string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
             {
@@ -158,7 +152,6 @@ public class BuildWindow : OdinEditorWindow
             AddLogInfo($"开始构建安装包，目标平台：{buildTarget}");
             AddLogInfo($"输出路径：{outputPath}");
             
-            // 设置构建选项
             BuildPlayerOptions buildOptions = new BuildPlayerOptions
             {
                 scenes = EditorBuildSettings.scenes
@@ -170,15 +163,12 @@ public class BuildWindow : OdinEditorWindow
                 options = BuildOptions.None
             };
             
-            // 执行构建
             BuildReport report = BuildPipeline.BuildPlayer(buildOptions);
             
-            // 检查构建结果
             if (report.summary.result == BuildResult.Succeeded)
             {
                 AddLogInfo($"安装包构建成功！总耗时：{report.summary.totalTime.TotalSeconds:F2}秒");
                 
-                // 打开构建输出目录
                 string buildDir = Path.GetDirectoryName(outputPath);
                 if (!string.IsNullOrEmpty(buildDir) && Directory.Exists(buildDir))
                 {
@@ -194,6 +184,26 @@ public class BuildWindow : OdinEditorWindow
         {
             AddLogInfo($"构建安装包时发生异常：{ex.Message}");
             Debug.LogError($"构建安装包失败：{ex}");
+        }
+    }
+
+    [ButtonGroup]
+    [Button("测试")]
+    public void Test()
+    {
+        var settings = HybridCLRSettings.Instance;
+        if (settings != null)
+        {
+            // 访问Hot Update Assembly Definitions
+            var hotUpdateAssemblies = settings.hotUpdateAssemblyDefinitions;
+            foreach (var assemblyName in hotUpdateAssemblies)
+            {
+                AddLogInfo("Hot Update Assembly: " + assemblyName.name);
+            }
+        }
+        else
+        {
+            AddLogInfo("HybridCLRSettings not found!");
         }
     }
     
@@ -255,9 +265,11 @@ public class BuildWindow : OdinEditorWindow
         
         // 收集修改的资源(远程资源不包含)
         var modifiedEntries = ContentUpdateScript.GatherModifiedEntries(settings, stateBinPath);
-
-        // 创建更新组
-        ContentUpdateScript.CreateContentUpdateGroup(settings, modifiedEntries, "ContentUpdate_Group");
+        if (modifiedEntries != null && modifiedEntries.Count > 0)
+        {
+            ContentUpdateScript.CreateContentUpdateGroup(settings, modifiedEntries, "ContentUpdate_Group");
+        }
+      
         var result = ContentUpdateScript.BuildContentUpdate(settings, stateBinPath);
         if (string.IsNullOrEmpty(result.Error))
         {
@@ -275,10 +287,13 @@ public class BuildWindow : OdinEditorWindow
     private void CopyDll()
     {
         string source = Path.Combine(buildConfig.dllSourcePath, EditorUserBuildSettings.activeBuildTarget.ToString());
-        foreach (var dll in buildConfig.dlls)
+        
+        var settings = HybridCLRSettings.Instance;
+        var hotUpdateAssemblies = settings.hotUpdateAssemblyDefinitions;
+        foreach (var assemblyName in hotUpdateAssemblies)
         {
-            FileUtil.CopyFile(Path.Combine(source, dll), Path.Combine(buildConfig.dllTargetPath, dll + ".bytes"));
-            AddLogInfo("同步dll：" + dll);
+            FileUtil.CopyFile(Path.Combine(source, assemblyName.name + ".dll"), Path.Combine(buildConfig.dllTargetPath, assemblyName.name + ".dll.bytes"));
+            AddLogInfo("同步dll：" + assemblyName.name + ".dll");
         }
         AssetDatabase.Refresh();
     }

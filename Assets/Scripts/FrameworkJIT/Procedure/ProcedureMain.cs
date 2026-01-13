@@ -6,6 +6,7 @@
  */
 
 using System;
+using cfg;
 using UnityEngine;
 
 public class ProcedureMain : ProcedureBase
@@ -20,7 +21,7 @@ public class ProcedureMain : ProcedureBase
             FirstEnter();
         
         ScreenCtr.Instance.SetMainCamera(JITConfig.MapCamera);
-        //PanelCtr.Instance.PanelOn("MainPanel");
+        PanelCtr.Instance.PanelOn(DPnlId.MainPanel);
     }
 
     private void FirstEnter()

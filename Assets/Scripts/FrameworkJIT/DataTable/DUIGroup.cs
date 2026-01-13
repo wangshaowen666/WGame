@@ -16,18 +16,18 @@ namespace cfg
         /// <summary>
         /// 最底层
         /// </summary>
-        Bottom_1 = 1,
-        Bottom_2 = 2,
-        Bottom_3 = 3,
-        Middle_1 = 4,
-        Middle_2 = 5,
-        Middle_3 = 6,
-        Top_1 = 7,
-        Top_2 = 8,
+        Bottom1 = 1,
+        Bottom2 = 2,
+        Bottom3 = 3,
+        Middle1 = 4,
+        Middle2 = 5,
+        Middle3 = 6,
+        Top1 = 7,
+        Top2 = 8,
         /// <summary>
         /// 最高层
         /// </summary>
-        Top_3 = 9,
+        Top3 = 9,
     }
 
 } 

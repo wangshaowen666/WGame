@@ -6,6 +6,7 @@
  */
 
 using System;
+using cfg;
 using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
@@ -22,7 +23,6 @@ public class MainPanel : UIPanelBase
 
     private void OnClickSetting()
     {
-        // ResMgr.Instance.LoadSync<SpriteAtlas>("atlas_acti7086_main_s6091_hd");
-        // PanelCtr.Instance.PanelOn("SettingPanel");
+        PanelCtr.Instance.PanelOn(DPnlId.SettingPanel);
     }
 }

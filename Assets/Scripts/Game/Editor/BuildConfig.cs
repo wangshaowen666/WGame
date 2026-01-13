@@ -12,9 +12,6 @@ using Sirenix.OdinInspector;
 [CreateAssetMenu(fileName = "BuildConfig", menuName = "Game/BuildConfig")]
 public class BuildConfig : ScriptableObject
 {
-    [Title("热更C#的dll集合")]
-    public List<string> dlls = new List<string>();
-    
     [Title("服务器路径")]
     [FolderPath(AbsolutePath = true)]
     public string remotePath = "";

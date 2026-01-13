@@ -30,16 +30,15 @@ public class AddressableLoader : IResLoader
         }
 
         var ret = handle.WaitForCompletion();
-        //Addressables.Release(handle);
         return ret;
     }
 
-    public void LoadAsync<T>(string key, Action<T> callback)
+    public void LoadAsync<T>(string key, LoadAssetCallback<T> callback, object userData = null)
     {
-        LoadRes<T>(key, callback).Forget();
+        LoadRes(key, callback, userData).Forget();
     }
 
-    private async UniTaskVoid LoadRes<T>(string key, Action<T> callback = null)
+    private async UniTaskVoid LoadRes<T>(string key,LoadAssetCallback<T> callback = null, object userData = null)
     {
         AsyncOperationHandle<T> handle = Addressables.LoadAssetAsync<T>(key);
         await handle.Task;
@@ -49,7 +48,6 @@ public class AddressableLoader : IResLoader
             throw new GameException($"资源加载失败:{key}  handle.OperationException.ToString()");
         }
         
-        callback?.Invoke(handle.Result);
-        //Addressables.Release(handle);
+        callback?.Invoke(handle.Result, userData);
     }
 }

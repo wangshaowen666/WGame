@@ -13,8 +13,11 @@ using UnityEngine;
 using UnityEngine.U2D;
 using Object = UnityEngine.Object;
 
-public class ResMgr : Singleton<ResMgr>
-{
+// in关键字指定泛型类型参数T是逆变的，这意味着委托之间的赋值兼容性方向与类型继承方向相反，不加in需要类型完全匹配
+public delegate void LoadAssetCallback<in T>(T asset, object userData);
+public class ResMgr : Singleton<ResMgr> {
+   
+    
     private readonly IResLoader _resLoader;
     private readonly Dictionary<string, MethodInfo> _genericMap;
 
@@ -28,13 +31,13 @@ public class ResMgr : Singleton<ResMgr>
         // SpriteAtlasManager.atlasRequested += RequestAtlas;
     }
 
-    private void RequestAtlas(string tag, Action<SpriteAtlas> callback)
+    private void RequestAtlas(string tag, LoadAssetCallback<SpriteAtlas> callback)
     {
         Log.Info("要加载图集了：", tag);
         var b = LoadSync<SpriteAtlas>(tag);
         Timer.StartDelay(5000, i =>
         {
-            callback(b);
+            callback(b, null);
         });
     }
 
@@ -43,14 +46,14 @@ public class ResMgr : Singleton<ResMgr>
         return _resLoader.LoadSync<T>(key);
     }
 
-    public void LoadAsync<T>(string key, Action<T> callback)
+    public void LoadAsync<T>(string key, LoadAssetCallback<T> callback, object userData = null)
     {
-        _resLoader.LoadAsync(key, callback);
+        _resLoader.LoadAsync(key, callback, userData);
     }
     
-    public void LoadPrefab(string key, Action<GameObject> callback)
+    public void LoadPrefab(string key, LoadAssetCallback<GameObject> callback, object userData = null)
     {
-        LoadAsync(key, callback);
+        LoadAsync(key, callback, userData);
     }
 
     /// <summary>

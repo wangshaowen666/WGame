@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce6db80e3bba14ae5aedee8d31765f90, type: 3}
   m_Name: BuildConfig
   m_EditorClassIdentifier: 
+  dlls:
+  - Game.dll
+  - Framework.JIT.dll
   remotePath: /Library/WebServer/Documents/MyServer
   dllSourcePath: /Users/wangshaowen/wgame/HybridCLRData/HotUpdateDlls
   dllTargetPath: /Users/wangshaowen/wgame/Assets/Res/Dll

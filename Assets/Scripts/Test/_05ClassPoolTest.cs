@@ -16,7 +16,7 @@ public class _05ClassPoolTest : MonoBehaviour
     private float _timer;
     private int _count = 100;
 
-    private ObjectPool<_05Test> _pool;
+    //private ObjectPool<_05Test> _pool;
     
     public static readonly ProfilerMarker Test1 = new ProfilerMarker("Test.Test1");
 
