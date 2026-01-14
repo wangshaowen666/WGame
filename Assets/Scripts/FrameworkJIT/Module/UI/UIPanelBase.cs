@@ -24,13 +24,13 @@ public class UIPanelBase : MonoBehaviour
     public PanelState State { get; private set; }
     public DPnlId PnlId => _cfg.Id;
     public bool IsHideCovered => _cfg.HideCovered;
+
+    protected object UserData;
     
     private const float FadeTime = 0.3f;
     
     private CanvasGroup _canvasGroup;
     private DUIPanel _cfg;
-
-   
 
     public virtual void OnInit(DUIPanel cfg)
     {
@@ -38,22 +38,26 @@ public class UIPanelBase : MonoBehaviour
         _cfg = cfg;
     }
 
-    public virtual void OnOpen(int serialId, object userData)
+    public virtual void OnOpen(object userData = null)
     {
         _canvasGroup.alpha = 0;
         _canvasGroup.DOFade(1, FadeTime);
+        _canvasGroup.blocksRaycasts = true;
         
         State = PanelState.Active;
+        UserData = userData;
     }
 
     public virtual void OnHide()
     {
         _canvasGroup.alpha = 0;
+        _canvasGroup.blocksRaycasts = false;
         State = PanelState.Hide;
     }
 
     public virtual void OnCover()
     {
+        _canvasGroup.blocksRaycasts = false;
         State = PanelState.Cover;
     }
     
@@ -66,15 +70,18 @@ public class UIPanelBase : MonoBehaviour
                 break;
         }
         
+        _canvasGroup.blocksRaycasts = true;
         State = PanelState.Active;
     }
 
     public virtual void OnRecycle()
     {
         State = PanelState.Recycle;
-        
-        _canvasGroup.alpha = 0;
-        _canvasGroup.DOFade(1, FadeTime);
+        _canvasGroup.DOFade(0, FadeTime);
+        _canvasGroup.blocksRaycasts = false;
+
+        UserData = null;
+        State = PanelState.None;
     }
 
     public virtual void OnClose()

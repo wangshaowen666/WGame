@@ -106,8 +106,6 @@ public class ScreenCtr : Singleton<ScreenCtr>
 
     private void InitEventSystem(Transform parent)
     {
-        //if (Object.FindObjectOfType<InputSystemUIInputModule>()) return;
-
         var obj = new GameObject("EventSystem");
         obj.AddComponent<InputSystemUIInputModule>();
         obj.transform.SetParent(parent, false);

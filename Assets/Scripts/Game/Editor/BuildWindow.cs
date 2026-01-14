@@ -66,6 +66,7 @@ public class BuildWindow : OdinEditorWindow
     {
         ShellUtil.Run(buildConfig.excelShellPath);
         AddLogInfo("导表完成");
+        AssetDatabase.Refresh();
         AutoCompleteDataTableCtrProperties();
     }
     
@@ -191,20 +192,8 @@ public class BuildWindow : OdinEditorWindow
     [Button("测试")]
     public void Test()
     {
-        var settings = HybridCLRSettings.Instance;
-        if (settings != null)
-        {
-            // 访问Hot Update Assembly Definitions
-            var hotUpdateAssemblies = settings.hotUpdateAssemblyDefinitions;
-            foreach (var assemblyName in hotUpdateAssemblies)
-            {
-                AddLogInfo("Hot Update Assembly: " + assemblyName.name);
-            }
-        }
-        else
-        {
-            AddLogInfo("HybridCLRSettings not found!");
-        }
+        var a = cfg.DPnlId.MainPanel;
+        AddLogInfo(a.ToString() + "   " + (int)a);
     }
     
     [ButtonGroup]

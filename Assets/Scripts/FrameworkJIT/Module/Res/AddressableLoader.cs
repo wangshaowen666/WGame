@@ -16,7 +16,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 public class AddressableLoader : IResLoader
 {
     /// <summary>
-    /// 推荐使用异步方式，同步加载目前只有Lua的CustomLoad注册使用了
+    /// 推荐使用异步方式，同步加载目前只有Lua的CustomLoad注册使用了、LuBan加载配置表也用到了
     /// </summary>
     /// <param name="key"></param>
     /// <typeparam name="T"></typeparam>
@@ -45,7 +45,7 @@ public class AddressableLoader : IResLoader
         
         if (handle.Status != AsyncOperationStatus.Succeeded)
         {
-            throw new GameException($"资源加载失败:{key}  handle.OperationException.ToString()");
+            throw new GameException($"资源加载失败:{key}  {handle.OperationException}");
         }
         
         callback?.Invoke(handle.Result, userData);

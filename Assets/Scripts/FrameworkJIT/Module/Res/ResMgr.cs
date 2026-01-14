@@ -16,11 +16,8 @@ using Object = UnityEngine.Object;
 // in关键字指定泛型类型参数T是逆变的，这意味着委托之间的赋值兼容性方向与类型继承方向相反，不加in需要类型完全匹配
 public delegate void LoadAssetCallback<in T>(T asset, object userData);
 public class ResMgr : Singleton<ResMgr> {
-   
-    
     private readonly IResLoader _resLoader;
     private readonly Dictionary<string, MethodInfo> _genericMap;
-
     private ResMgr()
     {
         _resLoader = new AddressableLoader();

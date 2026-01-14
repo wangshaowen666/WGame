@@ -23,11 +23,11 @@ public class SettingPanel : UIPanelBase
 
     private void ClickCancel()
     {
-        Destroy(gameObject);
+        PanelCtr.Instance.PanelOff(this);
     }
 
     private void ClickConfirm()
     {
-        Destroy(gameObject);
+        PanelCtr.Instance.PanelOff(this);
     }
 }

@@ -9,116 +9,68 @@ using System;
 using System.Collections.Generic;
 using cfg;
 using UnityEngine;
-using Object = UnityEngine.Object;
-
-public sealed class OpenPanelInfo : IResetable
-{
-    public int SerialId { get; private set; }
-    public DUIPanel Cfg { get; private set; }
-    public object UserData { get; private set; }
-
-    public static OpenPanelInfo Create(int serialId, DUIPanel cfg, object userData)
-    {
-        var info = ClassFactory.Get<OpenPanelInfo>();
-        info.SerialId = serialId;
-        info.Cfg = cfg;
-        info.UserData = userData;
-        
-        return info;
-    }
-    
-    public void Reset()
-    {
-        SerialId = 0;
-        Cfg = null;
-        UserData = null;
-    }
-}
 
 public class UIGroup
 {
-    private LinkedList<UIPanelBase> _uiPanels;
-    private List<DPnlId> _loadingIds;
-    private readonly Transform _root;
-    
-    private ObjectPool<UIPanelBase> _uiPanelPool;
+    private readonly LinkedList<UIPanelBase> _uiPanels;
+    public Transform Trans { get; }
 
-    public UIGroup(Transform root)
+    public UIGroup(Transform transform)
     {
-        _root = root;
         _uiPanels = new LinkedList<UIPanelBase>();
-        _loadingIds = new List<DPnlId>();
-
-        _uiPanelPool = new ObjectPool<UIPanelBase>();
+        Trans = transform;
     }
 
-    public void PanelOn(DUIPanel cfg, object userData = null)
+    public void AddPanel(UIPanelBase panel, object userData = null)
     {
-        if (!cfg.AllowMult)
+        panel.OnOpen(userData);
+        _uiPanels.AddFirst(panel);
+        Refresh();
+    }
+
+    public void RemovePanel(UIPanelBase panel)
+    {
+        _uiPanels.Remove(panel);
+        Refresh();
+        panel.OnRecycle();
+    }
+
+    public void RemoveAll(ObjectPool<UIPanelBase> pool)
+    {
+        var panelNode = _uiPanels.First;
+        while (panelNode != null)
         {
-            if (_loadingIds.Contains(cfg.Id))
-                return;
+            var panel = panelNode.Value;
+            panel.OnRecycle();
+            pool.PutObj(panel.PnlId.ToString(), panel);
             
-            if (HasPanel(cfg.Id))
-                return;
+            panelNode = panelNode.Next;
         }
         
-        // 对象池只负责存，不负责创建
-        UIPanelBase panel = _uiPanelPool.GetObj(cfg.Name);
-        if (panel == null)
-        {
-            var info = OpenPanelInfo.Create(0, cfg, userData);
-            ResMgr.Instance.LoadAsync<GameObject>(cfg.Name, OnLoadFinish, info);
-        }
-        else
-        {
-            InnerPanelOn(panel, 0, userData);
-        }
+        _uiPanels.Clear();
     }
-
-    public bool HasPanel(DPnlId id)
+    
+    public void MoveToTop(UIPanelBase panel, object userData = null)
+    {
+        panel.OnOpen(userData);
+        panel.transform.SetSiblingIndex(Trans.childCount - 1);
+        _uiPanels.Remove(panel);
+        _uiPanels.AddFirst(panel);
+        Refresh();
+    }
+    
+    public UIPanelBase HasPanel(DPnlId id)
     {
         var panel = _uiPanels.First;
         while (panel != null)
         {
             if (panel.Value.PnlId == id)
-                return true;
+                return panel.Value;
             
             panel = panel.Next;
         }
         
-        return false;
-    }
-
-    public void PanelOff(string pnlName, Action<UIPanelBase> callback = null)
-    {
-        
-    }
-
-    private void OnLoadFinish(GameObject obj, object userData)
-    {
-        OpenPanelInfo info = userData as OpenPanelInfo;
-        if (info == null)
-        {
-            Log.Error("出错了");
-            return;
-        }
-        
-        var prefab =Object.Instantiate(obj, _root);
-        var panel = prefab.GetComponent<UIPanelBase>();
-        if (panel == null)
-            throw new GameException("预制体上缺少UIPanelBase脚本");
-        
-        panel.OnInit(info.Cfg);
-        InnerPanelOn(panel, info.SerialId, userData);
-        ClassFactory.Recycle(info);
-    }
-    
-    private void InnerPanelOn(UIPanelBase panel, int serialId, object userData)
-    {
-        panel.OnOpen(serialId, userData);
-        _uiPanels.AddFirst(panel);
-        Refresh();
+        return null;
     }
 
     private void Refresh()
