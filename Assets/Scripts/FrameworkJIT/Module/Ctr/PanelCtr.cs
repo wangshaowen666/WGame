@@ -139,7 +139,7 @@ public class PanelCtr : Singleton<PanelCtr>
         if (pnlId == 0)
         {
             // todo 这里加载到内存，但没有实例化，卸载的时候要注意
-            ClassFactory.Recycle(info);
+            ClassFactory.Instance.Recycle(info);
             return;
         }
 
@@ -150,7 +150,7 @@ public class PanelCtr : Singleton<PanelCtr>
         
         panel.OnInit(info.Cfg);
         info.Group.AddPanel(panel, info.UserData);
-        ClassFactory.Recycle(info);
+        ClassFactory.Instance.Recycle(info);
     }
 
     private void CreateUIRoot()
@@ -190,7 +190,7 @@ public sealed class OpenPanelInfo : IResetable
 
     public static OpenPanelInfo Create(uint loadingId, DUIPanel cfg, UIGroup group, object userData)
     {
-        var info = ClassFactory.Get<OpenPanelInfo>();
+        var info = ClassFactory.Instance.Get<OpenPanelInfo>();
         info.LoadingId = loadingId;
         info.Cfg = cfg;
         info.Group = group;

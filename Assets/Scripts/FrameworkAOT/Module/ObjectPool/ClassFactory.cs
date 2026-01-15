@@ -40,8 +40,10 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-public static class ClassFactory
+public class ClassFactory : Singleton<ClassFactory>
 {
+    private ClassFactory() { }
+    
     // 新增池的缓存，使工厂字典查找池的操作由每次都查询改成只在构造时查询一次
     private static class PoolCache<T> where T: class, IResetable, new()
     {
@@ -60,7 +62,7 @@ public static class ClassFactory
     private static Dictionary<Type, ClassPool> poolFactory = new Dictionary<Type, ClassPool>();
     
     // 新增预分配方法
-    public static void PreAllocate(Type type, int count, int maxCount = -1, bool allowChangeMax = true)
+    public void PreAllocate(Type type, int count, int maxCount = -1, bool allowChangeMax = true)
     {
         if (count <= 0)
         {
@@ -82,7 +84,7 @@ public static class ClassFactory
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void PreAllocate<T>(int count, int maxCount = -1, bool allowChangeMax = true) where T : class, IResetable, new()
+    public void PreAllocate<T>(int count, int maxCount = -1, bool allowChangeMax = true) where T : class, IResetable, new()
     {
         PreAllocate(typeof(T), count, maxCount, allowChangeMax);
     }
@@ -91,7 +93,7 @@ public static class ClassFactory
     /// 批量预分配多种类型的对象池
     /// </summary>
     /// <param name="allocationMap"></param>
-    public static void PreAllocateBatch(Dictionary<Type, int> allocationMap)
+    public void PreAllocateBatch(Dictionary<Type, int> allocationMap)
     {
         if (allocationMap == null) return;
 
@@ -103,47 +105,13 @@ public static class ClassFactory
         Log.Info(Log.LogColor.Green, $"批量预分配完成，共{allocationMap.Count}种类型");
     }
 
-    /// <summary>
-    /// 获取对象池，可用于批量操作优化
-    /// 不过已目前的实现，推荐通过工厂进行
-    /// </summary>
-    /// <param name="type"></param>
-    /// <returns></returns>
-    // public static ClassPool GetPool(Type type)
-    // {
-    //     if (!poolFactory.TryGetValue(type, out var pool))
-    //     {
-    //         pool = new ClassPool(type);
-    //         poolFactory[type] = pool;
-    //     }
-    //     return pool;
-    // }
-    //
-    // [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    // public static ClassPool GetPool<T>() where T : class, IResetable, new()
-    // {
-    //     return PoolCache<T>.pool;
-    // }
-
-    // public static T Get<T>() where T : class, IResetable, new()
-    // {
-    //     // 类型获取、字典查找都会带来额外的开销
-    //     var type = typeof(T);
-    //     if (!poolFactory.TryGetValue(type, out var pool))
-    //     {
-    //         pool = new ClassPool(type);
-    //         poolFactory[type] = pool;
-    //     }
-    //     return pool.Get<T>();
-    // }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T Get<T>() where T : class, IResetable, new()
+    public T Get<T>() where T : class, IResetable, new()
     {
         return PoolCache<T>.pool.Get<T>();
     }
 
-    public static void Recycle(IResetable item)
+    public void Recycle(IResetable item)
     {
         var type = item.GetType();
         if (!poolFactory.TryGetValue(type, out var pool))
@@ -154,26 +122,14 @@ public static class ClassFactory
         
         pool.Recycle(item);
     }
-
-    // public static void Recycle<T>(T item) where T : IResetable
-    // {
-    //     var type = item.GetType();
-    //     if (!poolFactory.TryGetValue(type, out var pool))
-    //     {
-    //         Log.Error(Log.LogColor.Red, "正在回收未经对象池工厂创建的对象：", type.Name);
-    //         return;
-    //     }
-    //     
-    //     pool.Recycle(item);
-    // }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Recycle<T>(T item) where T : class, IResetable, new()
+    public void Recycle<T>(T item) where T : class, IResetable, new()
     {
         PoolCache<T>.pool.Recycle(item);
     }
 
-    public static void Clean(Type type)
+    public void Clean(Type type)
     {
         if (!poolFactory.TryGetValue(type, out var pool))
         {
@@ -184,7 +140,7 @@ public static class ClassFactory
         pool.Clean();
     }
 
-    public static void CleanAll()
+    public void CleanAll()
     {
         foreach (var pool in poolFactory.Values)
         {

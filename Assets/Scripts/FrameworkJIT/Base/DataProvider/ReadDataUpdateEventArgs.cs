@@ -39,7 +39,7 @@ public class ReadDataUpdateEventArgs : FrameworkEventArgs
     
     public static ReadDataUpdateEventArgs Create(string dataAssetName, float progress, object userData)
     {
-        ReadDataUpdateEventArgs args = ClassFactory.Get<ReadDataUpdateEventArgs>();
+        ReadDataUpdateEventArgs args = ClassFactory.Instance.Get<ReadDataUpdateEventArgs>();
         args.DataAssetName = dataAssetName;
         args.Progress = progress;
         args.UserData = userData;

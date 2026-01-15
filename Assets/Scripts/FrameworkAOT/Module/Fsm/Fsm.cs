@@ -23,14 +23,14 @@ public class Fsm : IResetable
 
     public static Fsm Create<T>(params T[] states) where T : FsmState
     {
-        Fsm fsm = ClassFactory.Get<Fsm>();
+        Fsm fsm = ClassFactory.Instance.Get<Fsm>();
         fsm.Init(states.ToList());
         return fsm;
     }
 
     public static Fsm Create<T>(List<T> states) where T : FsmState
     {
-        Fsm fsm = ClassFactory.Get<Fsm>();
+        Fsm fsm = ClassFactory.Instance.Get<Fsm>();
         fsm.Init(states.ToList());
         return fsm;
     }
@@ -80,7 +80,7 @@ public class Fsm : IResetable
         T oldV = GetData<T>(name);
         if (oldV != null)
         {
-            ClassFactory.Recycle(oldV);
+            ClassFactory.Instance.Recycle(oldV);
         }
         
         _datas[name] = value;

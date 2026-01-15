@@ -36,7 +36,7 @@ public sealed class VarBool : Variable<bool>
 {
     public static implicit operator VarBool(bool value)
     {
-        VarBool varValue = ClassFactory.Get<VarBool>();
+        VarBool varValue = ClassFactory.Instance.Get<VarBool>();
         varValue.Value = value;
         return varValue;
     }
@@ -51,7 +51,7 @@ public sealed class VarByte : Variable<byte>
 {
     public static implicit operator VarByte(byte value)
     {
-        VarByte varValue = ClassFactory.Get<VarByte>();
+        VarByte varValue = ClassFactory.Instance.Get<VarByte>();
         varValue.Value = value;
         return varValue;
     }
@@ -66,7 +66,7 @@ public sealed class VarShort : Variable<short>
 {
     public static implicit operator VarShort(short value)
     {
-        VarShort varValue = ClassFactory.Get<VarShort>();
+        VarShort varValue = ClassFactory.Instance.Get<VarShort>();
         varValue.Value = value;
         return varValue;
     }
@@ -81,7 +81,7 @@ public sealed class VarInt : Variable<int>
 {
     public static implicit operator VarInt(int value)
     {
-        VarInt varValue = ClassFactory.Get<VarInt>();
+        VarInt varValue = ClassFactory.Instance.Get<VarInt>();
         //VarInt varValue = new VarInt();
         varValue.Value = value;
         return varValue;
@@ -97,7 +97,7 @@ public sealed class VarLong : Variable<long>
 {
     public static implicit operator VarLong(long value)
     {
-        VarLong varValue = ClassFactory.Get<VarLong>();
+        VarLong varValue = ClassFactory.Instance.Get<VarLong>();
         varValue.Value = value;
         return varValue;
     }
@@ -112,7 +112,7 @@ public sealed class VarFloat : Variable<float>
 {
     public static implicit operator VarFloat(float value)
     {
-        VarFloat varValue = ClassFactory.Get<VarFloat>();
+        VarFloat varValue = ClassFactory.Instance.Get<VarFloat>();
         varValue.Value = value;
         return varValue;
     }
@@ -127,7 +127,7 @@ public sealed class VarDouble : Variable<double>
 {
     public static implicit operator VarDouble(double value)
     {
-        VarDouble varValue = ClassFactory.Get<VarDouble>();
+        VarDouble varValue = ClassFactory.Instance.Get<VarDouble>();
         varValue.Value = value;
         return varValue;
     }

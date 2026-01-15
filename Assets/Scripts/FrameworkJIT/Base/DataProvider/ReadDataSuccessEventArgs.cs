@@ -39,7 +39,7 @@ public sealed class ReadDataSuccessEventArgs : FrameworkEventArgs
     
     public static ReadDataSuccessEventArgs Create(string dataAssetName, float duration, object userData)
     {
-        ReadDataSuccessEventArgs args = ClassFactory.Get<ReadDataSuccessEventArgs>();
+        ReadDataSuccessEventArgs args = ClassFactory.Instance.Get<ReadDataSuccessEventArgs>();
         args.DataAssetName = dataAssetName;
         args.Duration = duration;
         args.UserData = userData;
