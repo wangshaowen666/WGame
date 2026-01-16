@@ -9,8 +9,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
 
-[CreateAssetMenu(fileName = "BuildConfig", menuName = "Game/BuildConfig")]
-public class BuildConfig : ScriptableObject
+[CreateAssetMenu(fileName = "EditorPathConfig", menuName = "Game/EditorPathConfig")]
+public class EditorPathConfig : ScriptableObject
 {
     [Title("服务器路径")]
     [FolderPath(AbsolutePath = true)]

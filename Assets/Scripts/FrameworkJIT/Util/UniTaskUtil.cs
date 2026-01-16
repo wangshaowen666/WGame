@@ -36,7 +36,7 @@ public static class Timer
     public static CancellationTokenSource StartSecondDelay(float delaySd, Action<int> action, bool inMainThread = true, bool ignoreTimeScale = false)
     {
         CancellationTokenSource cts = new CancellationTokenSource();
-        UniTaskUtil.DelayInvoke((int)(delaySd / 1000f), action, cts.Token, inMainThread, ignoreTimeScale).Forget();
+        UniTaskUtil.DelayInvoke((int)(delaySd * 1000f), action, cts.Token, inMainThread, ignoreTimeScale).Forget();
         return cts;
     }
     

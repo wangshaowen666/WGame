@@ -23,14 +23,14 @@ public class Fsm : IResetable
 
     public static Fsm Create<T>(params T[] states) where T : FsmState
     {
-        Fsm fsm = ClassFactory.Instance.Get<Fsm>();
+        Fsm fsm = ClassPool.Get<Fsm>();
         fsm.Init(states.ToList());
         return fsm;
     }
 
     public static Fsm Create<T>(List<T> states) where T : FsmState
     {
-        Fsm fsm = ClassFactory.Instance.Get<Fsm>();
+        Fsm fsm = ClassPool.Get<Fsm>();
         fsm.Init(states.ToList());
         return fsm;
     }
@@ -67,7 +67,7 @@ public class Fsm : IResetable
 
     public T GetData<T>(string name) where T : Variable
     {
-        return _datas.GetValueOrDefault(name) as T;
+        return GetData(name) as T;
     }
     
     public T GetObj<T>(string name) where T : class
@@ -77,10 +77,13 @@ public class Fsm : IResetable
 
     public void SetData<T>(string name, T value) where T : Variable
     {
-        T oldV = GetData<T>(name);
+        var oldV = GetData(name);
         if (oldV != null)
         {
-            ClassFactory.Instance.Recycle(oldV);
+            if (oldV.GetType() != typeof(T))
+                Log.Warning("状态机数据key已存在，本次写入类型不匹配 会覆盖旧类型结果，key:", name, "原始类型:", oldV.GetType(), "当前设置类型：", typeof(T).Name);
+            
+            ClassPool.Recycle(oldV);
         }
         
         _datas[name] = value;
@@ -93,7 +96,8 @@ public class Fsm : IResetable
 
     public void RemoveData(string name)
     {
-        _datas.Remove(name);
+        _datas.Remove(name, out Variable obj);
+        ClassPool.Recycle(obj);
     }
     
     public void RemoveObj(string name)
@@ -107,6 +111,11 @@ public class Fsm : IResetable
         _datas.Clear();
         _objs.Clear();
         _states.Clear();
+    }
+    
+    private Variable GetData(string name)
+    {
+        return _datas.GetValueOrDefault(name);
     }
     
     private void Init<T>(List<T> states) where T : FsmState

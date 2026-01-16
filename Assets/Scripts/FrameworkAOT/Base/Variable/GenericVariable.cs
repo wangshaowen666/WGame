@@ -11,8 +11,6 @@ public abstract class Variable<T> : Variable
 {
     private T _value;
 
-    public override Type Type => typeof(T);
-
     public T Value
     {
         get
@@ -23,15 +21,6 @@ public abstract class Variable<T> : Variable
         {
             _value = value;
         }
-    }
-    public override object GetValue()
-    {
-        return _value;
-    }
-
-    public override void SetValue(object value)
-    {
-        _value = (T)value;
     }
 
     public override string ToString()

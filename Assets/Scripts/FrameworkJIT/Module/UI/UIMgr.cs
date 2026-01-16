@@ -11,7 +11,7 @@ using cfg;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-public class PanelCtr : Singleton<PanelCtr>
+public class UIMgr : Singleton<UIMgr>
 {
     private const string UILayerName = "UI";
     private const string UIRootName = "UIRoot";
@@ -24,14 +24,13 @@ public class PanelCtr : Singleton<PanelCtr>
     private Transform _uiRoot;
     private ObjectPool<UIPanelBase> _uiPanelPool;
     
-    private PanelCtr()
+    private UIMgr()
     {
         _layerGroupMap = new Dictionary<DUIGroup, UIGroup>();
         _loadingPanelIdMap = new Dictionary<uint, DPnlId>();
         
         _uiLayerId = LayerMask.NameToLayer(UILayerName);
-        
-        _uiPanelPool = new ObjectPool<UIPanelBase>();
+        _uiPanelPool = ObjectMgr.Instance.RegisterPool<UIPanelBase>(3);
         
         CreateUIRoot();
     }
@@ -64,7 +63,6 @@ public class PanelCtr : Singleton<PanelCtr>
         }
 
         uint loadingId = AutoID.GetID();
-        // 对象池只负责存，不负责创建
         UIPanelBase panel = _uiPanelPool.GetObj(id.ToString());
         if (panel == null)
         {
@@ -117,7 +115,7 @@ public class PanelCtr : Singleton<PanelCtr>
 
         foreach (var kv in _layerGroupMap)
         {
-            kv.Value.RemoveAll(_uiPanelPool);
+            kv.Value.RemoveAll();
         }
     }
 
@@ -139,7 +137,7 @@ public class PanelCtr : Singleton<PanelCtr>
         if (pnlId == 0)
         {
             // todo 这里加载到内存，但没有实例化，卸载的时候要注意
-            ClassFactory.Instance.Recycle(info);
+            ClassPool.Recycle(info);
             return;
         }
 
@@ -150,7 +148,7 @@ public class PanelCtr : Singleton<PanelCtr>
         
         panel.OnInit(info.Cfg);
         info.Group.AddPanel(panel, info.UserData);
-        ClassFactory.Instance.Recycle(info);
+        ClassPool.Recycle(info);
     }
 
     private void CreateUIRoot()
@@ -190,7 +188,7 @@ public sealed class OpenPanelInfo : IResetable
 
     public static OpenPanelInfo Create(uint loadingId, DUIPanel cfg, UIGroup group, object userData)
     {
-        var info = ClassFactory.Instance.Get<OpenPanelInfo>();
+        var info = ClassPool.Get<OpenPanelInfo>();
         info.LoadingId = loadingId;
         info.Cfg = cfg;
         info.Group = group;

@@ -35,8 +35,9 @@ public class UIGroup
         panel.OnRecycle();
     }
 
-    public void RemoveAll(ObjectPool<UIPanelBase> pool)
+    public void RemoveAll()
     {
+        var pool = ObjectMgr.Instance.GetPool<UIPanelBase>();
         var panelNode = _uiPanels.First;
         while (panelNode != null)
         {

@@ -21,7 +21,7 @@ public class ProcedureMain : ProcedureBase
             FirstEnter();
         
         ScreenCtr.Instance.SetMainCamera(JITConfig.MapCamera);
-        PanelCtr.Instance.PanelOn(DPnlId.MainPanel);
+        UIMgr.Instance.PanelOn(DPnlId.MainPanel);
     }
 
     private void FirstEnter()

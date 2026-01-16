@@ -23,11 +23,11 @@ public class SettingPanel : UIPanelBase
 
     private void ClickCancel()
     {
-        PanelCtr.Instance.PanelOff(this);
+        UIMgr.Instance.PanelOff(this);
     }
 
     private void ClickConfirm()
     {
-        PanelCtr.Instance.PanelOff(this);
+        UIMgr.Instance.PanelOff(this);
     }
 }

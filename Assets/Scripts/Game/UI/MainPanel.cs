@@ -23,6 +23,6 @@ public class MainPanel : UIPanelBase
 
     private void OnClickSetting()
     {
-        PanelCtr.Instance.PanelOn(DPnlId.SettingPanel);
+        UIMgr.Instance.PanelOn(DPnlId.SettingPanel);
     }
 }

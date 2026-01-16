@@ -31,13 +31,13 @@ public class _05ClassPoolTest : MonoBehaviour
             }
         });
         
-        ClassFactory.Instance.PreAllocate<_05Test>(c);
+        ClassPool.PreAllocate<_05Test>(c);
         
         TimeProfiler.LogTime(() =>
         {
             for (int i = 0; i < c; i++)
             {
-                _05Test t = ClassFactory.Instance.Get<_05Test>();
+                _05Test t = ClassPool.Get<_05Test>();
             }
         });
     }
@@ -70,17 +70,17 @@ public class _05ClassPoolTest : MonoBehaviour
         TimeProfiler.RecordTimeStart("对象池取值再放回");
         for (int i = 0; i < _count; i++)
         {
-            _05Test t = ClassFactory.Instance.Get<_05Test>();
-            ClassFactory.Instance.Recycle(t);
+            _05Test t = ClassPool.Get<_05Test>();
+            ClassPool.Recycle(t);
         }
         TimeProfiler.RecordTimeStop("对象池取值再放回");
         
         
-        ClassFactory.Instance.PreAllocate<_05Test>(_count);
+        ClassPool.PreAllocate<_05Test>(_count);
         TimeProfiler.RecordTimeStart("对象池取值");
         for (int i = 0; i < _count; i++)
         {
-            _05Test t = ClassFactory.Instance.Get<_05Test>();
+            _05Test t = ClassPool.Get<_05Test>();
         }
         TimeProfiler.RecordTimeStop("对象池取值");
         

@@ -23,54 +23,59 @@ using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class BuildWindow : OdinEditorWindow
+public class ToolBox : OdinEditorWindow
 {
-    [InlineEditor]
-    public BuildConfig buildConfig;
+    [Title("日志信息")]
+    [HideLabel]
+    [MultiLineProperty(lines:6)]
+    public string logInfoTextField;
     
-    [MenuItem("Tools/Game/打包工具", false, 10)]
+    [FormerlySerializedAs("buildConfig")]
+    [InlineEditor]
+    [Title("路径配置")]
+    [HideLabel]
+    public EditorPathConfig editorPathConfig;
+    
+    [MenuItem("Tools/Game/工具箱", false, 10)]
     private static void OpenWindow()
     {
-        var window = GetWindow<BuildWindow>();
+        var window = GetWindow<ToolBox>();
         window.position = GUIHelper.GetEditorWindowRect().AlignCenter(700, 700);
     }
     protected override void OnEnable()
     {
-        if (buildConfig ==null)
+        if (editorPathConfig ==null)
         {
-            string[] guids = AssetDatabase.FindAssets("t:BuildConfig");
+            string[] guids = AssetDatabase.FindAssets("t:EditorPathConfig");
             if (guids.Length > 0)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guids[0]);
-                buildConfig = AssetDatabase.LoadAssetAtPath<BuildConfig>(path);
+                editorPathConfig = AssetDatabase.LoadAssetAtPath<EditorPathConfig>(path);
             }
             else
             {
                 // 创建默认配置文件
-                buildConfig = CreateInstance<BuildConfig>();
-                AssetDatabase.CreateAsset(buildConfig, "Assets/Res/Config/BuildConfig.asset");
+                editorPathConfig = CreateInstance<EditorPathConfig>();
+                AssetDatabase.CreateAsset(editorPathConfig, "Assets/Res/Config/EditorPathConfig.asset");
                 AssetDatabase.SaveAssets();
             }
         }
     }
     
-    [Title("Log Info")]
-    [HideLabel]
-    [MultiLineProperty(lines:6)]
-    public string logInfoTextField;
-    
-    [ButtonGroup]
+    [TitleGroup("打包工具")]
+    [ButtonGroup("打包工具/打包")]
     [Button("导表")]
     public void ImportExcel()
     {
-        ShellUtil.Run(buildConfig.excelShellPath);
+        ShellUtil.Run(editorPathConfig.excelShellPath);
         AddLogInfo("导表完成");
         AssetDatabase.Refresh();
         AutoCompleteDataTableCtrProperties();
     }
     
-    [ButtonGroup]
+    [ButtonGroup("打包工具/打包")]
     [Button("构建热更Bundle", 30)]
     [GUIColor(0, 1, 0)]
     public void UpdateBuild()
@@ -87,7 +92,7 @@ public class BuildWindow : OdinEditorWindow
         CopyBundle();
     }
 
-    [ButtonGroup]
+    [ButtonGroup("打包工具/打包")]
     [Button("构建新Bundle")]
     public void NewBuild()
     {
@@ -103,7 +108,7 @@ public class BuildWindow : OdinEditorWindow
         CopyBundle();
     }
 
-    [ButtonGroup]
+    [ButtonGroup("打包工具/打包")]
     [Button("构建安装包")]
     public void BuildPackage()
     {
@@ -188,7 +193,7 @@ public class BuildWindow : OdinEditorWindow
         }
     }
 
-    [ButtonGroup]
+    [ButtonGroup("打包工具/打包")]
     [Button("测试")]
     public void Test()
     {
@@ -196,12 +201,52 @@ public class BuildWindow : OdinEditorWindow
         AddLogInfo(a.ToString() + "   " + (int)a);
     }
     
-    [ButtonGroup]
+    [ButtonGroup("打包工具/打包")]
     [Button("清除日志")]
     public void ClearLog()
     {
         logInfoTextField = "";
     }
+
+    //[OnInspectorGUI] private void Space1() { GUILayout.Space(20); }
+    
+#if STATS_ON
+    [TitleGroup("统计工具")]
+    [ButtonGroup("统计工具/统计")]
+    [Button("导出对象池统计数据", 30)]
+    public void ExportObjectPoolInfo()
+    {
+        string exportFileName = EditorUtility.SaveFilePanel("Export CSV Data", string.Empty, $"对象池统计数据 {DateTime.Now}.csv", string.Empty);
+        if (!string.IsNullOrEmpty(exportFileName))
+        {
+            try
+            {
+                var contents = ObjectMgr.Instance.GetPoolStats();
+                int index = 0;
+                string[] data = new string[contents.Count + 1];
+                data[index++] = "类名,变量名,总对象数,活跃对象数,非活跃对象数,峰值对象数,总获取次数,总放回次数,总释放次数";
+                foreach (string str in contents)
+                {
+                    data[index++] = str;
+                }
+
+                File.WriteAllLines(exportFileName, data, Encoding.UTF8);
+                AddLogInfo(string.Format("导出对象池统计信息 '{0}' 成功.", exportFileName));
+            }
+            catch (Exception exception)
+            {
+                AddLogInfo(string.Format("导出对象池统计信息 '{0}' 失败, 原因'{1}'.", exportFileName, exception));
+            }
+        }
+    }
+    
+    [ButtonGroup("统计工具/统计")]
+    [Button("导出类池统计数据")]
+    public void ExportClassPoolInfo()
+    {
+        
+    }
+#endif
 
     private void AddLogInfo(string str)
     {
@@ -275,13 +320,13 @@ public class BuildWindow : OdinEditorWindow
     /// </summary>
     private void CopyDll()
     {
-        string source = Path.Combine(buildConfig.dllSourcePath, EditorUserBuildSettings.activeBuildTarget.ToString());
+        string source = Path.Combine(editorPathConfig.dllSourcePath, EditorUserBuildSettings.activeBuildTarget.ToString());
         
         var settings = HybridCLRSettings.Instance;
         var hotUpdateAssemblies = settings.hotUpdateAssemblyDefinitions;
         foreach (var assemblyName in hotUpdateAssemblies)
         {
-            FileUtil.CopyFile(Path.Combine(source, assemblyName.name + ".dll"), Path.Combine(buildConfig.dllTargetPath, assemblyName.name + ".dll.bytes"));
+            FileUtil.CopyFile(Path.Combine(source, assemblyName.name + ".dll"), Path.Combine(editorPathConfig.dllTargetPath, assemblyName.name + ".dll.bytes"));
             AddLogInfo("同步dll：" + assemblyName.name + ".dll");
         }
         AssetDatabase.Refresh();
@@ -326,7 +371,7 @@ public class BuildWindow : OdinEditorWindow
     private void CopyBundle()
     {
         string absolutePath = GetBundleBuildPath();
-        string remoteTarget = Path.Combine(buildConfig.remotePath, EditorUserBuildSettings.activeBuildTarget.ToString());
+        string remoteTarget = Path.Combine(editorPathConfig.remotePath, EditorUserBuildSettings.activeBuildTarget.ToString());
 
         Directory.Delete(remoteTarget, true);
         FileUtil.CopyDirectory(absolutePath, remoteTarget);
@@ -361,19 +406,19 @@ public class BuildWindow : OdinEditorWindow
             }
             
             AddLogInfo("开始自动补全DataTableCtr表属性...");
-            if (!File.Exists(buildConfig.tablesFilePath))
+            if (!File.Exists(editorPathConfig.tablesFilePath))
             {
-                AddLogInfo($"错误：Tables.cs文件不存在：{buildConfig.tablesFilePath}");
+                AddLogInfo($"错误：Tables.cs文件不存在：{editorPathConfig.tablesFilePath}");
                 return;
             }
             
-            if (!File.Exists(buildConfig.dataTableCtrFilePath))
+            if (!File.Exists(editorPathConfig.dataTableCtrFilePath))
             {
-                AddLogInfo($"错误：DataTableCtr.cs文件不存在：{buildConfig.dataTableCtrFilePath}");
+                AddLogInfo($"错误：DataTableCtr.cs文件不存在：{editorPathConfig.dataTableCtrFilePath}");
                 return;
             }
             
-            string tablesContent = File.ReadAllText(buildConfig.tablesFilePath);
+            string tablesContent = File.ReadAllText(editorPathConfig.tablesFilePath);
             Regex tablePropertyRegex = new Regex(@"^\s*public\s+(\w+)\s+(\w+)\s+\{get;\s+\}\s*$", RegexOptions.Multiline);
             List<Tuple<string, string>> tableProperties = new List<Tuple<string, string>>();
             
@@ -384,7 +429,7 @@ public class BuildWindow : OdinEditorWindow
                 tableProperties.Add(new Tuple<string, string>(typeName, propertyName));
             }
             
-            string dataTableCtrContent = File.ReadAllText(buildConfig.dataTableCtrFilePath);
+            string dataTableCtrContent = File.ReadAllText(editorPathConfig.dataTableCtrFilePath);
             Regex existingPropertyRegex = new Regex(@"^\s*public\s+(\w+)\s+(\w+)\s+=>\s+_tables\.(\w+);\s*$", RegexOptions.Multiline);
             HashSet<string> existingProperties = new HashSet<string>();
             
@@ -431,7 +476,7 @@ public class BuildWindow : OdinEditorWindow
                     newPropertiesBuilder.Insert(0, "\n");
                 }
                 dataTableCtrContent = dataTableCtrContent.Insert(insertIndex, newPropertiesBuilder.ToString());
-                File.WriteAllText(buildConfig.dataTableCtrFilePath, dataTableCtrContent);
+                File.WriteAllText(editorPathConfig.dataTableCtrFilePath, dataTableCtrContent);
                 AssetDatabase.Refresh();
                 AddLogInfo($"已成功为DataTableCtr补全{newPropertyCount}个表属性");
             }
