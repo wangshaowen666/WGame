@@ -8,6 +8,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 public class ClassContainer
@@ -16,21 +17,16 @@ public class ClassContainer
     // 测试下来数组比栈耗时减少1倍多，主要是因为[MethodImpl(MethodImplOptions.AggressiveInlining)]
     private IResetable[] _poolArray;
     private int _index;
-    
     private Type _type;
-    private int _maxCount;
+    
+    // 默认初始容量
+    private const int Capacity = 8;
 
-    public ClassContainer(Type type, int initCount = 8, int maxCount = -1)
+    public ClassContainer(Type type)
     {
-        _maxCount = maxCount;
         _type = type;
-        _poolArray = new IResetable[Math.Max(8, initCount)];
+        _poolArray = new IResetable[Capacity];
         _index = 0;
-
-        if (initCount > 0)
-        {
-            InnerPreAllocate(initCount, true);
-        }
     }
 
     /// <summary>
@@ -38,7 +34,7 @@ public class ClassContainer
     /// </summary>
     /// <param name="count">分配数量</param>
     /// <param name="allowChangeMax">超上限是否修改上限值</param>
-    public void PreAllocate(int count, bool allowChangeMax = false)
+    public void PreAllocate(int count)
     {
         if (count <= 0)
         {
@@ -46,7 +42,7 @@ public class ClassContainer
             return;
         }
 
-        InnerPreAllocate(count, allowChangeMax);
+        InnerPreAllocate(count);
     }
 
     public T Get<T>() where T : class, IResetable, new()
@@ -57,10 +53,16 @@ public class ClassContainer
         {
             ret = _poolArray[--_index] as T;
             _poolArray[_index] = null;
+#if STATS_ON
+            UpdateStats(4);
+#endif
         }
         else
         {
             ret = new T();
+#if STATS_ON
+            UpdateStats(3);
+#endif
         }
 
         return ret;
@@ -72,8 +74,11 @@ public class ClassContainer
         RecycleItem(item);
     }
 
-    public void Clean()
+    public void Release()
     {
+#if STATS_ON
+        UpdateStats(5, _index + 1);
+#endif
         Array.Clear(_poolArray, 0, _index);
         _index = 0;
     }
@@ -90,54 +95,117 @@ public class ClassContainer
             }
         }
 #endif
-        if (_maxCount == -1 || _index < _maxCount)
+        if (_index >= _poolArray.Length)
         {
-            if (_index >= _poolArray.Length)
-            {
-                var newSize = _poolArray.Length * 2;
-                if (_maxCount != -1 && newSize > _maxCount)
-                {
-                    newSize = _maxCount;
-                }
-                Array.Resize(ref _poolArray, newSize);
-            }
-            
-            item.Reset();
-            _poolArray[_index++] = item;
+            var newSize = _poolArray.Length * 2;
+            Array.Resize(ref _poolArray, newSize);
         }
+            
+        item.Reset();
+        _poolArray[_index++] = item;
+        
+#if STATS_ON
+        UpdateStats(2);
+#endif
     }
 
-    private void InnerPreAllocate(int count, bool allowChangeMax)
+    private void InnerPreAllocate(int count)
     {
         int targetCount = _index + count;
         if (targetCount > _poolArray.Length)
         {
             int newCapacity = Math.Max(_poolArray.Length * 2, targetCount);
-            if (_maxCount != -1 && newCapacity > _maxCount)
-            {
-                if (allowChangeMax)
-                {
-                    _maxCount = newCapacity;
-                }
-                else
-                {
-                    newCapacity = _maxCount;
-                }
-            }
             Array.Resize(ref _poolArray, newCapacity);
         }
         
         // 创建新对象并加入池中
         for (int i = 0; i < count; i++)
         {
-            if (_maxCount != -1 && count >= _maxCount)
-            {
-                Log.Warning(Log.LogColor.Yellow, $"对象池已达到最大容量 {_maxCount}，停止预分配");
-                break;
-            }
-
             var obj = Activator.CreateInstance(_type) as IResetable;
             _poolArray[_index++] = obj;
         }
+
+#if STATS_ON
+        UpdateStats(1, count);
+#endif
     }
+    
+       
+#if STATS_ON
+    // 统计信息
+    private ClassPoolStats _stats = new ClassPoolStats{capacity = Capacity};
+    
+    /// <summary>
+    /// 更新统计信息
+    /// </summary>
+    /// <param name="flag">操作标识。1预热 2存 3取新 4取旧 5释放</param>
+    /// <param name="count">数量</param>
+    private void UpdateStats(int flag, int count = 1)
+    {
+        switch (flag)
+        {
+            case 1:
+                _stats.preAllocate += count;
+                _stats.capacity = _poolArray.Length;
+                _stats.totalNum += count;
+                _stats.createNum += count;
+                
+                if (_stats.peakNUm < _stats.totalNum)
+                    _stats.peakNUm = _stats.totalNum;
+                break;
+            
+            case 3:
+            case 4:
+                _stats.totalGets++;
+                if (flag == 3)
+                {
+                    _stats.createNum++;
+                }
+                else
+                {
+                    _stats.totalNum--;
+                }
+                break;
+            
+            case 2:
+                _stats.totalPuts++;
+                _stats.totalNum++;
+                _stats.capacity = _poolArray.Length;
+                if (_stats.peakNUm < _stats.totalNum)
+                    _stats.peakNUm = _stats.totalNum;
+                break;
+            
+            case 5:
+                _stats.totalNum -= count;
+                _stats.releaseNum += count;
+                break;
+        }
+    }
+    
+    /// <summary>
+    /// 获取对象池统计信息
+    /// </summary>
+    /// <returns>统计信息</returns>
+    public ClassPoolStats GetStats()
+    {
+        return _stats;
+    }
+#endif
 }
+
+#if STATS_ON
+/// <summary>
+/// 对象池统计信息
+/// </summary>
+public class ClassPoolStats
+{
+    public int capacity;        // 容量
+    public int preAllocate;     // 预热数量
+    public int createNum;       // 创建数量
+    public int totalNum;        // 池中总数量
+    public int peakNUm;         // 峰值数量
+    public long totalGets;      // 总获取次数
+    public long totalPuts;      // 总放回次数
+    public long releaseNum;     // 总释放数量
+}
+#endif

@@ -30,7 +30,7 @@ public class UIMgr : Singleton<UIMgr>
         _loadingPanelIdMap = new Dictionary<uint, DPnlId>();
         
         _uiLayerId = LayerMask.NameToLayer(UILayerName);
-        _uiPanelPool = ObjectMgr.Instance.RegisterPool<UIPanelBase>(3);
+        _uiPanelPool = ObjectMgr.Instance.RegisterPool<UIPanelBase>(100);
         
         CreateUIRoot();
     }

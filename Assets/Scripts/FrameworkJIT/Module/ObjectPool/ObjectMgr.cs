@@ -111,7 +111,7 @@ public class ObjectMgr : Singleton<ObjectMgr>
     
     
 #if STATS_ON
-    public List<string> GetPoolStats()
+    public List<string> DealPoolStats()
     {
         List<string> result = new List<string>();
         foreach (var pool in _poolMap)
@@ -120,7 +120,7 @@ public class ObjectMgr : Singleton<ObjectMgr>
             {
                 result.Add($"{pool.Key.Name},{statMap.Key},{statMap.Value.totalObjects},{statMap.Value.activeObjects}," +
                            $"{statMap.Value.inactiveObjects},{statMap.Value.peakObjects},{statMap.Value.totalGets}," +
-                           $"{statMap.Value.totalPuts},{statMap.Value.totalRelease}");
+                           $"{statMap.Value.totalPuts},{statMap.Value.totalRelease},{statMap.Value.totalLoad},{statMap.Value.externalObjects}");
             }
         }
         

@@ -94,7 +94,7 @@ public static class ParseUtil
         }
         catch (Exception e)
         {
-            Log.Error("Json反序列化出错：", json);
+            Log.Error("Json反序列化出错：", json, e.Message);
             return null;
         }
     }

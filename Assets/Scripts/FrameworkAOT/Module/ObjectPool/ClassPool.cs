@@ -58,48 +58,10 @@ public static class ClassPool
     
     private static readonly Dictionary<Type, ClassContainer> _poolMap = new Dictionary<Type, ClassContainer>();
     
-    // 新增预分配方法
-    public static void PreAllocate(Type type, int count, int maxCount = -1, bool allowChangeMax = true)
-    {
-        if (count <= 0)
-        {
-            Log.Error(Log.LogColor.Red, "预分配数量必须大于0");
-            return;
-        }
-
-        if (!_poolMap.TryGetValue(type, out var pool))
-        {
-            pool = new ClassContainer(type, count, maxCount);
-            _poolMap[type] = pool;
-            Log.Info(Log.LogColor.Cyan, $"预分配 {type.Name} 对象池: {count}个对象");
-        }
-        else
-        {
-            // 如果池子已存在，进行扩容预分配
-            pool.PreAllocate(count, allowChangeMax);
-        }
-    }
-    
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void PreAllocate<T>(int count, int maxCount = -1, bool allowChangeMax = true) where T : class, IResetable, new()
+    public static void PreAllocate<T>(int count) where T : class, IResetable, new()
     {
-        PreAllocate(typeof(T), count, maxCount, allowChangeMax);
-    }
-    
-    /// <summary>
-    /// 批量预分配多种类型的对象池
-    /// </summary>
-    /// <param name="allocationMap"></param>
-    public static void PreAllocateBatch(Dictionary<Type, int> allocationMap)
-    {
-        if (allocationMap == null) return;
-
-        foreach (var kvp in allocationMap)
-        {
-            PreAllocate(kvp.Key, kvp.Value);
-        }
-        
-        Log.Info(Log.LogColor.Green, $"批量预分配完成，共{allocationMap.Count}种类型");
+        PoolCache<T>.Container.PreAllocate(count);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -126,7 +88,7 @@ public static class ClassPool
         PoolCache<T>.Container.Recycle(item);
     }
 
-    public static void Clean(Type type)
+    public static void Release(Type type)
     {
         if (!_poolMap.TryGetValue(type, out var pool))
         {
@@ -134,16 +96,32 @@ public static class ClassPool
             return;
         }
         
-        pool.Clean();
+        pool.Release();
     }
 
-    public static void CleanAll()
+    public static void ReleaseAll()
     {
         foreach (var pool in _poolMap.Values)
         {
-            pool.Clean();
+            pool.Release();
         }
         
         _poolMap.Clear();
     }
+        
+#if STATS_ON
+    public static List<string> DealPoolStats()
+    {
+        List<string> result = new List<string>();
+        foreach (var pool in _poolMap)
+        {
+            var stats = pool.Value.GetStats();
+            result.Add($"{pool.Key.Name},{stats.capacity},{stats.preAllocate}," +
+                       $"{stats.createNum},{stats.totalNum},{stats.peakNUm}," +
+                       $"{stats.totalGets},{stats.totalPuts},{stats.releaseNum}");
+        }
+        
+        return result;
+    }
+#endif
 }

@@ -221,10 +221,11 @@ public class ToolBox : OdinEditorWindow
         {
             try
             {
-                var contents = ObjectMgr.Instance.GetPoolStats();
+                var contents = ObjectMgr.Instance.DealPoolStats();
+                AddLogInfo(ParseUtil.ToJson(contents));
                 int index = 0;
                 string[] data = new string[contents.Count + 1];
-                data[index++] = "类名,变量名,总对象数,活跃对象数,非活跃对象数,峰值对象数,总获取次数,总放回次数,总释放次数";
+                data[index++] = "类名,变量名,总对象数,活跃对象数,非活跃对象数,峰值对象数,总获取次数,总放回次数,总释放次数,总加载次数,外部对象数";
                 foreach (string str in contents)
                 {
                     data[index++] = str;
@@ -244,7 +245,29 @@ public class ToolBox : OdinEditorWindow
     [Button("导出类池统计数据")]
     public void ExportClassPoolInfo()
     {
-        
+        string exportFileName = EditorUtility.SaveFilePanel("Export CSV Data", string.Empty, $"类池统计数据 {DateTime.Now}.csv", string.Empty);
+        if (!string.IsNullOrEmpty(exportFileName))
+        {
+            try
+            {
+                var contents = ClassPool.DealPoolStats();
+                AddLogInfo(ParseUtil.ToJson(contents));
+                int index = 0;
+                string[] data = new string[contents.Count + 1];
+                data[index++] = "类名,容量,预热数量,创建数量,池中总数量,峰值数量,总获取次数,总放回次数,总释放数量";
+                foreach (string str in contents)
+                {
+                    data[index++] = str;
+                }
+
+                File.WriteAllLines(exportFileName, data, Encoding.UTF8);
+                AddLogInfo(string.Format("导出类池统计信息 '{0}' 成功.", exportFileName));
+            }
+            catch (Exception exception)
+            {
+                AddLogInfo(string.Format("导出类池统计信息 '{0}' 失败, 原因'{1}'.", exportFileName, exception));
+            }
+        }
     }
 #endif
 
