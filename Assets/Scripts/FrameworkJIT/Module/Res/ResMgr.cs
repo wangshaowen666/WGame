@@ -43,9 +43,19 @@ public class ResMgr : Singleton<ResMgr> {
         return _resLoader.LoadSync<T>(key);
     }
 
-    public void LoadAsync<T>(string key, LoadAssetCallback<T> callback, object userData = null)
+    public void LoadAsync<T>(string key, LoadAssetCallback<T> callback = null, object userData = null)
     {
         _resLoader.LoadAsync(key, callback, userData);
+    }
+
+    public void Unload(string key)
+    {
+        _resLoader.Unload(key);
+    }
+
+    public void UnloadAll()
+    {
+        _resLoader.UnloadAll();
     }
     
     public void LoadPrefab(string key, LoadAssetCallback<GameObject> callback, object userData = null)

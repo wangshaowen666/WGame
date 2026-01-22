@@ -29,7 +29,7 @@ public partial class ToolBox
         AutoCompleteDataTableCtrProperties();
     }
     
-     /// <summary>
+    /// <summary>
     /// 自动为DataTableCtr补全所有可获取的表的属性
     /// </summary>
     private void AutoCompleteDataTableCtrProperties()

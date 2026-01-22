@@ -165,7 +165,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
                 {
                     if (!items[i].IsUsing && currentTime - items[i].LastUseTime > _autoReleaseTime)
                     {
-                        ReleaseObj(items[i].Target);
+                        ReleaseObj(key, items[i].Target);
                         ClassPool.Recycle(items[i]);
                         items.RemoveAt(i);
                         
@@ -196,7 +196,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
         {
             foreach (var item in kv.Value)
             {
-                ReleaseObj(item.Target);
+                ReleaseObj(kv.Key, item.Target);
                 ClassPool.Recycle(item);
             }
         }
@@ -207,7 +207,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
 #endif    
     }
 
-    private void ReleaseObj(Object obj)
+    private void ReleaseObj(string key, Object obj)
     {
         if (obj is MonoBehaviour monoBehaviour)
         {
@@ -217,6 +217,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
         {
             Object.Destroy(obj);
         }
+        ResMgr.Instance.Unload(key);
     }
     
 #if STATS_ON

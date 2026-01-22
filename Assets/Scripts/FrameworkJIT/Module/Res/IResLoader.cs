@@ -10,9 +10,38 @@ using UnityEngine;
 
 public interface IResLoader
 {
+    /// <summary>
+    /// 同步加载资源
+    /// </summary>
+    /// <typeparam name="T">资源类型</typeparam>
+    /// <param name="key">资源键</param>
+    /// <returns>加载的资源</returns>
     T LoadSync<T>(string key);
     
-    // 这里如果不提供userData参数，当callback执行时 想使用原调用方法中的局部参数 则只能使用匿名函数的形式
-    // 匿名函数的闭包实现生成了匿名类存储局部变量，不如自己显示创建类通过池管理
+    /// <summary>
+    /// 异步加载资源
+    /// </summary>
+    /// <typeparam name="T">资源类型</typeparam>
+    /// <param name="key">资源键</param>
+    /// <param name="callback">加载完成回调</param>
+    /// <param name="userData">用户数据</param>
     void LoadAsync<T>(string key, LoadAssetCallback<T> callback, object userData = null);
+    
+    /// <summary>
+    /// 卸载指定key的所有资源
+    /// </summary>
+    /// <param name="key">资源键</param>
+    void Unload(string key);
+    
+    /// <summary>
+    /// 卸载所有已加载的资源
+    /// </summary>
+    void UnloadAll();
+    
+    /// <summary>
+    /// 获取指定key已加载的资源数量
+    /// </summary>
+    /// <param name="key">资源键</param>
+    /// <returns>已加载资源数量</returns>
+    int GetLoadedCount(string key);
 }

@@ -83,6 +83,7 @@ public class AddressableHelper
         if (PlayerPrefsUtil.GetInt("UpdateFlag") == 1)
             return;
         
+        // 下载交集，同时满足所有标签的bundle才会下载
         var locationHandle = Addressables.LoadResourceLocationsAsync(LoginDownloadLabels, Addressables.MergeMode.Intersection);
         await locationHandle;
         if (locationHandle.Status != AsyncOperationStatus.Succeeded)

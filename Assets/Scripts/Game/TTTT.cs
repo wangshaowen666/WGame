@@ -23,18 +23,51 @@ public class TTTT : MonoBehaviour
     
     private void Start()
     {
-        Procedure.Instance.RunProcedure<ProcedureVersionCheck>();
+        //Procedure.Instance.RunProcedure<ProcedureVersionCheck>();
     }
 
+    [ContextMenu("打开界面")]
+    void Execute3()
+    {
+        UIMgr.Instance.PanelOn(cfg.DPnlId.SettingPanel);
+    }
+    
+    [ContextMenu("关闭界面")]
+    void Execute4()
+    {
+        UIMgr.Instance.PanelOff(cfg.DPnlId.SettingPanel);
+    }
+    
+    
     [ContextMenu("执行")]
     void Execute()
     {
-        for (int i = 0; i < 10; i++)
+        ResMgr.Instance.LoadAsync<TextAsset>("TTT.lua");
+    }
+    
+    [ContextMenu("执行2")]
+    void Execute2()
+    {
+        ResMgr.Instance.LoadAsync<TextAsset>("Main.lua");
+    }
+    
+    [ContextMenu("卸载1")]
+    void Unload1()
+    {
+        ResMgr.Instance.Unload("TTT.lua");
+    }
+    
+    [ContextMenu("卸载2")]
+    void Unload2()
+    {
+        ResMgr.Instance.Unload("Main.lua");
+    }
+
+    void Update()
+    {
+        for (int i = 0; i < 1000; i++)
         {
-            str = i.ToString();
-            hashNmd.Add(str);
+            var t = new string[i];
         }
-        
-        Log.Info("结果", ParseUtil.ToJson(hashNmd));
     }
 }
