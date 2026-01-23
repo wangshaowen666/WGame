@@ -6,8 +6,6 @@
  */
 
 using Cysharp.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 public class ProcedurePreload : ProcedureBase
 {
@@ -27,7 +25,7 @@ public class ProcedurePreload : ProcedureBase
         DataTableCtr.Instance.LoadTable();
         
         // 启动lua
-        //LuaCtr.Instance.InitLuaEnv();
+        LuaCtr.Instance.InitLuaEnv();
         
         await UniTask.Delay(300);
         

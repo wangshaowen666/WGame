@@ -57,7 +57,7 @@ public class ProcedureResCheck_AA : ProcedureBase
         }
         catch (Exception e)
         {
-            Log.Error("更新执行出错:" + e.Message);
+            Log.Error("更新执行出错:", e.Message, e.InnerException, e.StackTrace);
         }
     }
     

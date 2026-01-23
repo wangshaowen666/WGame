@@ -5,7 +5,8 @@
  *--------------------------------------------------------------
  */
 
-using System;
+using System.Collections.Generic;
+using HybridCLR;
 using UnityEngine;
 
 /// <summary>
@@ -16,7 +17,7 @@ public class GameLaunch
     public static void StartGame()
     {
         Application.targetFrameRate = 60;
-        
+        ReplenishMeta();
         InitGameProcedure();
         Procedure.Instance.RunProcedure<ProcedurePreload>();
     }
@@ -27,5 +28,20 @@ public class GameLaunch
         Procedure.Instance.AddProcedure(new ProcedurePreload());
         Procedure.Instance.AddProcedure(new ProcedureMain());
         Procedure.Instance.AddProcedure(new ProcedureBattle());
+    }
+    
+    private static void ReplenishMeta()
+    {
+        List<string> aotDllList = new List<string>
+        {
+            "mscorlib.dll",
+        };
+
+        foreach (var aotDllName in aotDllList)
+        {
+            byte[] dllBytes = ResMgr.Instance.LoadSync<TextAsset>(aotDllName).bytes;
+            RuntimeApi.LoadMetadataForAOTAssembly(dllBytes, HomologousImageMode.SuperSet);
+            Log.Info("补充元数据dll:", aotDllName);
+        }
     }
 }
