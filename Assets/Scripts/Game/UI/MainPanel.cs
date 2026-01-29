@@ -13,16 +13,24 @@ using UnityEngine.UI;
 
 public class MainPanel : UIPanelBase
 {
+    public Button btnStart;
     public Button btnSetting;
 
     private void Awake()
     {
         Log.Info("进入主界面");
         btnSetting.onClick.AddListener(OnClickSetting);
+        btnStart.onClick.AddListener(OnClickStart);
     }
 
     private void OnClickSetting()
     {
         UIMgr.Instance.PanelOn(DPnlId.SettingPanel);
+    }
+
+    private void OnClickStart()
+    {
+        EventMgr.Instance.Send(GameEvent.ClickGoBattle);
+        UIMgr.Instance.PanelOff(this);
     }
 }

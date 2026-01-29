@@ -14,11 +14,11 @@ using UnityEngine;
 /// 用范型存在的问题：后续事件需要新增、修改参数数量或类型等都会影响到旧方法，需要全部修改；
 /// 如果用EventArg专门定义相关类，只需要在参数类和新的回调中处理即可。
 /// </summary>
-public class EventCenter : Singleton<EventCenter>
+public class EventMgr : Singleton<EventMgr>
 {
     private readonly Dictionary<GameEvent, List<Delegate>> _eventMap = new Dictionary<GameEvent, List<Delegate>>();
 
-    private EventCenter()
+    private EventMgr()
     {
     }
 
@@ -76,10 +76,10 @@ public class EventCenter : Singleton<EventCenter>
     {
         if (_eventMap.TryGetValue(eventId, out var list))
         {
-            foreach (var handler in list)
+            for (int i = list.Count - 1; i >= 0; i--)
             {
-                (handler as Action)?.Invoke();
-            }       
+                (list[i] as Action)?.Invoke();
+            }     
         }
     }
     

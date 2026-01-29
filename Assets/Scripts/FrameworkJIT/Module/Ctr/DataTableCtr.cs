@@ -11,9 +11,15 @@ using UnityEngine;
 
 public class DataTableCtr : Singleton<DataTableCtr>
 {
-    private cfg.Tables _tables;
     private bool _isLoaded = false;
+    // 导表工具自动补全下列属性
+    private cfg.Tables _tables;
 
+    public TbArmor TbArmor => _tables.TbArmor;
+    public TbThruster TbThruster => _tables.TbThruster;
+    public TbAircraft TbAircraft => _tables.TbAircraft;
+    public TbWeapon TbWeapon => _tables.TbWeapon;
+    public TbEntity TbEntity => _tables.TbEntity;
     public TbUIPanel TbUIPanel => _tables.TbUIPanel;
     
     private DataTableCtr()
@@ -48,9 +54,6 @@ public class DataTableCtr : Singleton<DataTableCtr>
         
         _tables = new cfg.Tables(LoadByteBuf);
         _isLoaded = true;
-        
-        Log.Info(_tables.TbUIPanel.Get(DPnlId.MainPanel));
-        Log.Info(_tables.TbUIPanel[DPnlId.SettingPanel]);
     }
     
     /// <summary>

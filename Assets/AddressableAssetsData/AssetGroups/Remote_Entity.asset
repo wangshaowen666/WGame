@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Remote_Entity
+  m_EditorClassIdentifier: 
+  m_GroupName: Remote_Entity
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 64bfd2c1d91a1452c86a67e58c7b1a08
+  m_SerializeEntries:
+  - m_GUID: 0992f89f84d762f478fd32f8225168b0
+    m_Address: DefaultArmor
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 11e27c26ac87b40f0a62ec40d7261989
+    m_Address: EnemyBolt
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 160925a6fe2664f2a978566b819f0af0
+    m_Address: EnemyExplosion
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3455fe69f7ddc4604b95bf9b0a1e88d7
+    m_Address: PlayerExplosion
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 738bdf56857a65f479c367c7b62c4ad7
+    m_Address: PlayerShip
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7d5f7699d6d1d48e485ac71126e12061
+    m_Address: Asteroid01
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 834bfaee90a9d4e04b1e8c1ca22cc88e
+    m_Address: Asteroid03
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8cf749fdfa5edc3478d16893efeaa0eb
+    m_Address: PlayerEngine
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9143e2b62ad50488482f9b73672fc331
+    m_Address: Asteroid02
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a6d58f54ce5934781962a4f887e834f3
+    m_Address: AsteroidExplosion
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: abd1565e9e268f04cac3631d022b4ace
+    m_Address: DefaultWeapon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: afc18fc39ade3744397c0c993b57be53
+    m_Address: EnemyShip
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f4ec271e525e14ca9927a07e6a2e153d
+    m_Address: PlayerBolt
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fedd25a3c60e7ae499fc6efab9ee180b
+    m_Address: EnemyEngine
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 887a2619f93d5433294a38258012af01, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 4b635a98b32db49f98c6b62caa0462ca, type: 2}
+    - {fileID: 11400000, guid: e5924521bff1942c28fecac173d77892, type: 2}

@@ -17,6 +17,16 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 593d0c9c5636347c6ab0dea1bdb86328
   m_SerializeEntries:
+  - m_GUID: 15ba7b42d117649b794767e5d06beafe
+    m_Address: Unity.Netcode.Runtime.dll
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7625f664ecd664196ab5af3b585982f5
+    m_Address: UniTask.dll
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 83a061f5ff077483d958cc5ecf4dcac6
     m_Address: mscorlib.dll
     m_ReadOnly: 0

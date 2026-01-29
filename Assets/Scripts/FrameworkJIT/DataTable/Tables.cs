@@ -13,17 +13,32 @@ namespace cfg
 {
 public partial class Tables
 {
+    public TbArmor TbArmor {get; }
+    public TbThruster TbThruster {get; }
+    public TbAircraft TbAircraft {get; }
     public TbUIPanel TbUIPanel {get; }
+    public TbWeapon TbWeapon {get; }
+    public TbEntity TbEntity {get; }
 
     public Tables(System.Func<string, ByteBuf> loader)
     {
+        TbArmor = new TbArmor(loader("tbarmor"));
+        TbThruster = new TbThruster(loader("tbthruster"));
+        TbAircraft = new TbAircraft(loader("tbaircraft"));
         TbUIPanel = new TbUIPanel(loader("tbuipanel"));
+        TbWeapon = new TbWeapon(loader("tbweapon"));
+        TbEntity = new TbEntity(loader("tbentity"));
         ResolveRef();
     }
     
     private void ResolveRef()
     {
+        TbArmor.ResolveRef(this);
+        TbThruster.ResolveRef(this);
+        TbAircraft.ResolveRef(this);
         TbUIPanel.ResolveRef(this);
+        TbWeapon.ResolveRef(this);
+        TbEntity.ResolveRef(this);
     }
 }
 

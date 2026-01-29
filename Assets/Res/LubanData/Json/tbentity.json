@@ -1,0 +1,66 @@
+[
+  {
+    "id": 10000,
+    "name": "PlayerShip"
+  },
+  {
+    "id": 10001,
+    "name": "EnemyShip"
+  },
+  {
+    "id": 20000,
+    "name": "PlayerEngine"
+  },
+  {
+    "id": 20001,
+    "name": "EnemyEngine"
+  },
+  {
+    "id": 30000,
+    "name": "DefaultWeapon"
+  },
+  {
+    "id": 30001,
+    "name": "DefaultWeapon"
+  },
+  {
+    "id": 40000,
+    "name": "DefaultArmor"
+  },
+  {
+    "id": 40001,
+    "name": "DefaultArmor"
+  },
+  {
+    "id": 50000,
+    "name": "PlayerBolt"
+  },
+  {
+    "id": 50001,
+    "name": "EnemyBolt"
+  },
+  {
+    "id": 60000,
+    "name": "Asteroid01"
+  },
+  {
+    "id": 60001,
+    "name": "Asteroid02"
+  },
+  {
+    "id": 60002,
+    "name": "Asteroid03"
+  },
+  {
+    "id": 70000,
+    "name": "PlayerExplosion"
+  },
+  {
+    "id": 70001,
+    "name": "EnemyExplosion"
+  },
+  {
+    "id": 70002,
+    "name": "AsteroidExplosion"
+  }
+]

@@ -10,5 +10,10 @@ using UnityEngine;
 
 public class ProcedureBattle : ProcedureBase
 {
-    
+    public override void OnEnter()
+    {
+        base.OnEnter();
+        
+        EventMgr.Instance.Send(GameEvent.EnterBattle);
+    }
 }

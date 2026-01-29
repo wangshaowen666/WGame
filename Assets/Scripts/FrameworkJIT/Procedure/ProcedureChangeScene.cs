@@ -26,6 +26,10 @@ public class ProcedureChangeScene : ProcedureBase
             Log.Error("场景名未赋值");
             return;
         }
+        else
+        {
+            Log.Info("场景名：", nm);
+        }
        
         await SceneCtr.Instance.LoadScene(nm);
         switch (nm)

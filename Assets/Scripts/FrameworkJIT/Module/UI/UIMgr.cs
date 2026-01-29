@@ -67,7 +67,7 @@ public class UIMgr : Singleton<UIMgr>
         if (panel == null)
         {
             _loadingPanelIdMap.Add(loadingId, id);
-            var info = OpenPanelInfo.Create(loadingId, cfg, group, userData);
+            var info = LoadPanelArg.Create(loadingId, cfg, group, userData);
             ResMgr.Instance.LoadAsync<GameObject>(cfg.Name, OnLoadFinish, info);
         }
         else
@@ -128,27 +128,27 @@ public class UIMgr : Singleton<UIMgr>
     
     private void OnLoadFinish(GameObject obj, object userData)
     {
-        OpenPanelInfo info = userData as OpenPanelInfo;
-        if (info == null)
+        LoadPanelArg arg = userData as LoadPanelArg;
+        if (arg == null)
             throw new GameException("打开界面参数无效");
 
-        _loadingPanelIdMap.Remove(info.LoadingId, out var pnlId);
+        _loadingPanelIdMap.Remove(arg.LoadingId, out var pnlId);
         // 加载的过程中被关闭了
         if (pnlId == 0)
         {
             // todo 这里加载到内存，但没有实例化，卸载的时候要注意
-            ClassPool.Recycle(info);
+            ClassPool.Recycle(arg);
             return;
         }
 
-        var prefab =Object.Instantiate(obj, info.Group.Trans);
+        var prefab =Object.Instantiate(obj, arg.Group.Trans);
         var panel = prefab.GetComponent<UIPanelBase>();
         if (panel == null)
             throw new GameException("预制体上缺少UIPanelBase脚本");
         
-        panel.OnInit(info.Cfg);
-        info.Group.AddPanel(panel, info.UserData);
-        ClassPool.Recycle(info);
+        panel.OnInit(arg.Cfg);
+        arg.Group.AddPanel(panel, arg.UserData);
+        ClassPool.Recycle(arg);
     }
 
     private void CreateUIRoot()
@@ -179,16 +179,16 @@ public class UIMgr : Singleton<UIMgr>
     } 
 }
 
-public sealed class OpenPanelInfo : IResetable
+public sealed class LoadPanelArg : IResetable
 {
     public uint LoadingId { get; private set; }
     public DUIPanel Cfg { get; private set; }
     public UIGroup Group { get; private set; }
     public object UserData { get; private set; }
 
-    public static OpenPanelInfo Create(uint loadingId, DUIPanel cfg, UIGroup group, object userData)
+    public static LoadPanelArg Create(uint loadingId, DUIPanel cfg, UIGroup group, object userData)
     {
-        var info = ClassPool.Get<OpenPanelInfo>();
+        var info = ClassPool.Get<LoadPanelArg>();
         info.LoadingId = loadingId;
         info.Cfg = cfg;
         info.Group = group;

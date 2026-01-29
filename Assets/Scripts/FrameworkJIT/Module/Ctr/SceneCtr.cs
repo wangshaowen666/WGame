@@ -31,11 +31,6 @@ public class SceneCtr : Singleton<SceneCtr>
 
         try
         {
-            if (mode == LoadSceneMode.Single && _curScene.Scene.IsValid())
-            {
-                await Addressables.UnloadSceneAsync(_curScene);
-            }
-
             var handle = Addressables.LoadSceneAsync(sceneName, mode);
             while (!handle.IsDone)
             {
@@ -44,6 +39,10 @@ public class SceneCtr : Singleton<SceneCtr>
 
             if (handle.Status == AsyncOperationStatus.Succeeded)
             {
+                if (mode == LoadSceneMode.Single && _curScene.Scene.IsValid())
+                {
+                    await Addressables.UnloadSceneAsync(_curScene);
+                }
                 _curScene = handle.Result;
             }
             else

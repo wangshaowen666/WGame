@@ -1,0 +1,18 @@
+[
+  {
+    "id": 10000,
+    "thrusterId": 20000,
+    "weaponId": 30000,
+    "armorId": 40000,
+    "deadEffId": 70000,
+    "deadSoundId": 0
+  },
+  {
+    "id": 10001,
+    "thrusterId": 20001,
+    "weaponId": 30001,
+    "armorId": 40001,
+    "deadEffId": 70001,
+    "deadSoundId": 1
+  }
+]

@@ -19,6 +19,7 @@ public class GameLaunch
         Application.targetFrameRate = 60;
         ReplenishMeta();
         InitGameProcedure();
+        BattleMgr.Instance.Init();
         Procedure.Instance.RunProcedure<ProcedurePreload>();
     }
 
@@ -35,6 +36,8 @@ public class GameLaunch
         List<string> aotDllList = new List<string>
         {
             "mscorlib.dll",
+            "UniTask.dll",
+            "Unity.Netcode.Runtime.dll",
         };
 
         foreach (var aotDllName in aotDllList)

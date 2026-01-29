@@ -231,7 +231,7 @@ public partial class ToolBox
     {
         string source = Path.Combine(editorPathConfig.dllSourcePath, EditorUserBuildSettings.activeBuildTarget.ToString());
 
-        var metaAssemblies = new List<string> { "mscorlib.dll"};
+        var metaAssemblies = new List<string> { "mscorlib.dll", "UniTask.dll", "Unity.Netcode.Runtime.dll"};
         foreach (var assemblyName in metaAssemblies)
         {
             FileUtil.CopyFile(Path.Combine(source, assemblyName), Path.Combine(editorPathConfig.dllTargetPath, assemblyName + ".bytes"));
