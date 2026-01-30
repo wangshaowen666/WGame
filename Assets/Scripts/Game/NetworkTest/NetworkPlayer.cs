@@ -16,10 +16,10 @@ public class NetworkPlayer : NetworkBehaviour
 {
     public static NetworkPlayer LocalPlayer;
    
-
+    [HideInInspector]
     public NetworkVariable<float> fireCooldown = new NetworkVariable<float>(0f);
     
-    
+    private ObjectPool<GameObject> objectPool = new ObjectPool<GameObject>();
     private float _fireRate = 0.2f;
 
     private void Awake()
@@ -41,12 +41,12 @@ public class NetworkPlayer : NetworkBehaviour
 
     public void Fire()
     {
-        
+        FireServerRpc();
     }
 
     public void Move()
     {
-        
+        MoveServerRpc();
     }
 
     [ServerRpc]
@@ -56,6 +56,7 @@ public class NetworkPlayer : NetworkBehaviour
         OnMoveClientRpc();
     }
 
+    [ServerRpc]
     private void FireServerRpc()
     {
         if (Time.time - fireCooldown.Value < _fireRate)
@@ -63,7 +64,19 @@ public class NetworkPlayer : NetworkBehaviour
             return;
         }
         
-        
+        fireCooldown.Value = Time.time;
+        var bullet = objectPool.GetObj("bullet");
+        if (bullet == null)
+        {
+            ResMgr.Instance.LoadAsync<GameObject>("PlayerBullet", OnLoadBulletFinish);
+        }
+        else
+        {
+            bullet.transform.position = transform.position;
+            bullet.transform.rotation = transform.rotation;
+            var netObj = bullet.GetComponent<NetworkObject>();
+            netObj.Spawn();
+        }
     }
 
     [ClientRpc]
@@ -86,4 +99,12 @@ public class NetworkPlayer : NetworkBehaviour
     {
         
     }
+    
+    private void OnLoadBulletFinish(GameObject asset, object userdata)
+    {
+        var bullet = Instantiate(asset, transform.position, transform.rotation);
+        var netObj = bullet.GetComponent<NetworkObject>();
+        netObj.Spawn();
+    }
+    
 }

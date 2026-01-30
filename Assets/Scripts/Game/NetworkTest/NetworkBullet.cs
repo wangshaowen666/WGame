@@ -19,9 +19,7 @@ public class NetworkBullet : NetworkBehaviour
     {
         fireCooldown.Value -= fireRate;
     }
+    
+    
 
-    private void Update()
-    {
-        
-    }
 }
