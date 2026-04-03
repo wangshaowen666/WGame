@@ -11,15 +11,35 @@ using UnityEngine;
 
 public class NetworkBullet : NetworkBehaviour
 {
-    public float fireRate = 0.2f;
-
-    public NetworkVariable<float> fireCooldown = new NetworkVariable<float>(0f);
-
-    private void Awake()
+    private ObjectPool<GameObject> _bulletPool;
+    
+    public override void OnNetworkSpawn()
     {
-        fireCooldown.Value -= fireRate;
+        base.OnNetworkSpawn();
+        if (IsServer)
+        {
+            _bulletPool = ObjectMgr.Instance.GetPool<GameObject>();
+            Timer.StartRepeat(20, OnMove, 100, true);
+        }
     }
-    
-    
 
+    public void ReStart()
+    {
+        if (IsServer)
+        {
+            Timer.StartRepeat(20, OnMove, 100, true);
+        }
+    }
+
+    private void OnMove(int flag)
+    {
+        if (IsServer)
+        {
+            transform.Translate(transform.forward * Time.deltaTime * 30, Space.World);
+            if (flag == 100)
+            {
+                _bulletPool.PutObj("bullet", gameObject);
+            }
+        }
+    }
 }

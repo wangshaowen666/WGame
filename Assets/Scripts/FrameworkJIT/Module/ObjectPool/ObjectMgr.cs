@@ -49,7 +49,6 @@ public class ObjectMgr : Singleton<ObjectMgr>
         Type type = typeof(T);
         if (_poolMap.ContainsKey(type))
         {
-            Log.Error(typeof(T).Name, "对象池已经存在，请勿重复注册");
             return _poolMap[type] as ObjectPool<T>;
         }
         

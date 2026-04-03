@@ -9,33 +9,29 @@ using System;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class NetworkPlayer : NetworkBehaviour
 {
     public static NetworkPlayer LocalPlayer;
    
-    [HideInInspector]
-    public NetworkVariable<float> fireCooldown = new NetworkVariable<float>(0f);
-    
-    private ObjectPool<GameObject> objectPool = new ObjectPool<GameObject>();
+    //private NetworkVariable<float> fireCooldown = new NetworkVariable<float>(0f);
+
+    private ObjectPool<GameObject> objectPool;
     private float _fireRate = 0.2f;
-
-    private void Awake()
-    {
-        fireCooldown.Value -= _fireRate;
-    }
-
 
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        Log.Info(1111);
         if (IsLocalPlayer)
         {
-            Log.Info(2222);
             LocalPlayer = this;
+        }
+        
+        if (IsServer)
+        {
+            //fireCooldown.Value -= _fireRate;
+            objectPool = ObjectMgr.Instance.RegisterPool<GameObject>();
         }
     }
 
@@ -44,27 +40,29 @@ public class NetworkPlayer : NetworkBehaviour
         FireServerRpc();
     }
 
-    public void Move()
+    public void Move(Vector3 dir)
     {
-        MoveServerRpc();
+        MoveServerRpc(dir);
     }
 
     [ServerRpc]
-    private void MoveServerRpc()
+    private void MoveServerRpc(Vector3 dir)
     {
-        transform.position += Vector3.up;
+        Quaternion targetRot = Quaternion.LookRotation(dir);
+        transform.rotation = targetRot;
+        transform.position += dir;
         OnMoveClientRpc();
     }
 
     [ServerRpc]
     private void FireServerRpc()
     {
-        if (Time.time - fireCooldown.Value < _fireRate)
-        {
-            return;
-        }
+        // if (Time.time - fireCooldown.Value < _fireRate)
+        // {
+        //     return;
+        // }
         
-        fireCooldown.Value = Time.time;
+        //fireCooldown.Value = Time.time;
         var bullet = objectPool.GetObj("bullet");
         if (bullet == null)
         {
@@ -74,15 +72,14 @@ public class NetworkPlayer : NetworkBehaviour
         {
             bullet.transform.position = transform.position;
             bullet.transform.rotation = transform.rotation;
-            var netObj = bullet.GetComponent<NetworkObject>();
-            netObj.Spawn();
+            var netBullet = bullet.GetComponent<NetworkBullet>();
+            netBullet.ReStart();
         }
     }
 
     [ClientRpc]
     private void OnMoveClientRpc()
     {
-        Log.Info("客户端播放移动特效：" + transform.position);
     }
     
 

@@ -83,8 +83,7 @@ public partial class ToolBox : OdinEditorWindow
     
     private string Test()
     {
-        var a = cfg.DPnlId.MainPanel;
-        return a.ToString();
+        return "a.ToString();";
     }
 
     private void AddLogInfo(string str)

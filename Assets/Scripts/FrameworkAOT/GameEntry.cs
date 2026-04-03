@@ -12,7 +12,7 @@ public class GameEntry : MonoBehaviour
 {
     void Start()
     {
-        Procedure.Instance.RunProcedure<ProcedureLaunch>();
+        ProcedureMgr.Instance.RunProcedure<ProcedureLaunch>();
     }
     
     void Update()

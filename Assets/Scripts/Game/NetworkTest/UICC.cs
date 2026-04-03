@@ -9,14 +9,21 @@ using System;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class UICC : MonoBehaviour
 {
     [SerializeField]
-    private Text _hpText;
+    private Button _upBtn;
     [SerializeField]
-    private Button _button;
+    private Button _downBtn;
+    [SerializeField]
+    private Button _leftBtn;
+    [SerializeField]
+    private Button _rightBtn;
+    [SerializeField]
+    private Button _fireBtn;
     [SerializeField]
     private Button _clientBtn;
     [SerializeField]
@@ -24,23 +31,22 @@ public class UICC : MonoBehaviour
 
     
     private float _fireRate = 0.2f;
+    private float _curFireTime;
     
     [SerializeField] 
     private NetworkManager networkManager;
     
     private void Awake()
     {
-        _hpText.text = $"血量: {100}";
-        _button.onClick.AddListener(ClickBtn);
+        _upBtn.onClick.AddListener(ClickUp);
+        _downBtn.onClick.AddListener(ClickDown);
+        _leftBtn.onClick.AddListener(ClickLeft);
+        _rightBtn.onClick.AddListener(ClickRight);
+        _fireBtn.onClick.AddListener(ClickFire);
         _clientBtn.onClick.AddListener(ClickClient);
         _hostBtn.onClick.AddListener(ClickHost);
-        
-        EventMgr.Instance.Register<int>(GameEvent.UIPanelOn, OnFlush);
-    }
 
-    private void OnFlush(int v)
-    {
-        _hpText.text = $"血量: {v}";
+        _curFireTime = -_fireRate;
     }
 
 
@@ -97,17 +103,33 @@ public class UICC : MonoBehaviour
             Debug.LogError("安卓Client启动失败！");
         }
     }
-
-    private void ClickBtn()
+    
+    private void ClickRight()
     {
-        NetworkPlayer.LocalPlayer.Move();
+        NetworkPlayer.LocalPlayer.Move(Vector3.right);
+    }
+
+    private void ClickLeft()
+    {
+        NetworkPlayer.LocalPlayer.Move(Vector3.left);
+    }
+
+    private void ClickDown()
+    {
+        NetworkPlayer.LocalPlayer.Move(Vector3.back);
+    }
+
+    private void ClickUp()
+    {
+        NetworkPlayer.LocalPlayer.Move(Vector3.forward);
     }
 
     private void ClickFire()
     {
-        if (Time.time - NetworkPlayer.LocalPlayer.fireCooldown.Value >= _fireRate)
+        if (Time.time - _curFireTime >= _fireRate)
         {
             NetworkPlayer.LocalPlayer.Fire();
+            _curFireTime = Time.time;
         }
     }
 }

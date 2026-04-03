@@ -272,6 +272,7 @@ public static class UniTaskUtil
         {
             if (!inMainThread)
                 await UniTask.SwitchToMainThread();
+            Log.Info("执行完成");
         }
     }
 #endregion

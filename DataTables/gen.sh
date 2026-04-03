@@ -22,4 +22,4 @@ dotnet $LUBAN_DLL \
     --conf $CONF_ROOT/luban.conf \
     -x bin.outputDataDir=$WORKSPACE/Assets/Res/LubanData/Bin \
     -x json.outputDataDir=$WORKSPACE/Assets/Res/LubanData/Json \
-    -x outputCodeDir=$WORKSPACE/Assets/Scripts/FrameworkJIT/DataTable \
+    -x outputCodeDir=$WORKSPACE/Assets/Scripts/Game/DataTable/Gen \

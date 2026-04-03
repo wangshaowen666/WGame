@@ -6,20 +6,30 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 public static class FileUtil
 {
-    // 输出路径
-    private const string OUT_PATH = "/Users/wangshaowen/Desktop";
+    // 默认输出路径
+    private const string OutPath = "/Users/wangshaowen/Desktop";
     
-    public static void WriteFile(string content, string fileName)
+    /// <summary>
+    /// 写文件并输出
+    /// </summary>
+    /// <param name="content">文本内容</param>
+    /// <param name="fileName">文件名</param>
+    /// <param name="outPath">输出路径</param>
+    public static void WriteFile(string content, string fileName, string outPath = null)
     {
-        string path = Path.Combine(OUT_PATH, fileName);
+        string path = Path.Combine(string.IsNullOrEmpty(outPath) ? OutPath : outPath, fileName);
         File.WriteAllText(path, content);
     }
 
+    /// <summary>
+    /// 根据路径获得文件内容
+    /// </summary>
+    /// <param name="path">文件路径</param>
+    /// <returns></returns>
     public static string ReadFile(string path)
     {
         try
@@ -40,6 +50,12 @@ public static class FileUtil
         }
     }
     
+    /// <summary>
+    /// 文件夹拷贝
+    /// </summary>
+    /// <param name="sourceDir">源文件夹</param>
+    /// <param name="destinationDir">目标文件集</param>
+    /// <param name="overwrite">是否覆盖</param>
     public static void CopyDirectory(string sourceDir, string destinationDir, bool overwrite = true)
     {
         if (!Directory.Exists(sourceDir))
@@ -70,6 +86,12 @@ public static class FileUtil
         }
     }
 
+    /// <summary>
+    /// 文件拷贝
+    /// </summary>
+    /// <param name="sourceFilePath">源文件目录</param>
+    /// <param name="destFilePath">目标文件目录</param>
+    /// <param name="overwrite">是否覆盖</param>
     public static void CopyFile(string sourceFilePath, string destFilePath, bool overwrite = true)
     {
         if (!File.Exists(sourceFilePath))
@@ -87,6 +109,11 @@ public static class FileUtil
         File.Copy(sourceFilePath, destFilePath, overwrite);
     }
 
+    /// <summary>
+    /// 将文件字节数转化成英文形式
+    /// </summary>
+    /// <param name="byteLength">字节数</param>
+    /// <returns></returns>
     public static string GetFileLength(long byteLength)
     {
         if (byteLength < 1024L)
@@ -106,4 +133,6 @@ public static class FileUtil
         
         return $"{byteLength / 1073741824f:F2} GB";
     }
+    
+    
 }

@@ -38,23 +38,26 @@ public partial class ToolBox
         {
             while (EditorApplication.isCompiling)
             {
+                AddLogInfo("编译中，等待完成...");
                 Thread.Sleep(100);
             }
             
             AddLogInfo("开始自动补全DataTableCtr表属性...");
-            if (!File.Exists(editorPathConfig.tablesFilePath))
+            var tablePath = GetScriptPathByType(typeof(cfg.Tables));
+            if (!File.Exists(tablePath))
             {
-                AddLogInfo($"错误：Tables.cs文件不存在：{editorPathConfig.tablesFilePath}");
+                AddLogInfo($"错误：Tables.cs文件不存在");
                 return;
             }
             
-            if (!File.Exists(editorPathConfig.dataTableCtrFilePath))
+            var dataTableMgrPath = GetScriptPathByType(typeof(DataTableMgr));
+            if (!File.Exists(dataTableMgrPath))
             {
-                AddLogInfo($"错误：DataTableCtr.cs文件不存在：{editorPathConfig.dataTableCtrFilePath}");
+                AddLogInfo($"错误：DataTableCtr.cs文件不存在");
                 return;
             }
             
-            string tablesContent = File.ReadAllText(editorPathConfig.tablesFilePath);
+            string tablesContent = File.ReadAllText(tablePath);
             Regex tablePropertyRegex = new Regex(@"^\s*public\s+(\w+)\s+(\w+)\s+\{get;\s+\}\s*$", RegexOptions.Multiline);
             List<Tuple<string, string>> tableProperties = new List<Tuple<string, string>>();
             
@@ -65,7 +68,7 @@ public partial class ToolBox
                 tableProperties.Add(new Tuple<string, string>(typeName, propertyName));
             }
             
-            string dataTableCtrContent = File.ReadAllText(editorPathConfig.dataTableCtrFilePath);
+            string dataTableCtrContent = File.ReadAllText(dataTableMgrPath);
             Regex existingPropertyRegex = new Regex(@"^\s*public\s+(\w+)\s+(\w+)\s+=>\s+_tables\.(\w+);\s*$", RegexOptions.Multiline);
             HashSet<string> existingProperties = new HashSet<string>();
             
@@ -112,7 +115,7 @@ public partial class ToolBox
                     newPropertiesBuilder.Insert(0, "\n");
                 }
                 dataTableCtrContent = dataTableCtrContent.Insert(insertIndex, newPropertiesBuilder.ToString());
-                File.WriteAllText(editorPathConfig.dataTableCtrFilePath, dataTableCtrContent);
+                File.WriteAllText(dataTableMgrPath, dataTableCtrContent);
                 AssetDatabase.Refresh();
                 AddLogInfo($"已成功为DataTableCtr补全{newPropertyCount}个表属性");
             }
@@ -127,4 +130,15 @@ public partial class ToolBox
             Debug.LogError($"自动补全DataTableCtr表属性失败：{ex}");
         }
     }
+    
+    private string GetScriptPathByType(Type type)
+    {
+        string[] guids = AssetDatabase.FindAssets($"t:Script {type.Name}");
+
+        if (guids.Length == 0)
+            return null;
+
+        return AssetDatabase.GUIDToAssetPath(guids[0]);
+    }
+   
 }

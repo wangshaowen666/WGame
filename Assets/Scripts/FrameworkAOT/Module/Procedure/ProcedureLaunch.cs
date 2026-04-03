@@ -20,11 +20,11 @@ public class ProcedureLaunch : ProcedureBase
 
         if (AOTConfig.Standalone)
         {
-            Procedure.Instance.RunProcedure<ProcedureLoadDll>();
+            ProcedureMgr.Instance.RunProcedure<ProcedureLoadDll>();
         }
         else
         {
-            Procedure.Instance.RunProcedure<ProcedureVersionCheck>();
+            ProcedureMgr.Instance.RunProcedure<ProcedureVersionCheck>();
         }
     }
     

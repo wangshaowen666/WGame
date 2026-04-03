@@ -16,17 +16,7 @@ public class BattleMgr : Singleton<BattleMgr>
     {
     }
 
-    public void Init()
-    {
-        InitEvent();
-    }
-
-    private void InitEvent()
-    {
-        EventMgr.Instance.Register(GameEvent.EnterBattle, OnEnterBattle);
-    }
-
-    private void OnEnterBattle()
+    public void EnterBattle()
     {
         _battle = new BattleSurvival();
         _battle.Init();

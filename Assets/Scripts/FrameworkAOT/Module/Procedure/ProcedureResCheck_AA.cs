@@ -49,7 +49,7 @@ public class ProcedureResCheck_AA : ProcedureBase
             
             await _helper.Download(_tokenSource.Token);
             
-            Procedure.Instance.RunProcedure<ProcedureLoadDll>();
+            ProcedureMgr.Instance.RunProcedure<ProcedureLoadDll>();
         }
         catch (OperationCanceledException e)
         {

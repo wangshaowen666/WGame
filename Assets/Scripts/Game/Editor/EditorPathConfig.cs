@@ -27,12 +27,4 @@ public class EditorPathConfig : ScriptableObject
     [Title("excel导表工具路径")]
     [FilePath(AbsolutePath = true)]
     public string excelShellPath = "";
-    
-    [Title("Table类路径")]
-    [FilePath(AbsolutePath = true)]
-    public string tablesFilePath = "";
-    
-    [Title("DataTableCtr类路径")]
-    [FilePath(AbsolutePath = true)]
-    public string dataTableCtrFilePath = "";
 }
