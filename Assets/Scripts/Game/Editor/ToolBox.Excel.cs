@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
@@ -23,10 +22,15 @@ public partial class ToolBox
     [Button("导表", 30)]
     public void ImportExcel()
     {
-        ShellUtil.Run(editorPathConfig.excelShellPath);
+        var ret = ShellUtil.Run(editorPathConfig.excelShellPath);
+        if (!ret.TrimEnd().EndsWith("bye~"))
+        {
+            AddLogInfo("导表出错：" + ret);
+            return;
+        }
         AddLogInfo("导表完成");
         AssetDatabase.Refresh();
-        AutoCompleteDataTableCtrProperties();
+        EditorApplication.delayCall += AutoCompleteDataTableCtrProperties;
     }
     
     /// <summary>
@@ -36,12 +40,6 @@ public partial class ToolBox
     {
         try
         {
-            while (EditorApplication.isCompiling)
-            {
-                AddLogInfo("编译中，等待完成...");
-                Thread.Sleep(100);
-            }
-            
             AddLogInfo("开始自动补全DataTableCtr表属性...");
             var tablePath = GetScriptPathByType(typeof(cfg.Tables));
             if (!File.Exists(tablePath))

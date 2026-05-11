@@ -2,16 +2,28 @@
   {
     "id": 10000,
     "thrusterId": 20000,
-    "weaponId": 30000,
-    "armorId": 40000,
+    "maxHp": 1000,
+    "defense": 100,
+    "attack": 110,
+    "interval": 0.2,
+    "speed": 20,
+    "bulletId": 50000,
+    "bulletSpeed": 20,
+    "bulletSoundId": 0,
     "deadEffId": 70000,
     "deadSoundId": 0
   },
   {
     "id": 10001,
     "thrusterId": 20001,
-    "weaponId": 30001,
-    "armorId": 40001,
+    "maxHp": 1000,
+    "defense": 100,
+    "attack": 10,
+    "interval": 0.2,
+    "speed": 20,
+    "bulletId": 50000,
+    "bulletSpeed": 20,
+    "bulletSoundId": 0,
     "deadEffId": 70001,
     "deadSoundId": 1
   }

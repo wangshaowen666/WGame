@@ -11,7 +11,7 @@ using UnityEngine;
 
 public static class ShellUtil 
 {
-    public static void Run(string scriptPath)
+    public static string Run(string scriptPath)
     {
         ProcessStartInfo psi = new ProcessStartInfo();
         psi.FileName = "/bin/sh"; // Linux/macOS使用sh，Windows可用powershell
@@ -25,11 +25,21 @@ public static class ShellUtil
         string error = process.StandardError.ReadToEnd();
         
         process.WaitForExit();
-        
+
+        string ret = "";
         if (!string.IsNullOrEmpty(output))
-            UnityEngine.Debug.Log("Shell Output: " + output);
+        {
+            Log.Info("Shell Output: " + output);
+            ret = output;
+        }
+
         if (!string.IsNullOrEmpty(error))
-            UnityEngine.Debug.LogError("Shell Error: " + error);
+        {
+            Log.Error("Shell Error: " + error);
+            ret = error;
+        }
+        
+        return ret;
     }
     
     public static void RunWithArgs(string scriptPath, string[] args)

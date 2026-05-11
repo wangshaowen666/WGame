@@ -60,7 +60,7 @@ public class ScreenCtr : Singleton<ScreenCtr>
     {
         if (UICamera) return;
         
-        var obj = new GameObject(JITConfig.UICamera);
+        var obj = new GameObject(GameConfig.UICamera);
         var camera = obj.AddComponent<Camera>();
             
         camera.orthographic = true;

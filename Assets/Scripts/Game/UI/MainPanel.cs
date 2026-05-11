@@ -16,11 +16,17 @@ public class MainPanel : UIPanelBase
     public Button btnStart;
     public Button btnSetting;
 
-    private void Awake()
+    public override void OnInit(DUIPanel cfg)
     {
+        base.OnInit(cfg);
         Log.Info("进入主界面");
         btnSetting.onClick.AddListener(OnClickSetting);
         btnStart.onClick.AddListener(OnClickStart);
+    }
+
+    public override void OnOpen(object userData = null)
+    {
+        base.OnOpen(userData);
     }
 
     private void OnClickSetting()
@@ -30,7 +36,7 @@ public class MainPanel : UIPanelBase
 
     private void OnClickStart()
     {
-        EventMgr.Instance.Send(GameEvent.ClickGoBattle);
+        EventMgr.Instance.Send(GameEvent.ProcedureExitMain);
         UIMgr.Instance.PanelOff(this);
     }
 }

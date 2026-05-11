@@ -17,10 +17,6 @@ public class DataTableMgr : Singleton<DataTableMgr>
 
     public TbThruster TbThruster => _tables.TbThruster;
     public TbAircraft TbAircraft => _tables.TbAircraft;
-    public TbWeapon TbWeapon => _tables.TbWeapon;
-
-
-    public TbArmor TbArmor => _tables.TbArmor;
     public TbEntity TbEntity => _tables.TbEntity;
     public TbUIPanel TbUIPanel => _tables.TbUIPanel;
     

@@ -16,14 +16,6 @@
     "name": "EnemyEngine"
   },
   {
-    "id": 30000,
-    "name": "DefaultWeapon"
-  },
-  {
-    "id": 30001,
-    "name": "DefaultWeapon"
-  },
-  {
     "id": 40000,
     "name": "DefaultArmor"
   },

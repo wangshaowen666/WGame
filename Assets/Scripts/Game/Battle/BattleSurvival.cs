@@ -10,17 +10,48 @@ using UnityEngine;
 
 public class BattleSurvival : BattleBase
 {
-    private Aircraft _playerAircraft;
+    private const int PlayerEid = 10000;
+    
+    private PlayerShip _playerShip;
+
+    private Transform _worldRoot;
+    private Transform _aircraftRoot;
+    private Transform _bulletRoot;
+    private Transform _effectRoot;
     
     public override void Init()
     {
         base.Init();
-        CreatePlayerAircraft(10000);
+        InitWorldRoot();
+        CreatePlayerShip(PlayerEid);
     }
 
-    private void CreatePlayerAircraft(int eId)
+    private void CreatePlayerShip(int eId)
     {
-        _playerAircraft = ClassPool.Get<Aircraft>();
-        _playerAircraft.Init(eId);
+        EntityMgr.Instance.ShowEntity(eId, _aircraftRoot, OnLoadShipFinish);
+    }
+
+    private void OnLoadShipFinish(EntityBase entity)
+    {
+        _playerShip = entity as PlayerShip;
+        if (_playerShip != null) 
+            _playerShip.OnInit(PlayerEid);
+    }
+    
+    private void InitWorldRoot()
+    {
+        _worldRoot = new GameObject("World").transform;
+
+        _aircraftRoot = CreateChildRoot("Aircraft");
+        _bulletRoot = CreateChildRoot("Bullet");
+        _effectRoot = CreateChildRoot("Effect");
+    }
+
+    private Transform CreateChildRoot(string childName)
+    {
+        var trans = new GameObject(childName).transform;
+        trans.SetParent(_worldRoot, false);
+        
+        return trans;
     }
 }

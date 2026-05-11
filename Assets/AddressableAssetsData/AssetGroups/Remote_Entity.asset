@@ -17,11 +17,6 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 64bfd2c1d91a1452c86a67e58c7b1a08
   m_SerializeEntries:
-  - m_GUID: 0992f89f84d762f478fd32f8225168b0
-    m_Address: DefaultArmor
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 11e27c26ac87b40f0a62ec40d7261989
     m_Address: EnemyBolt
     m_ReadOnly: 0
@@ -69,11 +64,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a6d58f54ce5934781962a4f887e834f3
     m_Address: AsteroidExplosion
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: abd1565e9e268f04cac3631d022b4ace
-    m_Address: DefaultWeapon
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

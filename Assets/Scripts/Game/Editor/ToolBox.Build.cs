@@ -45,8 +45,6 @@ public partial class ToolBox
     {
         EditorApplication.ExecuteMenuItem("HybridCLR/Generate/All");
         AddLogInfo("已调用HybridCLR Generate/All编译");
-
-        CopyMetaDll();
         
         CopyDll();
        
@@ -102,11 +100,6 @@ public partial class ToolBox
             if (!string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
             {
                 Directory.CreateDirectory(outputDir);
-            }
-            
-            if (File.Exists(outputPath))
-            {
-                File.Delete(outputPath);
             }
             
             AddLogInfo($"开始构建安装包，目标平台：{buildTarget}");
@@ -225,18 +218,6 @@ public partial class ToolBox
             AddLogInfo("同步dll：" + assemblyName.name + ".dll");
         }
         AssetDatabase.Refresh();
-    }
-
-    private void CopyMetaDll()
-    {
-        string source = Path.Combine(editorPathConfig.dllSourcePath, EditorUserBuildSettings.activeBuildTarget.ToString());
-
-        var metaAssemblies = new List<string> { "mscorlib.dll", "UniTask.dll", "Unity.Netcode.Runtime.dll"};
-        foreach (var assemblyName in metaAssemblies)
-        {
-            FileUtil.CopyFile(Path.Combine(source, assemblyName), Path.Combine(editorPathConfig.dllTargetPath, assemblyName + ".bytes"));
-            AddLogInfo("同步补充元数据dll：" + assemblyName);
-        }
     }
     
     /// <summary>

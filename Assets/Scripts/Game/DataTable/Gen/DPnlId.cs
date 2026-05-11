@@ -21,6 +21,10 @@ namespace cfg
         /// 设置界面
         /// </summary>
         SettingPanel = 2,
+        /// <summary>
+        /// 战斗界面
+        /// </summary>
+        BattlePanel = 3,
     }
 
 } 

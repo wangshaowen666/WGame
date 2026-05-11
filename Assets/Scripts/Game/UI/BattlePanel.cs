@@ -12,7 +12,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class UICC : MonoBehaviour
+public class BattlePanel : UIPanelBase
 {
     [SerializeField]
     private Button _upBtn;
@@ -28,13 +28,11 @@ public class UICC : MonoBehaviour
     private Button _clientBtn;
     [SerializeField]
     private Button _hostBtn;
-
     
     private float _fireRate = 0.2f;
     private float _curFireTime;
     
-    [SerializeField] 
-    private NetworkManager networkManager;
+    private NetworkManager _networkManager;
     
     private void Awake()
     {
@@ -47,38 +45,39 @@ public class UICC : MonoBehaviour
         _hostBtn.onClick.AddListener(ClickHost);
 
         _curFireTime = -_fireRate;
+        _networkManager = FindObjectOfType<NetworkManager>();
     }
 
 
     private void ClickHost()
     {
         // 手动初始化UnityTransport
-        if (networkManager.NetworkConfig.NetworkTransport is UnityTransport transport)
+        if (_networkManager.NetworkConfig.NetworkTransport is UnityTransport transport)
         {
             transport.Initialize();
         }
         // 启动Host
-        var result = networkManager.StartHost();
+        var result = _networkManager.StartHost();
         Debug.Log($"Host启动结果: {result}"); // 必须是true
     }
 
     private void ClickClient()
     {
-        if (networkManager.IsClient || networkManager.IsServer)
+        if (_networkManager.IsClient || _networkManager.IsServer)
         {
             Debug.LogWarning("已处于网络运行状态，无需重复启动Client！");
             return;
         }
 
         // 关键修复2：确认NetworkManager和Transport有效
-        if (networkManager == null)
+        if (_networkManager == null)
         {
             Debug.LogError("NetworkManager未赋值！");
             return;
         }
 
         // 关键修复3：设置服务器IP和端口（必须和IDE的Host一致）
-        if (networkManager.NetworkConfig.NetworkTransport is UnityTransport transport)
+        if (_networkManager.NetworkConfig.NetworkTransport is UnityTransport transport)
         {
             transport.SetConnectionData(
                 "192.168.3.72",  //
@@ -93,7 +92,7 @@ public class UICC : MonoBehaviour
         }
 
         // 启动Client（带结果检查）
-        var startResult = networkManager.StartClient();
+        var startResult = _networkManager.StartClient();
         if (startResult)
         {
             Debug.Log("安卓Client启动成功，等待连接...");

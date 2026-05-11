@@ -6,6 +6,7 @@
  */
 
 using System;
+using cfg;
 using UnityEngine;
 
 public class ProcedureBattle : ProcedureBase
@@ -14,9 +15,8 @@ public class ProcedureBattle : ProcedureBase
     {
         base.OnEnter();
         
-        ScreenCtr.Instance.SetMainCamera(JITConfig.BattleCamera);
-        
+        ScreenCtr.Instance.SetMainCamera(GameConfig.BattleCamera);
+        UIMgr.Instance.PanelOn(DPnlId.BattlePanel);
         BattleMgr.Instance.EnterBattle();
-        EventMgr.Instance.Send(GameEvent.EnterBattle);
     }
 }

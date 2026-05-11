@@ -12,5 +12,12 @@
     "group": 2,
     "allowMult": false,
     "hideCovered": true
+  },
+  {
+    "id": 3,
+    "name": "BattlePanel",
+    "group": 2,
+    "allowMult": false,
+    "hideCovered": false
   }
 ]

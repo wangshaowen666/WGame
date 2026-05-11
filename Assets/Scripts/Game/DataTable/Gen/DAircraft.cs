@@ -18,8 +18,14 @@ public sealed partial class DAircraft : Luban.BeanBase
     {
         Id = _buf.ReadInt();
         ThrusterId = _buf.ReadInt();
-        WeaponId = _buf.ReadInt();
-        ArmorId = _buf.ReadInt();
+        MaxHp = _buf.ReadInt();
+        Defense = _buf.ReadInt();
+        Attack = _buf.ReadInt();
+        Interval = _buf.ReadFloat();
+        Speed = _buf.ReadFloat();
+        BulletId = _buf.ReadInt();
+        BulletSpeed = _buf.ReadInt();
+        BulletSoundId = _buf.ReadInt();
         DeadEffId = _buf.ReadInt();
         DeadSoundId = _buf.ReadInt();
     }
@@ -38,13 +44,37 @@ public sealed partial class DAircraft : Luban.BeanBase
     /// </summary>
     public readonly int ThrusterId;
     /// <summary>
-    /// 武器id
+    /// 最大生命值
     /// </summary>
-    public readonly int WeaponId;
+    public readonly int MaxHp;
     /// <summary>
-    /// 装甲id
+    /// 防御力
     /// </summary>
-    public readonly int ArmorId;
+    public readonly int Defense;
+    /// <summary>
+    /// 攻击力
+    /// </summary>
+    public readonly int Attack;
+    /// <summary>
+    /// 攻击间隔
+    /// </summary>
+    public readonly float Interval;
+    /// <summary>
+    /// 移动速度
+    /// </summary>
+    public readonly float Speed;
+    /// <summary>
+    /// 子弹id
+    /// </summary>
+    public readonly int BulletId;
+    /// <summary>
+    /// 子弹速度
+    /// </summary>
+    public readonly int BulletSpeed;
+    /// <summary>
+    /// 子弹声音编号
+    /// </summary>
+    public readonly int BulletSoundId;
     /// <summary>
     /// 死亡特效id
     /// </summary>
@@ -66,8 +96,14 @@ public sealed partial class DAircraft : Luban.BeanBase
         return "{ "
         + "id:" + Id + ","
         + "thrusterId:" + ThrusterId + ","
-        + "weaponId:" + WeaponId + ","
-        + "armorId:" + ArmorId + ","
+        + "maxHp:" + MaxHp + ","
+        + "defense:" + Defense + ","
+        + "attack:" + Attack + ","
+        + "interval:" + Interval + ","
+        + "speed:" + Speed + ","
+        + "bulletId:" + BulletId + ","
+        + "bulletSpeed:" + BulletSpeed + ","
+        + "bulletSoundId:" + BulletSoundId + ","
         + "deadEffId:" + DeadEffId + ","
         + "deadSoundId:" + DeadSoundId + ","
         + "}";

@@ -14,6 +14,9 @@ public static class AutoID
 
     public static uint GetID()
     {
+        if (_id == uint.MaxValue)
+            _id = 0;
+        
         return ++_id;
     }
 }

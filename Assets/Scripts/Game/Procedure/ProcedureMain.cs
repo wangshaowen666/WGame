@@ -20,16 +20,16 @@ public class ProcedureMain : ProcedureBase
         if (_firstEnter)
             FirstEnter();
         
-        EventMgr.Instance.Register(GameEvent.ClickGoBattle, OnGoBattle);
+        EventMgr.Instance.Register(GameEvent.ProcedureExitMain, RunProcedure);
         
-        ScreenCtr.Instance.SetMainCamera(JITConfig.MapCamera);
+        ScreenCtr.Instance.SetMainCamera(GameConfig.MapCamera);
         UIMgr.Instance.PanelOn(DPnlId.MainPanel);
     }
 
     public override void OnExit()
     {
         base.OnExit();
-        EventMgr.Instance.UnRegister(GameEvent.ClickGoBattle, OnGoBattle);
+        EventMgr.Instance.UnRegister(GameEvent.ProcedureExitMain, RunProcedure);
     }
 
     private void FirstEnter()
@@ -38,9 +38,9 @@ public class ProcedureMain : ProcedureBase
         ScreenCtr.Instance.Init();
     }
 
-    private void OnGoBattle()
+    private void RunProcedure()
     {
-        _fsm.SetObj("sceneNm", "Network");
+        _fsm.SetObj("sceneNm", "Battle");
         ProcedureMgr.Instance.RunProcedure<ProcedureChangeScene>();
     }
 }

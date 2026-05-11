@@ -13,15 +13,16 @@ public class EntityMgr : Singleton<EntityMgr>
 {
     private EntityMgr() { }
 
-    private ObjectPool<GameObject> _pool;
+    private ObjectPool<EntityBase> _pool;
+    private List<uint> _loadingIdMap = new List<uint>();
 
     protected override void OnInit()
     {
         base.OnInit();
-        
+        _pool = ObjectMgr.Instance.RegisterPool<EntityBase>(10);
     }
 
-    public void ShowEntity(int eId, Transform parent, Action<GameObject> callback)
+    public void ShowEntity(int eId, Transform parent, Action<EntityBase> callback)
     {
         var cfg = DataTableMgr.Instance.TbEntity[eId];
         if (cfg == null)
@@ -34,8 +35,10 @@ public class EntityMgr : Singleton<EntityMgr>
         var obj = _pool.GetObj(nm);
         if (obj == null)
         {
-            LoadEntityArg arg = LoadEntityArg.Create(parent, callback);
+            var loadingID = AutoID.GetID();
+            LoadEntityArg arg = LoadEntityArg.Create(loadingID, parent, callback);
             ResMgr.Instance.LoadAsync<GameObject>(nm, OnLoadFinish, arg);
+            _loadingIdMap.Add(loadingID);
         }
         else
         {
@@ -45,18 +48,34 @@ public class EntityMgr : Singleton<EntityMgr>
 
     private void OnLoadFinish(GameObject obj, object userData)
     {
+        LoadEntityArg arg = userData as LoadEntityArg;
+        if (arg == null)
+            throw new GameException("打开界面参数无效");
+
+        var hasID = _loadingIdMap.Remove(arg.LoadingID);
+        if (!hasID) return;
         
+        var prefab = UnityEngine.Object.Instantiate(obj, arg.Parent);
+        if (prefab == null)
+            throw new GameException("实体预制体上缺少EntityBase脚本");
+        
+        var entity = prefab.GetComponent<EntityBase>();
+        arg.Callback?.Invoke(entity);
+        
+        ClassPool.Recycle(arg);
     }
 }
 
 public sealed class LoadEntityArg : IResetable
 {
+    public uint LoadingID;
     public Transform Parent;
-    public Action<GameObject> Callback;
+    public Action<EntityBase> Callback;
 
-    public static LoadEntityArg Create(Transform parent, Action<GameObject> callback)
+    public static LoadEntityArg Create(uint loadingID, Transform parent, Action<EntityBase> callback)
     {
         LoadEntityArg arg = ClassPool.Get<LoadEntityArg>();
+        arg.LoadingID = loadingID;
         arg.Parent = parent;
         arg.Callback = callback;
             

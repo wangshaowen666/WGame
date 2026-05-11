@@ -8,7 +8,7 @@
 using System;
 using UnityEngine;
 
-public class EntityBase
+public abstract class EntityBase : MonoBehaviour
 {
-    
+    public virtual void OnInit(int id){}
 }
