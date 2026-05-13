@@ -262,7 +262,7 @@ public static class UniTaskUtil
         }
         catch (OperationCanceledException)
         {
-            Log.Info("任务被取消");
+            //Log.Info("任务被取消");
         }
         catch (Exception e)
         {
@@ -272,7 +272,6 @@ public static class UniTaskUtil
         {
             if (!inMainThread)
                 await UniTask.SwitchToMainThread();
-            Log.Info("执行完成");
         }
     }
 #endregion

@@ -15,8 +15,8 @@ public class DataTableMgr : Singleton<DataTableMgr>
     // 导表工具自动补全下列属性
     private cfg.Tables _tables;
 
-    public TbThruster TbThruster => _tables.TbThruster;
-    public TbAircraft TbAircraft => _tables.TbAircraft;
+    public TbEffect TbEffect => _tables.TbEffect;
+    public TbPlane TbPlane => _tables.TbPlane;
     public TbEntity TbEntity => _tables.TbEntity;
     public TbUIPanel TbUIPanel => _tables.TbUIPanel;
     

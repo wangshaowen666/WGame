@@ -8,22 +8,6 @@
     "name": "EnemyShip"
   },
   {
-    "id": 20000,
-    "name": "PlayerEngine"
-  },
-  {
-    "id": 20001,
-    "name": "EnemyEngine"
-  },
-  {
-    "id": 40000,
-    "name": "DefaultArmor"
-  },
-  {
-    "id": 40001,
-    "name": "DefaultArmor"
-  },
-  {
     "id": 50000,
     "name": "PlayerBolt"
   },
@@ -54,5 +38,13 @@
   {
     "id": 70002,
     "name": "AsteroidExplosion"
+  },
+  {
+    "id": 70003,
+    "name": "PlayerEngine"
+  },
+  {
+    "id": 70004,
+    "name": "EnemyEngine"
   }
 ]

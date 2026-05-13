@@ -37,11 +37,4 @@ public interface IResLoader
     /// 卸载所有已加载的资源
     /// </summary>
     void UnloadAll();
-    
-    /// <summary>
-    /// 获取指定key已加载的资源数量
-    /// </summary>
-    /// <param name="key">资源键</param>
-    /// <returns>已加载资源数量</returns>
-    int GetLoadedCount(string key);
 }

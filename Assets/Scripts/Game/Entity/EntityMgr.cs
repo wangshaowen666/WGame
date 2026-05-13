@@ -22,7 +22,7 @@ public class EntityMgr : Singleton<EntityMgr>
         _pool = ObjectMgr.Instance.RegisterPool<EntityBase>(10);
     }
 
-    public void ShowEntity(int eId, Transform parent, Action<EntityBase> callback)
+    public void CreateEntity(int eId, Transform parent, Action<EntityBase> callback)
     {
         var cfg = DataTableMgr.Instance.TbEntity[eId];
         if (cfg == null)
@@ -36,14 +36,23 @@ public class EntityMgr : Singleton<EntityMgr>
         if (obj == null)
         {
             var loadingID = AutoID.GetID();
+            _loadingIdMap.Add(loadingID);
             LoadEntityArg arg = LoadEntityArg.Create(loadingID, parent, callback);
             ResMgr.Instance.LoadAsync<GameObject>(nm, OnLoadFinish, arg);
-            _loadingIdMap.Add(loadingID);
         }
         else
         {
-            
+            obj.transform.localPosition = Vector3.zero;
+            callback?.Invoke(obj);
         }
+    }
+
+    public void RecycleEntity(int eId, EntityBase entity)
+    {
+        var cfg = DataTableMgr.Instance.TbEntity[eId];
+        entity.transform.localPosition = Vector3.one * 9999;
+        entity.OnRecycle();
+        _pool.PutObj(cfg.Name, entity);
     }
 
     private void OnLoadFinish(GameObject obj, object userData)

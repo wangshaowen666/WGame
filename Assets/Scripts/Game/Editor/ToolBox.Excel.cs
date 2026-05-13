@@ -58,19 +58,33 @@ public partial class ToolBox
             string tablesContent = File.ReadAllText(tablePath);
             Regex tablePropertyRegex = new Regex(@"^\s*public\s+(\w+)\s+(\w+)\s+\{get;\s+\}\s*$", RegexOptions.Multiline);
             List<Tuple<string, string>> tableProperties = new List<Tuple<string, string>>();
+            HashSet<string> validPropertyNames = new HashSet<string>();
             
             foreach (Match match in tablePropertyRegex.Matches(tablesContent))
             {
                 string typeName = match.Groups[1].Value;
                 string propertyName = match.Groups[2].Value;
                 tableProperties.Add(new Tuple<string, string>(typeName, propertyName));
+                validPropertyNames.Add(propertyName);
             }
             
             string dataTableCtrContent = File.ReadAllText(dataTableMgrPath);
-            Regex existingPropertyRegex = new Regex(@"^\s*public\s+(\w+)\s+(\w+)\s+=>\s+_tables\.(\w+);\s*$", RegexOptions.Multiline);
-            HashSet<string> existingProperties = new HashSet<string>();
+            Regex dataTablePropertyRegex = new Regex(@"^\s*public\s+(\w+)\s+(\w+)\s+=>\s+_tables\.(\w+);\s*$", RegexOptions.Multiline);
             
-            foreach (Match match in existingPropertyRegex.Matches(dataTableCtrContent))
+            int removedCount = 0;
+            dataTableCtrContent = dataTablePropertyRegex.Replace(dataTableCtrContent, match =>
+            {
+                string propertyName = match.Groups[2].Value;
+                if (!validPropertyNames.Contains(propertyName))
+                {
+                    removedCount++;
+                    return string.Empty;
+                }
+                return match.Value;
+            });
+            
+            HashSet<string> existingProperties = new HashSet<string>();
+            foreach (Match match in dataTablePropertyRegex.Matches(dataTableCtrContent))
             {
                 string propertyName = match.Groups[3].Value;
                 existingProperties.Add(propertyName);
@@ -85,7 +99,6 @@ public partial class ToolBox
             
             insertIndex += "private cfg.Tables _tables;".Length;
             
-            // 构建新的属性字符串
             StringBuilder newPropertiesBuilder = new StringBuilder();
             int newPropertyCount = 0;
             
@@ -101,25 +114,33 @@ public partial class ToolBox
                 }
             }
             
-            if (newPropertyCount > 0)
+            if (removedCount > 0 || newPropertyCount > 0)
             {
-                if (insertIndex < dataTableCtrContent.Length && dataTableCtrContent[insertIndex] != '\n')
+                if (newPropertyCount > 0)
                 {
-                    newPropertiesBuilder.Insert(0, "\n");
+                    if (insertIndex < dataTableCtrContent.Length && dataTableCtrContent[insertIndex] != '\n')
+                    {
+                        newPropertiesBuilder.Insert(0, "\n");
+                    }
+                    
+                    if (insertIndex > 0 && dataTableCtrContent[insertIndex - 1] != '\n')
+                    {
+                        newPropertiesBuilder.Insert(0, "\n");
+                    }
+                    dataTableCtrContent = dataTableCtrContent.Insert(insertIndex, newPropertiesBuilder.ToString());
                 }
                 
-                if (insertIndex > 0 && dataTableCtrContent[insertIndex - 1] != '\n')
-                {
-                    newPropertiesBuilder.Insert(0, "\n");
-                }
-                dataTableCtrContent = dataTableCtrContent.Insert(insertIndex, newPropertiesBuilder.ToString());
                 File.WriteAllText(dataTableMgrPath, dataTableCtrContent);
                 AssetDatabase.Refresh();
-                AddLogInfo($"已成功为DataTableCtr补全{newPropertyCount}个表属性");
+                
+                var logParts = new List<string>();
+                if (removedCount > 0) logParts.Add($"移除{removedCount}个无效属性");
+                if (newPropertyCount > 0) logParts.Add($"新增{newPropertyCount}个属性");
+                AddLogInfo($"已成功更新DataTableCtr表属性：" + string.Join("，", logParts));
             }
             else
             {
-                AddLogInfo("DataTableCtr已有所有表属性，无需补全");
+                AddLogInfo("DataTableCtr已有所有表属性，无需更新");
             }
         }
         catch (Exception ex)

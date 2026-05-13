@@ -8,34 +8,44 @@
 using System;
 using UnityEngine;
 
+public enum Camp
+{
+    Self = 1,
+    Ally = 2,
+    Enemy = 4,
+    Neutral = 8,
+}
+
 public class BattleSurvival : BattleBase
 {
     private const int PlayerEid = 10000;
     
-    private PlayerShip _playerShip;
+    public PlayerPlane PlayerPlane => _playerPlane;
+    
+    private PlayerPlane _playerPlane;
 
     private Transform _worldRoot;
     private Transform _aircraftRoot;
-    private Transform _bulletRoot;
+    public Transform BulletRoot;
     private Transform _effectRoot;
     
     public override void Init()
     {
         base.Init();
         InitWorldRoot();
-        CreatePlayerShip(PlayerEid);
+        CreatePlayerPlane(PlayerEid);
     }
 
-    private void CreatePlayerShip(int eId)
+    private void CreatePlayerPlane(int eId)
     {
-        EntityMgr.Instance.ShowEntity(eId, _aircraftRoot, OnLoadShipFinish);
+        EntityMgr.Instance.CreateEntity(eId, _aircraftRoot, OnLoadShipFinish);
     }
 
     private void OnLoadShipFinish(EntityBase entity)
     {
-        _playerShip = entity as PlayerShip;
-        if (_playerShip != null) 
-            _playerShip.OnInit(PlayerEid);
+        _playerPlane = entity as PlayerPlane;
+        if (_playerPlane != null) 
+            _playerPlane.OnInit(PlayerEid, Camp.Self, this);
     }
     
     private void InitWorldRoot()
@@ -43,7 +53,7 @@ public class BattleSurvival : BattleBase
         _worldRoot = new GameObject("World").transform;
 
         _aircraftRoot = CreateChildRoot("Aircraft");
-        _bulletRoot = CreateChildRoot("Bullet");
+        BulletRoot = CreateChildRoot("Bullet");
         _effectRoot = CreateChildRoot("Effect");
     }
 

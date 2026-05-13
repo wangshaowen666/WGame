@@ -56,7 +56,7 @@ public static class UpdateMgr
     {
         foreach (var u in s_updateMaps)
         {
-            u.Update(deltaTime, realDeltaTime);
+            u.MyUpdate(deltaTime, realDeltaTime);
         }
 
         // 处理移除和添加逻辑
@@ -105,6 +105,7 @@ public static class UpdateMgr
 
         if (s_rmvCaches.Count > 0)
         {
+            // 这里应该允许重复移除（界面回收以及destroy都协议移除逻辑）
             Log.Error("重复移除或者尝试移除未注册的Updateable");
             s_rmvCaches.Clear();
         }

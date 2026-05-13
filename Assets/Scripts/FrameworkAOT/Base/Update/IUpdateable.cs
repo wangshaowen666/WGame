@@ -20,7 +20,7 @@ public interface IUpdateable
     /// </summary>
     /// <param name="deltaTime">帧间隔，单位为秒，受timeScale影响</param>
     /// <param name="realDeltaTime">帧间隔，单位为秒，不受timeScale影响</param>
-    void Update(float deltaTime, float realDeltaTime);
+    void MyUpdate(float deltaTime, float realDeltaTime);
 }
 
 /// <summary>

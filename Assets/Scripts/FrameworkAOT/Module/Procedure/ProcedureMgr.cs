@@ -13,7 +13,7 @@ using UnityEngine;
 /// <summary>
 /// 基于状态机的游戏生命周期管理流程
 /// </summary>
-public class ProcedureMgr : Singleton<ProcedureMgr>, IUpdateable
+public class ProcedureMgr : Singleton<ProcedureMgr>
 {
     private Fsm _fsm;
 
@@ -28,8 +28,6 @@ public class ProcedureMgr : Singleton<ProcedureMgr>, IUpdateable
             new ProcedureLoadDll()
         };
         _fsm = Fsm.Create(procedures);
-        
-        UpdateMgr.RegisterUpdate(this);
     }
     
     public void AddProcedure(ProcedureBase procedure)
@@ -40,14 +38,6 @@ public class ProcedureMgr : Singleton<ProcedureMgr>, IUpdateable
     public void RunProcedure<T>() where T : ProcedureBase
     {
         _fsm.ChangeState<T>();
-    }
-    
-    public void Update(float deltaTime, float realDeltaTime)
-    {
-        if (_fsm.CurState != null)
-        {
-            _fsm.CurState.OnUpdate(deltaTime, realDeltaTime);
-        }
     }
 
     /// <summary>

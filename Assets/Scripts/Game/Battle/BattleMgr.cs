@@ -10,6 +10,8 @@ using UnityEngine;
 
 public class BattleMgr : Singleton<BattleMgr>
 {
+    public BattleBase CurrentBattle => _battle;
+    
     private BattleBase _battle;
 
     private BattleMgr()

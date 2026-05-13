@@ -16,7 +16,7 @@ public class GameLaunch
 {
     public static void StartGame()
     {
-        Application.targetFrameRate = 60;
+        //Application.targetFrameRate = 60;
         ReplenishMeta();
         InitGameProcedure();
       

@@ -13,15 +13,15 @@ namespace cfg
 {
 public partial class Tables
 {
-    public TbThruster TbThruster {get; }
-    public TbAircraft TbAircraft {get; }
+    public TbEffect TbEffect {get; }
+    public TbPlane TbPlane {get; }
     public TbUIPanel TbUIPanel {get; }
     public TbEntity TbEntity {get; }
 
     public Tables(System.Func<string, ByteBuf> loader)
     {
-        TbThruster = new TbThruster(loader("tbthruster"));
-        TbAircraft = new TbAircraft(loader("tbaircraft"));
+        TbEffect = new TbEffect(loader("tbeffect"));
+        TbPlane = new TbPlane(loader("tbplane"));
         TbUIPanel = new TbUIPanel(loader("tbuipanel"));
         TbEntity = new TbEntity(loader("tbentity"));
         ResolveRef();
@@ -29,8 +29,8 @@ public partial class Tables
     
     private void ResolveRef()
     {
-        TbThruster.ResolveRef(this);
-        TbAircraft.ResolveRef(this);
+        TbEffect.ResolveRef(this);
+        TbPlane.ResolveRef(this);
         TbUIPanel.ResolveRef(this);
         TbEntity.ResolveRef(this);
     }

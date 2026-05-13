@@ -17,7 +17,7 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 96c191e0e08964aa6a2282b99c640bda
   m_SerializeEntries:
-  - m_GUID: 4bfeafc65159346a5a8a9e032b2b70ca
+  - m_GUID: 8dfd7a9aee72344d894d37f1e2c28912
     m_Address: BattlePanel
     m_ReadOnly: 0
     m_SerializedLabels: []

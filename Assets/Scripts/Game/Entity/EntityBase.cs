@@ -10,5 +10,40 @@ using UnityEngine;
 
 public abstract class EntityBase : MonoBehaviour
 {
-    public virtual void OnInit(int id){}
+    protected int _id;
+    private bool _updateRegistered;
+
+    public virtual void OnInit(int id)
+    {
+        _id = id;
+        TryRegisterUpdate();
+    }
+
+    public virtual void OnRecycle()
+    {
+        TryUnRegisterUpdate();
+    }
+
+    private void OnDestroy()
+    {
+        TryUnRegisterUpdate();
+    }
+
+    protected void TryRegisterUpdate()
+    {
+        if (!_updateRegistered && this is IUpdateable updatable)
+        {
+            UpdateMgr.RegisterUpdate(updatable);
+            _updateRegistered = true;
+        }
+    }
+
+    protected void TryUnRegisterUpdate()
+    {
+        if (_updateRegistered && this is IUpdateable updatable)
+        {
+            UpdateMgr.UnRegisterUpdate(updatable);
+            _updateRegistered = false;
+        }
+    }
 }
