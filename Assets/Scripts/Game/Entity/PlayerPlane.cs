@@ -14,8 +14,8 @@ public class PlayerPlane : EntityBase, IUpdateable
 {
     public PlaneStats Stats => _stats;
 
-    private const int BulletNum = 5;
-    private const int BulletAngle = 10;
+    private const int BulletNum = 3;
+    private const int BulletAngle = 6;
     
     private BattleSurvival _battle;
     private DPlane _cfg;
@@ -25,8 +25,6 @@ public class PlayerPlane : EntityBase, IUpdateable
     private Vector3 _moveTarget;
     private bool _hasMoveTarget;
     private Camera _camera;
-    private Camp _camp;
-
     private int _bulletCount;
     private float _intervalAngle;
     
@@ -40,7 +38,7 @@ public class PlayerPlane : EntityBase, IUpdateable
         _stats.OnDeath += OnDeath;
         _stats.OnHpChanged += OnHpChanged;
         _camera = Camera.main;
-        _camp = camp;
+        Camp = camp;
         
         _shootTrans = transform.Find("Weapon Point");
         _moveTarget = transform.position;
@@ -98,8 +96,9 @@ public class PlayerPlane : EntityBase, IUpdateable
         if (bullet != null)
         {
             _bulletCount++;
+            float angle = -BulletAngle + _intervalAngle * (_bulletCount % BulletNum);
             bullet.transform.position = _shootTrans.position;
-            bullet.OnInit(_cfg.BulletId, _camp, _cfg.BulletSpeed, -BulletAngle + _intervalAngle * (_bulletCount % BulletNum), _stats);
+            bullet.OnInit(_cfg.BulletId, Camp, _cfg.BulletSpeed, angle, _stats.GetAttackDamage());
         }
     }
 
@@ -127,18 +126,18 @@ public class PlayerPlane : EntityBase, IUpdateable
         transform.position = newPos;
     }
     
-     private void OnDestroy()
-     {
-         if (_stats != null)
-         {
-             _stats.OnDeath -= OnDeath;
-             _stats.OnHpChanged -= OnHpChanged;
-             ClassPool.Recycle(_stats);
-             _stats = null;
-         }
-         
-         _cancel?.Cancel();
-         _cancel?.Dispose();
-         _cancel = null;
+    private void OnDestroy()
+    {
+        if (_stats != null)
+        {
+            _stats.OnDeath -= OnDeath;
+            _stats.OnHpChanged -= OnHpChanged;
+            ClassPool.Recycle(_stats);
+            _stats = null;
+        }
+        
+        _cancel?.Cancel();
+        _cancel?.Dispose();
+        _cancel = null;
     }
 }

@@ -15,11 +15,11 @@ MonoBehaviour:
   m_DefaultGroup: 1e727bc51648d45788aec4d5b93e2933
   m_currentHash:
     serializedVersion: 2
-    Hash: 8848c475cc9378ed708642bd896843f6
+    Hash: 2db5922cbf4c1d6b21cd33f7bbb89346
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 1
   m_BundleLocalCatalog: 0
-  m_CatalogRequestsTimeout: 10
+  m_CatalogRequestsTimeout: 5
   m_DisableCatalogUpdateOnStart: 1
   m_IgnoreUnsupportedFilesInBuild: 0
   m_UniqueBundleIds: 0
@@ -89,11 +89,11 @@ MonoBehaviour:
       - m_Id: 1078d2e8e847a439496542a08ac4babc
         m_Value: ServerData/[BuildTarget]/catalog
       - m_Id: 1634da84a222e4ef0975fc399f7e7dc5
-        m_Value: http://192.168.3.72:80/MyServer/[BuildTarget]/catalog
+        m_Value: http://192.168.14.5:80/MyServer/[BuildTarget]/catalog
       - m_Id: 69edce6a2fe2449e28db832aafb4a908
         m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/[BuildTarget]'
       - m_Id: 6b27b574154414a75bfc90db34088ee3
-        m_Value: http://192.168.3.72:80/MyServer/[BuildTarget]
+        m_Value: http://192.168.14.5:80/MyServer/[BuildTarget]
       - m_Id: ad97362cbb9a247b38d06532d9374b44
         m_Value: ServerData/[BuildTarget]
       - m_Id: b315a1fb503e74e499e9068711f5e43d

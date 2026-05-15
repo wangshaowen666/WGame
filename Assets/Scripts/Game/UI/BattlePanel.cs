@@ -6,6 +6,7 @@
  */
 
 using UnityEngine;
+using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 
@@ -19,6 +20,7 @@ public class BattlePanel : UIPanelBase, IUpdateable
     {
         base.OnOpen(userData);
         _camera = Camera.main;
+        EnhancedTouchSupport.Enable();
         UpdateMgr.RegisterUpdate(this);
 
         if (BattleMgr.Instance.CurrentBattle is BattleSurvival battle)
@@ -47,6 +49,7 @@ public class BattlePanel : UIPanelBase, IUpdateable
     public override void OnRecycle()
     {
         base.OnRecycle();
+        EnhancedTouchSupport.Disable();
         UpdateMgr.UnRegisterUpdate(this);
     }
 

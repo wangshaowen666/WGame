@@ -5,12 +5,12 @@
  *--------------------------------------------------------------
  */
 
-using System;
 using UnityEngine;
 
 public abstract class EntityBase : MonoBehaviour
 {
     protected int _id;
+    public Camp Camp { get; protected set; }
     private bool _updateRegistered;
 
     public virtual void OnInit(int id)

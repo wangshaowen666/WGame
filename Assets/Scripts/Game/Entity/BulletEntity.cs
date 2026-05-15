@@ -5,37 +5,35 @@
  *--------------------------------------------------------------
  */
 
-using System.Threading;
+using System;
 using UnityEngine;
 
-public class BulletEntity : EntityBase
+public class BulletEntity : EntityBase, IUpdateable
 {
-    private const int MoveTime = 3;
-    
-    private EntityBase _owner;
+    private const float MoveTime = 3f;
+
+    private int _damage;
     private int _speed;
     private int _eid;
     private float _timer;
 
-    private CancellationTokenSource _cancel;
+    private Collider _collider;
 
-    public void OnInit(int id, Camp camp, int speed, float angle, EntityStatsBase owner)
+    private void Awake()
     {
-        base.OnInit(id);
-
-        _eid = id;
-        _speed = speed;
-        transform.eulerAngles = new Vector3(0, angle, 0);
-        _cancel = Timer.StartRepeat(20, OnMove, 150, true);
+        _collider = GetComponent<Collider>();
     }
 
-    private void OnMove(int i)
+    public void OnInit(int id, Camp camp, int speed, float angle, int damage)
     {
-        transform.position += transform.forward * (_speed * 0.02f);
-        if (i == 150)
-        {
-            EntityMgr.Instance.RecycleEntity(_eid, this);
-        }
+        base.OnInit(id);
+        _eid = id;
+        _speed = speed;
+        _damage = damage;
+        _timer = 0f;
+        Camp = camp;
+        transform.eulerAngles = new Vector3(0, angle, 0);
+        _collider.enabled = true;
     }
 
     public void MyUpdate(float deltaTime, float realDeltaTime)
@@ -43,27 +41,43 @@ public class BulletEntity : EntityBase
         transform.position += transform.forward * (_speed * deltaTime);
         _timer += deltaTime;
         if (_timer >= MoveTime)
-        {
             EntityMgr.Instance.RecycleEntity(_eid, this);
-        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        var otherEntity = other.GetComponentInParent<EntityBase>();
+        if (otherEntity == null || IsSameCamp(otherEntity))
+            return;
+
+        EntityStatsBase targetStats = GetEntityStats(otherEntity);
+        if (targetStats == null || targetStats.IsDead)
+            return;
+
+        targetStats.TakeDamage(_damage);
+        EntityMgr.Instance.RecycleEntity(_eid, this);
+    }
+
+    private bool IsSameCamp(EntityBase other)
+    {
+        if (Camp == Camp.Neutral || other.Camp == Camp.Neutral)
+            return false;
+
+        return ((int)Camp & (int)other.Camp) != 0;
+    }
+
+    private static EntityStatsBase GetEntityStats(EntityBase entity)
+    {
+        if (entity is PlayerPlane player)
+            return player.Stats;
+        if (entity is EnemyPlane enemy)
+            return enemy.Stats;
+        return null;
     }
 
     public override void OnRecycle()
     {
+        _collider.enabled = false;
         base.OnRecycle();
-        if (_cancel != null)
-        {
-            _cancel.Cancel();
-            _cancel = null;
-        }
-    }
-
-    private void OnDestroy()
-    {
-        if (_cancel != null)
-        {
-            _cancel.Cancel();
-            _cancel = null;
-        }
     }
 }

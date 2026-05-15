@@ -18,14 +18,7 @@ public class ProcedureLaunch : ProcedureBase
         panel.SetTip("游戏启动中...", 0.1f);
         _fsm.SetObj("loginPanel", panel);
 
-        if (AOTConfig.Standalone)
-        {
-            ProcedureMgr.Instance.RunProcedure<ProcedureLoadDll>();
-        }
-        else
-        {
-            ProcedureMgr.Instance.RunProcedure<ProcedureVersionCheck>();
-        }
+        ProcedureMgr.Instance.RunProcedure<ProcedureVersionCheck>();
     }
     
     private LoginPanel LoadLoginPanel()

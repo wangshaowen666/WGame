@@ -49,9 +49,11 @@ public class EntityMgr : Singleton<EntityMgr>
 
     public void RecycleEntity(int eId, EntityBase entity)
     {
+        // 先执行回收，对应碰撞实体 OnRecycle处理了碰撞关闭操作，
+        entity.OnRecycle();
+        
         var cfg = DataTableMgr.Instance.TbEntity[eId];
         entity.transform.localPosition = Vector3.one * 9999;
-        entity.OnRecycle();
         _pool.PutObj(cfg.Name, entity);
     }
 

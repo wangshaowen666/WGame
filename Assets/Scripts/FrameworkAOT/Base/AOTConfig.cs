@@ -9,9 +9,6 @@ using UnityEngine;
 
 public static class AOTConfig
 {
-    // 单机模式
-    public const bool Standalone = true;
-    
     // 登陆界面路径
     public const string LoginPath = "LoginPanel/LoginRoot";
     

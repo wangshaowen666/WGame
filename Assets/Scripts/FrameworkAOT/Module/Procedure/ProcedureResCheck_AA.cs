@@ -65,7 +65,10 @@ public class ProcedureResCheck_AA : ProcedureBase
     {
         switch (result)
         {
-            
+            case 1:
+                // 尝试跳过加载直接进游戏单机游玩，前提是远端bundle全部下载完成过
+                ProcedureMgr.Instance.RunProcedure<ProcedureLoadDll>();
+                break;
         }
         Log.Info("执行加载出错回调");
         // 它不会真的取消任务，只会设置可取消标志

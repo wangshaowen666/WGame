@@ -12,12 +12,6 @@ using UnityEngine;
 
 public class ProcedureVersionCheck : ProcedureBase
 {
-    public class MyDataObject
-    {
-        public string name;
-        public int score;
-    }
-    
     public override void OnEnter()
     {
         base.OnEnter();
@@ -52,6 +46,12 @@ public class ProcedureVersionCheck : ProcedureBase
         //         break;
         // }
     }
+    
+    // public class MyDataObject
+    // {
+    //     public string name;
+    //     public int score;
+    // }
 }
 
 

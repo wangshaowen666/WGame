@@ -105,6 +105,15 @@ public partial class ToolBox
             AddLogInfo($"开始构建安装包，目标平台：{buildTarget}");
             AddLogInfo($"输出路径：{outputPath}");
             
+            if (File.Exists(outputPath))
+            {
+                File.Delete(outputPath);
+            }
+            else if (Directory.Exists(outputPath))
+            {
+                Directory.Delete(outputPath, true);
+            }
+            
             BuildPlayerOptions buildOptions = new BuildPlayerOptions
             {
                 scenes = EditorBuildSettings.scenes
