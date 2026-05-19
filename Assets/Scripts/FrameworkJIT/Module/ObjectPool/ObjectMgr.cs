@@ -109,7 +109,7 @@ public class ObjectMgr : Singleton<ObjectMgr>
     }
     
     
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
     public List<string> DealPoolStats()
     {
         List<string> result = new List<string>();

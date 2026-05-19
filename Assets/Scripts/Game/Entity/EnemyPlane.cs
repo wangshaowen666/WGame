@@ -93,7 +93,7 @@ public class EnemyPlane : EntityBase, IUpdateable
     {
         if (_stats.IsDead)
             return;
-
+        
         EntityMgr.Instance.CreateEntity(_cfg.BulletId, _battle.BulletRoot, OnLoadBulletFinish);
     }
 

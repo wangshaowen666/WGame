@@ -9,6 +9,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 public static class Timer
 {
@@ -167,6 +168,10 @@ public static class UniTaskUtil
         }
     }
     
+#if STATS_ON && UNITY_EDITOR
+    private static readonly Unity.Profiling.ProfilerMarker s_TimerMarker = new ("WGame.Timer");
+#endif
+    
     public static async UniTaskVoid RepeatInvoke(int intervalMs, Action<int> action, int repeatCount = -1,
         CancellationToken token = default, bool isImmediately = false, bool inMainThread = true, bool ignoreTimeScale = false)
     {
@@ -181,7 +186,6 @@ public static class UniTaskUtil
             Log.Error("间隔必须大于0");
             return;
         }
-
         try
         {
             int count = 0;
@@ -206,6 +210,7 @@ public static class UniTaskUtil
                 count++;
                 action.Invoke(count);
             }
+                
         }
         catch (OperationCanceledException)
         {

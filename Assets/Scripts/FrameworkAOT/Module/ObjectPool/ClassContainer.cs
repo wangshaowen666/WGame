@@ -53,14 +53,14 @@ public class ClassContainer
         {
             ret = _poolArray[--_index] as T;
             _poolArray[_index] = null;
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
             UpdateStats(4);
 #endif
         }
         else
         {
             ret = new T();
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
             UpdateStats(3);
 #endif
         }
@@ -76,7 +76,7 @@ public class ClassContainer
 
     public void Release()
     {
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
         UpdateStats(5, _index + 1);
 #endif
         Array.Clear(_poolArray, 0, _index);
@@ -104,7 +104,7 @@ public class ClassContainer
         item.Reset();
         _poolArray[_index++] = item;
         
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
         UpdateStats(2);
 #endif
     }
@@ -125,13 +125,13 @@ public class ClassContainer
             _poolArray[_index++] = obj;
         }
 
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
         UpdateStats(1, count);
 #endif
     }
     
        
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
     // 统计信息
     private ClassPoolStats _stats = new ClassPoolStats{capacity = Capacity};
     
@@ -193,7 +193,7 @@ public class ClassContainer
 #endif
 }
 
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
 /// <summary>
 /// 对象池统计信息
 /// </summary>

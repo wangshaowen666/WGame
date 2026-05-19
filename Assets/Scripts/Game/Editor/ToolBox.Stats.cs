@@ -13,7 +13,7 @@ using UnityEditor;
 
 public partial class ToolBox
 {
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
     [TitleGroup("统计工具")]
     [HorizontalGroup("统计工具/水平布局", width:150)]
     [ButtonGroup("统计工具/水平布局/统计")]

@@ -5,9 +5,7 @@
  *--------------------------------------------------------------
  */
 
-using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 /// <summary>
 /// 规避GF框架很多空的Update调用，采用按需注册的形式
@@ -22,6 +20,10 @@ public static class UpdateMgr
 
     private static bool s_addItem;
     private static bool s_rmvItem;
+    
+#if STATS_ON && UNITY_EDITOR
+    private static readonly Unity.Profiling.ProfilerMarker s_updateMarker = new ("WGame.Update");
+#endif
 
     public static void RegisterUpdate(IUpdateable updateable)
     {
@@ -53,11 +55,21 @@ public static class UpdateMgr
             s_addItem = false;
             s_rmvItem = false;
         }
-        
+
+#if STATS_ON && UNITY_EDITOR
+        using (s_updateMarker.Auto())
+        {
+            foreach (var u in s_updateMaps)
+            {
+                u.MyUpdate(deltaTime, realDeltaTime);
+            }
+        }
+#else
         foreach (var u in s_updateMaps)
         {
             u.MyUpdate(deltaTime, realDeltaTime);
         }
+#endif
     }
 
     private static void DealCache()

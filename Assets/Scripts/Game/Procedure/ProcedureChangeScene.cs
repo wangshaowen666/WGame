@@ -5,6 +5,7 @@
  *--------------------------------------------------------------
  */
 
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 
 public class ProcedureChangeScene : ProcedureBase
@@ -20,7 +21,9 @@ public class ProcedureChangeScene : ProcedureBase
 
     private async UniTaskVoid AsyncRun()
     {
-        var nm = _fsm.GetObj<string>("sceneNm");
+        var nm = _fsm.GetData<string>("sceneNm");
+
+        _fsm.SetData("hah", (VarInt)1);
         if (string.IsNullOrEmpty(nm))
         {
             Log.Error("场景名未赋值");

@@ -8,6 +8,9 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// 纯单次转换，开销大于拆箱、装箱，但是依靠池化操作，后续gc开销为0，主要用于底层接口 多态参数中
+/// </summary>
 public abstract class Variable : IResetable
 {
     public virtual void Reset(){}

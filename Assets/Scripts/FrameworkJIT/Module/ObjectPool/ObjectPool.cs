@@ -10,7 +10,7 @@ using Object = UnityEngine.Object;
 public interface IObjectPool
 {
     void Release();
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
     Dictionary<string, ObjectPoolStats> GetStats();
 #endif
 }
@@ -83,13 +83,13 @@ public class ObjectPool<T> : IObjectPool where T : Object
 
         if (obj == null)
         {
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
             UpdateStats(key, 5);
 #endif
             return null;
         }
         
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
         UpdateStats(key, 2);
 #endif
         return obj;
@@ -131,7 +131,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
         {
             poolItem = ObjectItem.Create(obj);
             objs.Add(poolItem);
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
             UpdateStats(key, 1);
 #endif
         }
@@ -139,7 +139,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
         {
             poolItem.IsUsing = false;
             poolItem.LastUseTime = Time.time;
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
             UpdateStats(key, 4);
 #endif
         }
@@ -169,7 +169,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
                         ClassPool.Recycle(items[i]);
                         items.RemoveAt(i);
                         
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
                         UpdateStats(key, 3);
 #endif
                     }
@@ -202,7 +202,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
         }
         
         _pool.Clear();
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
         _stats.Clear();
 #endif    
     }
@@ -220,7 +220,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
         ResMgr.Instance.Unload(key);
     }
     
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
     // 统计信息
     private Dictionary<string, ObjectPoolStats> _stats = new Dictionary<string, ObjectPoolStats>();
     
@@ -289,7 +289,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
 #endif
 }
 
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
 /// <summary>
 /// 对象池统计信息
 /// </summary>

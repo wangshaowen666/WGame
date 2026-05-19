@@ -22,7 +22,7 @@ public class ProcedureVersionCheck : ProcedureBase
     {
         if (true)
         {
-            var panel = _fsm.GetObj<LoginPanel>("loginPanel");
+            var panel = _fsm.GetData<LoginPanel>("loginPanel");
             panel.SetTip("获取服务器信息...", 0.2f);
             
             ProcedureMgr.Instance.RunProcedure<ProcedureResCheck_AA>();

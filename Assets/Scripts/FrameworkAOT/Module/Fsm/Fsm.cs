@@ -14,9 +14,8 @@ public class Fsm : IResetable
 {
     private readonly Dictionary<Type, FsmState> _states = new Dictionary<Type, FsmState>();
     // 序号比较会将字符串视为一系列的UTF-16代码单元进行精确的二进制比较,只严格检查每个字符的编码值是否完全一致,性能最高
-    private Dictionary<string, Variable> _datas = new Dictionary<string, Variable>(StringComparer.Ordinal);
-    // 引用类型存储，不存存放值类型，Variable主要用来避免值类型的装拆箱
-    private Dictionary<string, object> _objs = new Dictionary<string, object>(StringComparer.Ordinal);
+    // 如果存储的是值类型，用Variable
+    private Dictionary<string, object> _datas = new Dictionary<string, object>(StringComparer.Ordinal);
     private FsmState _curState;
 
     public FsmState CurState => _curState;
@@ -65,57 +64,38 @@ public class Fsm : IResetable
         state.OnInit(this);
     }
 
-    public T GetData<T>(string name) where T : Variable
+    public T GetData<T>(string name) where T : class
     {
-        return GetData(name) as T;
-    }
-    
-    public T GetObj<T>(string name) where T : class
-    {
-        return _objs.GetValueOrDefault(name) as T;
+        return _datas[name] as T;
     }
 
-    public void SetData<T>(string name, T value) where T : Variable
+    public void SetData<T>(string name, T value) where T : class
     {
-        var oldV = GetData(name);
-        if (oldV != null)
+        if (_datas.ContainsKey(name))
         {
-            if (oldV.GetType() != typeof(T))
-                Log.Warning("状态机数据key已存在，本次写入类型不匹配 会覆盖旧类型结果，key:", name, "原始类型:", oldV.GetType(), "当前设置类型：", typeof(T).Name);
-            
-            ClassPool.Recycle(oldV);
+            var oldTp = _datas[name].GetType();
+            if (oldTp != typeof(T))
+                Log.Warning("状态机数据key已存在，本次写入类型不匹配 会覆盖旧类型结果，key:", name, "原始类型:", oldTp, "当前设置类型：", typeof(T).Name);
+
+            if (oldTp.IsSubclassOf(typeof(IResetable)))
+                ClassPool.Recycle(_datas[name] as IResetable);
         }
         
         _datas[name] = value;
     }
 
-    public void SetObj<T>(string name, T obj) where T : class
-    {
-        _objs[name] = obj;
-    }
-
     public void RemoveData(string name)
     {
-        _datas.Remove(name, out Variable obj);
-        ClassPool.Recycle(obj);
-    }
-    
-    public void RemoveObj(string name)
-    {
-        _objs.Remove(name);
+        _datas.Remove(name, out object obj);
+        if (obj.GetType().IsSubclassOf(typeof(IResetable)))
+            ClassPool.Recycle(obj as IResetable);
     }
     
     public void Reset()
     {
         _curState = null;
         _datas.Clear();
-        _objs.Clear();
         _states.Clear();
-    }
-    
-    private Variable GetData(string name)
-    {
-        return _datas.GetValueOrDefault(name);
     }
     
     private void Init<T>(List<T> states) where T : FsmState

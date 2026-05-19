@@ -40,7 +40,7 @@ public class ProcedureMain : ProcedureBase
 
     private void RunProcedure()
     {
-        _fsm.SetObj("sceneNm", "Battle");
+        _fsm.SetData("sceneNm", "Battle");
         ProcedureMgr.Instance.RunProcedure<ProcedureChangeScene>();
     }
 }

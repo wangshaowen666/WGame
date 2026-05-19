@@ -17,7 +17,7 @@ public class ProcedurePreload : ProcedureBase
     
     private async UniTaskVoid AsyncRun()
     {
-        var panel = _fsm.GetObj<LoginPanel>("loginPanel");
+        var panel = _fsm.GetData<LoginPanel>("loginPanel");
         panel.SetTip("编译着色器中...", 0.9f);
         // todo 预加载配置表、图集、字体等
         
@@ -29,8 +29,8 @@ public class ProcedurePreload : ProcedureBase
         
         await UniTask.Delay(300);
         
-        _fsm.RemoveObj("loginPanel");
-        _fsm.SetObj("sceneNm", "Main");
+        _fsm.RemoveData("loginPanel");
+        _fsm.SetData("sceneNm", "Main");
         ProcedureMgr.Instance.RunProcedure<ProcedureChangeScene>();
     }
 }

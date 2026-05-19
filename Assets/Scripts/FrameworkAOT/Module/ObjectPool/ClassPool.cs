@@ -109,7 +109,7 @@ public static class ClassPool
         _poolMap.Clear();
     }
         
-#if STATS_ON
+#if STATS_ON && UNITY_EDITOR
     public static List<string> DealPoolStats()
     {
         List<string> result = new List<string>();

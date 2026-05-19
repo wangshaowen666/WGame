@@ -16,7 +16,7 @@ public class ProcedureLaunch : ProcedureBase
         
         var panel = LoadLoginPanel();
         panel.SetTip("游戏启动中...", 0.1f);
-        _fsm.SetObj("loginPanel", panel);
+        _fsm.SetData("loginPanel", panel);
 
         ProcedureMgr.Instance.RunProcedure<ProcedureVersionCheck>();
     }
