@@ -7,6 +7,7 @@
  */
 
 using System.Collections.Generic;
+using cfg;
 using Cysharp.Threading.Tasks;
 
 public class ProcedureChangeScene : ProcedureBase
@@ -16,6 +17,8 @@ public class ProcedureChangeScene : ProcedureBase
         base.OnEnter();
         
         // todo 释放资源等
+        if (ProcedureMgr.LoginFinish)
+            GameMgr.UI.PanelOn(DPnlId.LoadingPanel);
         
         AsyncRun().Forget();
     }
@@ -35,7 +38,12 @@ public class ProcedureChangeScene : ProcedureBase
             Log.Info("场景名：", nm);
         }
        
+        await UniTask.Delay(3000);
         await FrameworkMgr.Scene.LoadScene(nm);
+
+        if (ProcedureMgr.LoginFinish)
+            GameMgr.UI.PanelOff(DPnlId.LoadingPanel);
+        
         switch (nm)
         {
             case "Main":

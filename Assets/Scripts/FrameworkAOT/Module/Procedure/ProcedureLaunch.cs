@@ -38,7 +38,7 @@ public class ProcedureLaunch : ProcedureBase
         }
         else
         {
-            throw new GameException("Failed to load LoginRoot prefab from Resources/LoginPanel/");
+            throw new System.Exception("Failed to load LoginRoot prefab from Resources/LoginPanel/");
         }
     }
 }

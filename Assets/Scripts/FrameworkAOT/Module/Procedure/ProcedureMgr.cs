@@ -13,8 +13,10 @@ using System.Collections.Generic;
 /// </summary>
 public static class ProcedureMgr
 {
-    private static Fsm s_fsm;
+    // 登陆流程结束的标识
+    public static bool LoginFinish { get; set; }
 
+    private static Fsm s_fsm;
     static ProcedureMgr()
     {
         // 原本是通过反射自动收集所有流程，用华佗热更拆分程序集后，反射拿不到热更程序集中的流程

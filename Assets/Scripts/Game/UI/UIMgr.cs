@@ -38,7 +38,7 @@ public class UIMgr : ManagerBase
         var cfg = GameMgr.DataTable.TbUIPanel[id];
         if (cfg == null)
         {
-            throw new GameException("不存在的界面：" + id);
+            throw new System.Exception("不存在的界面：" + id);
         }
 
         var g = cfg.Group;
@@ -88,7 +88,7 @@ public class UIMgr : ManagerBase
             if (kv.Value == id)
             {
                 _loadingPanelIdMap[kv.Key] = 0;
-                break;
+                return;
             }
         }
 
@@ -128,7 +128,7 @@ public class UIMgr : ManagerBase
     {
         LoadPanelArg arg = userData as LoadPanelArg;
         if (arg == null)
-            throw new GameException("打开界面参数无效");
+            throw new System.Exception("打开界面参数无效");
 
         _loadingPanelIdMap.Remove(arg.LoadingId, out var pnlId);
         // 加载的过程中被关闭了
@@ -142,7 +142,7 @@ public class UIMgr : ManagerBase
         var prefab =Object.Instantiate(obj, arg.Group.Trans);
         var panel = prefab.GetComponent<UIPanelBase>();
         if (panel == null)
-            throw new GameException("预制体上缺少UIPanelBase脚本");
+            throw new System.Exception("预制体上缺少UIPanelBase脚本");
         
         panel.OnInit(arg.Cfg);
         arg.Group.AddPanel(panel, arg.UserData);

@@ -56,7 +56,7 @@ public class AddressableLoader : IResLoader
             await handle.Task;
 
             if (handle.Status != AsyncOperationStatus.Succeeded)
-                throw new GameException($"资源加载失败:{key}  {handle.OperationException}");
+                throw new Exception($"资源加载失败:{key}  {handle.OperationException}");
 
             _handleMap.TryAdd(key, handle);
             _refMap.TryGetValue(key, out int count);

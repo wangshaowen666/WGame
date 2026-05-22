@@ -34,7 +34,7 @@ public class Singleton<T> where T:Singleton<T>
             {
                 if (isDisposed)
                 {
-                    throw new GameException(typeof(T).Name + "单例已被释放，无法再次访问");
+                    throw new Exception(typeof(T).Name + "单例已被释放，无法再次访问");
                 }
                 
                 if (instance == null)
@@ -43,7 +43,7 @@ public class Singleton<T> where T:Singleton<T>
                     var ctor = Array.Find(ctors, c => c.GetParameters().Length == 0);
 
                     if (ctor == null)
-                        throw new GameException(typeof(T).Name + "缺少无参的私有构造函数，请私有化构造");
+                        throw new Exception(typeof(T).Name + "缺少无参的私有构造函数，请私有化构造");
                     instance = ctor.Invoke(null) as T;
                     if (instance != null) 
                         instance.OnInit();

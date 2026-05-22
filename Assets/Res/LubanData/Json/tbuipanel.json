@@ -19,5 +19,12 @@
     "group": 2,
     "allowMult": false,
     "hideCovered": false
+  },
+  {
+    "id": 4,
+    "name": "LoadingPanel",
+    "group": 8,
+    "allowMult": false,
+    "hideCovered": false
   }
 ]

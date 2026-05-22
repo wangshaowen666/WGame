@@ -25,6 +25,10 @@ namespace cfg
         /// 战斗界面
         /// </summary>
         BattlePanel = 3,
+        /// <summary>
+        /// 加载界面
+        /// </summary>
+        LoadingPanel = 4,
     }
 
 } 

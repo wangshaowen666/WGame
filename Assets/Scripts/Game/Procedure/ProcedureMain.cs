@@ -12,13 +12,10 @@ using UnityEngine;
 
 public class ProcedureMain : ProcedureBase
 {
-    // 从登陆界面首次进入主界面流程
-    private bool _firstEnter = true;
-
     public override void OnEnter()
     {
         base.OnEnter();
-        if (_firstEnter)
+        if (!ProcedureMgr.LoginFinish)
             FirstEnter();
         
         FrameworkMgr.Event.Register(GameEvent.ProcedureExitMain, RunProcedure);
@@ -34,7 +31,7 @@ public class ProcedureMain : ProcedureBase
 
     private void FirstEnter()
     {
-        _firstEnter = false;
+        ProcedureMgr.LoginFinish = true;
         
         FrameworkMgr.Screen.Init();
         GameMgr.UI.CreateUIRoot();

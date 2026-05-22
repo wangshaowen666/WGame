@@ -76,7 +76,7 @@ public class ResMgr : ManagerBase
             if (tp == null)
             {
                 Debug.Log(typeof(Sprite).AssemblyQualifiedName);
-                throw new GameException("不存在的类型" + type);
+                throw new Exception("不存在的类型" + type);
             }
             
             var methodInfo = typeof(IResLoader).GetMethod("LoadAsync");

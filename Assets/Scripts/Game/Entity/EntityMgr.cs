@@ -54,14 +54,14 @@ public class EntityMgr : ManagerBase
     {
         LoadEntityArg arg = userData as LoadEntityArg;
         if (arg == null)
-            throw new GameException("打开界面参数无效");
+            throw new Exception("打开界面参数无效");
 
         var hasID = _loadingIdMap.Remove(arg.LoadingID);
         if (!hasID) return;
         
         var prefab = UnityEngine.Object.Instantiate(obj, arg.Parent);
         if (prefab == null)
-            throw new GameException("实体预制体上缺少EntityBase脚本");
+            throw new Exception("实体预制体上缺少EntityBase脚本");
         
         var entity = prefab.GetComponent<EntityBase>();
         arg.Callback?.Invoke(entity);
