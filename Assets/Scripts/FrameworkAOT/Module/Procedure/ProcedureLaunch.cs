@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: ProcedureLaunch.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/11/12 16:25:31 
  *--------------------------------------------------------------
  */
@@ -18,7 +19,7 @@ public class ProcedureLaunch : ProcedureBase
         panel.SetTip("游戏启动中...", 0.1f);
         _fsm.SetData("loginPanel", panel);
 
-        ProcedureMgr.Instance.RunProcedure<ProcedureVersionCheck>();
+        ProcedureMgr.RunProcedure<ProcedureVersionCheck>();
     }
     
     private LoginPanel LoadLoginPanel()

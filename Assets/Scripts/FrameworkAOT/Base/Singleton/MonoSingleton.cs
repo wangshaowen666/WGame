@@ -1,8 +1,8 @@
 ﻿﻿/*--------------------------------------------------------------
  * File: MonoSingleton.cs
- * Author: Wang ShaoWen
- * Time: 2024/03/14 17:30:34 
+ * Author: Wsw
  * Feedback: 614270423@qq.com
+ * Time: 2024/03/14 17:30:34 
  * Copyright: Copyright © 2024 wangshaowen. All rights reserved.
  *--------------------------------------------------------------
  */

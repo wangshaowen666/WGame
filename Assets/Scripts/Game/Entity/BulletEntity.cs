@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: BulletEntity.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/05/11 11:53:55 
  *--------------------------------------------------------------
  */
@@ -41,7 +42,7 @@ public class BulletEntity : EntityBase, IUpdateable
         transform.position += transform.forward * (_speed * deltaTime);
         _timer += deltaTime;
         if (_timer >= MoveTime)
-            EntityMgr.Instance.RecycleEntity(_eid, this);
+            GameMgr.Entity.RecycleEntity(_eid, this);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -55,7 +56,7 @@ public class BulletEntity : EntityBase, IUpdateable
             return;
 
         targetStats.TakeDamage(_damage);
-        EntityMgr.Instance.RecycleEntity(_eid, this);
+        GameMgr.Entity.RecycleEntity(_eid, this);
     }
 
     private bool IsSameCamp(EntityBase other)

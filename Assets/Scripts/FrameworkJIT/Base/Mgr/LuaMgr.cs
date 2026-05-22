@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using XLua;
 
-public class LuaCtr : Singleton<LuaCtr>
+public class LuaMgr : ManagerBase
 {
     private LuaEnv _luaEnv; 
-    
-    private LuaCtr() { }
 
     public void InitLuaEnv()
     {
@@ -18,7 +16,7 @@ public class LuaCtr : Singleton<LuaCtr>
     
     private byte[] CustomLoader(ref string filepath)
     {
-        var file = ResMgr.Instance.LoadSync<TextAsset>(filepath + ".lua");
+        var file = FrameworkMgr.Res.LoadSync<TextAsset>(filepath + ".lua");
         if (file == null)
         {
             Debug.LogError("未找到Lua文件: " + filepath);

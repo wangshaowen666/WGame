@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: ScreenCtr.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/12/31 16:01:13 
  *--------------------------------------------------------------
  */
@@ -11,12 +12,8 @@ using UnityEngine.InputSystem.UI;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
-public class ScreenCtr : Singleton<ScreenCtr>
+public class ScreenMgr : ManagerBase
 {
-    private ScreenCtr()
-    {
-    }
-
     public void Init()
     {
         InitUICamera();
@@ -60,7 +57,7 @@ public class ScreenCtr : Singleton<ScreenCtr>
     {
         if (UICamera) return;
         
-        var obj = new GameObject(GameConfig.UICamera);
+        var obj = new GameObject(FrameworkConfig.UICamera);
         var camera = obj.AddComponent<Camera>();
             
         camera.orthographic = true;

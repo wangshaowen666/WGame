@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: _07Timer.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/12/05 15:46:38 
  *--------------------------------------------------------------
  */
@@ -21,7 +22,7 @@ public class _07Timer : MonoBehaviour
         WaitKeyDown().Forget();
 
         //_cts = Timer.StartDelay(5000, TimerDelayTest, false);
-        _cts = Timer.StartRepeat(500, TimerRepeatTest, 20, false, true);
+        _cts = FrameworkMgr.Timer.StartRepeat(500, TimerRepeatTest, 20, false, true);
     }
 
     async UniTaskVoid WaitKeyDown()

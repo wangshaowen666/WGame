@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: EntityMgr.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/01/27 10:11:47 
  *--------------------------------------------------------------
  */
@@ -9,22 +10,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EntityMgr : Singleton<EntityMgr>
+public class EntityMgr : ManagerBase
 {
-    private EntityMgr() { }
-
-    private ObjectPool<EntityBase> _pool;
+    private ObjectPool<EntityBase> _pool = FrameworkMgr.ObjectPool.RegisterPool<EntityBase>(10);
     private List<uint> _loadingIdMap = new List<uint>();
-
-    protected override void OnInit()
-    {
-        base.OnInit();
-        _pool = ObjectMgr.Instance.RegisterPool<EntityBase>(10);
-    }
 
     public void CreateEntity(int eId, Transform parent, Action<EntityBase> callback)
     {
-        var cfg = DataTableMgr.Instance.TbEntity[eId];
+        var cfg = GameMgr.DataTable.TbEntity[eId];
         if (cfg == null)
         {
             Log.Error("不存在的实体：", eId);
@@ -38,7 +31,7 @@ public class EntityMgr : Singleton<EntityMgr>
             var loadingID = AutoID.GetID();
             _loadingIdMap.Add(loadingID);
             LoadEntityArg arg = LoadEntityArg.Create(loadingID, parent, callback);
-            ResMgr.Instance.LoadAsync<GameObject>(nm, OnLoadFinish, arg);
+            FrameworkMgr.Res.LoadAsync<GameObject>(nm, OnLoadFinish, arg);
         }
         else
         {
@@ -52,7 +45,7 @@ public class EntityMgr : Singleton<EntityMgr>
         // 先执行回收，对应碰撞实体 OnRecycle处理了碰撞关闭操作，
         entity.OnRecycle();
         
-        var cfg = DataTableMgr.Instance.TbEntity[eId];
+        var cfg = GameMgr.DataTable.TbEntity[eId];
         entity.transform.localPosition = Vector3.one * 9999;
         _pool.PutObj(cfg.Name, entity);
     }

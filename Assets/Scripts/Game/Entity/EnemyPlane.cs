@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: EnemyPlane.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/05/13 17:06:04 
  *--------------------------------------------------------------
  */
@@ -31,7 +32,7 @@ public class EnemyPlane : EntityBase, IUpdateable
     {
         base.OnInit(id);
         _eid = id;
-        _cfg = DataTableMgr.Instance.TbPlane[id];
+        _cfg = GameMgr.DataTable.TbPlane[id];
         _battle = battle as BattleSurvival;
         _stats = ClassPool.Get<PlaneStats>();
         _stats.Init(_cfg);
@@ -49,7 +50,7 @@ public class EnemyPlane : EntityBase, IUpdateable
     private void CreateEngine()
     {
         var root = transform.Find("Thruster Point");
-        EntityMgr.Instance.CreateEntity(_cfg.ThrusterId, root, null);
+        GameMgr.Entity.CreateEntity(_cfg.ThrusterId, root, null);
     }
 
     public void MyUpdate(float deltaTime, float realDeltaTime)
@@ -86,7 +87,7 @@ public class EnemyPlane : EntityBase, IUpdateable
     private void AutoAttack()
     {
         int ms = (int)(_cfg.Interval * 1000);
-        _attackCts = Timer.StartRepeat(ms, OnAttack);
+        _attackCts = FrameworkMgr.Timer.StartRepeat(ms, OnAttack);
     }
 
     private void OnAttack(int count)
@@ -94,7 +95,7 @@ public class EnemyPlane : EntityBase, IUpdateable
         if (_stats.IsDead)
             return;
         
-        EntityMgr.Instance.CreateEntity(_cfg.BulletId, _battle.BulletRoot, OnLoadBulletFinish);
+        GameMgr.Entity.CreateEntity(_cfg.BulletId, _battle.BulletRoot, OnLoadBulletFinish);
     }
 
     private void OnLoadBulletFinish(EntityBase entity)
@@ -110,8 +111,8 @@ public class EnemyPlane : EntityBase, IUpdateable
     private void OnDeath()
     {
         _attackCts?.Cancel();
-        EntityMgr.Instance.CreateEntity(_cfg.DeadEffId, transform, null);
-        Timer.StartDelay(200, _ => EntityMgr.Instance.RecycleEntity(_eid, this));
+        GameMgr.Entity.CreateEntity(_cfg.DeadEffId, transform, null);
+        FrameworkMgr.Timer.StartDelay(200, _ => GameMgr.Entity.RecycleEntity(_eid, this));
     }
 
     private void OnHpChanged(int damage, int currentHp)

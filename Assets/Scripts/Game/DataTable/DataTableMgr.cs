@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: DataTableCtr.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/01/07 13:27:28 
  *--------------------------------------------------------------
  */
@@ -9,7 +10,7 @@ using cfg;
 using Luban;
 using UnityEngine;
 
-public class DataTableMgr : Singleton<DataTableMgr>
+public class DataTableMgr : ManagerBase
 {
     private bool _isLoaded = false;
     // 导表工具自动补全下列属性
@@ -19,28 +20,6 @@ public class DataTableMgr : Singleton<DataTableMgr>
     public TbPlane TbPlane => _tables.TbPlane;
     public TbEntity TbEntity => _tables.TbEntity;
     public TbUIPanel TbUIPanel => _tables.TbUIPanel;
-    
-    private DataTableMgr()
-    {
-    }
-    
-    /// <summary>
-    /// 初始化方法，在单例实例化时调用
-    /// </summary>
-    protected override void OnInit()
-    {
-        // 可以在这里添加初始化逻辑
-    }
-    
-    /// <summary>
-    /// 释放资源方法，在单例被释放时调用
-    /// </summary>
-    protected override void OnDispose()
-    {
-        // 释放资源
-        _tables = null;
-        _isLoaded = false;
-    }
 
     public void LoadTable()
     {
@@ -66,7 +45,7 @@ public class DataTableMgr : Singleton<DataTableMgr>
     
     private static ByteBuf LoadByteBuf(string file)
     {
-        var cfg = ResMgr.Instance.LoadSync<TextAsset>($"Bin/{file}.bytes");
+        var cfg = FrameworkMgr.Res.LoadSync<TextAsset>($"Bin/{file}.bytes");
         return new ByteBuf(cfg.bytes);
     }
     

@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: PlayerShip.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/05/11 11:41:30 
  *--------------------------------------------------------------
  */
@@ -31,7 +32,7 @@ public class PlayerPlane : EntityBase, IUpdateable
     public void OnInit(int id, Camp camp, BattleBase battle)
     {
         base.OnInit(id);
-        _cfg = DataTableMgr.Instance.TbPlane[id];
+        _cfg = GameMgr.DataTable.TbPlane[id];
         _battle = battle as BattleSurvival;
         _stats = ClassPool.Get<PlaneStats>();
         _stats.Init(_cfg);
@@ -70,13 +71,13 @@ public class PlayerPlane : EntityBase, IUpdateable
     private void CreateEngine()
     {
         var root = transform.Find("Thruster Point");
-        EntityMgr.Instance.CreateEntity(_cfg.ThrusterId, root, null);
+        GameMgr.Entity.CreateEntity(_cfg.ThrusterId, root, null);
     }
 
     private void AutoAttack()
     {
         int ms = (int)(_cfg.Interval * 1000);
-        _cancel = Timer.StartRepeat(ms, OnAttack);
+        _cancel = FrameworkMgr.Timer.StartRepeat(ms, OnAttack);
     }
 
     private void OnAttack(int i)
@@ -86,7 +87,7 @@ public class PlayerPlane : EntityBase, IUpdateable
         
         for (int j = 0; j < BulletNum; j++)
         {
-            EntityMgr.Instance.CreateEntity(_cfg.BulletId, _battle.BulletRoot, OnLoadBulletFinish);
+            GameMgr.Entity.CreateEntity(_cfg.BulletId, _battle.BulletRoot, OnLoadBulletFinish);
         }
     }
 
@@ -105,8 +106,8 @@ public class PlayerPlane : EntityBase, IUpdateable
     private void OnDeath()
     {
         _cancel?.Cancel();
-        EntityMgr.Instance.CreateEntity(_cfg.DeadEffId, transform, null);
-        Timer.StartDelay(2000, _ => EntityMgr.Instance.RecycleEntity(_id, this));
+        GameMgr.Entity.CreateEntity(_cfg.DeadEffId, transform, null);
+        FrameworkMgr.Timer.StartDelay(2000, _ => GameMgr.Entity.RecycleEntity(_id, this));
     }
 
     private void OnHpChanged(int damage, int currentHp)

@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: MainPanel.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/12/31 18:43:16 
  *--------------------------------------------------------------
  */
@@ -31,12 +32,12 @@ public class MainPanel : UIPanelBase
 
     private void OnClickSetting()
     {
-        UIMgr.Instance.PanelOn(DPnlId.SettingPanel);
+        GameMgr.UI.PanelOn(DPnlId.SettingPanel);
     }
 
     private void OnClickStart()
     {
-        EventMgr.Instance.Send(GameEvent.ProcedureExitMain);
-        UIMgr.Instance.PanelOff(this);
+        FrameworkMgr.Event.Send(GameEvent.ProcedureExitMain);
+        GameMgr.UI.PanelOff(this);
     }
 }

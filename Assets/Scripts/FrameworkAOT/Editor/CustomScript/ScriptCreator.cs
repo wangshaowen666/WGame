@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------
  * File: NewCSharpScript.cs
- * Author: Wang ShaoWen
- * Time: 2024/01/17 18:27:54
+ * Author: Wsw
  * Feedback: 614270423@qq.com
+ * Time: 2024/01/17 18:27:54
  * Copyright: Copyright © 2024 wangshaowen. All rights reserved.
  *--------------------------------------------------------------
  */
@@ -79,10 +79,10 @@ public class CreateCustomScriptAction : EndNameEditAction
 
         // 修改内容中的部分内容
         content = content.Replace("#SCRIPTNAME#", Path.GetFileNameWithoutExtension(pathName));
-        content = content.Replace("#Author#", "Wang ShaoWen");
+        content = content.Replace("#Author#", "Wsw");
+        content = content.Replace("#Feedback#", "614270423@qq.com");
         content = content.Replace("#TIME#", DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"));
         //content = content.Replace("#Copyright#", "Copyright © 2024 wangshaowen. All rights reserved.");
-        //content = content.Replace("#Feedback#", "614270423@qq.com");
         
         // 将修改后的内容写入新创建的文件
         StreamWriter sw = new StreamWriter(Path.GetFullPath(pathName), false, new UTF8Encoding(false, false));

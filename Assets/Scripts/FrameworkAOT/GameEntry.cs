@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: GameEntry.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/11/12 16:41:23 
  *--------------------------------------------------------------
  */
@@ -11,7 +12,7 @@ public class GameEntry : MonoBehaviour
 {
     void Start()
     {
-        ProcedureMgr.Instance.RunProcedure<ProcedureLaunch>();
+        ProcedureMgr.RunProcedure<ProcedureLaunch>();
         DontDestroyOnLoad(gameObject);
     }
     

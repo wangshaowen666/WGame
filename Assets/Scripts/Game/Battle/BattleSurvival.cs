@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: BattleSurvival.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/01/26 14:49:35 
  *--------------------------------------------------------------
  */
@@ -46,7 +47,7 @@ public class BattleSurvival : BattleBase
 
     private void CreatePlayerPlane(int eId)
     {
-        EntityMgr.Instance.CreateEntity(eId, _aircraftRoot, OnLoadPlayerFinish);
+        GameMgr.Entity.CreateEntity(eId, _aircraftRoot, OnLoadPlayerFinish);
     }
 
     private void OnLoadPlayerFinish(EntityBase entity)
@@ -58,7 +59,7 @@ public class BattleSurvival : BattleBase
 
     private void StartSpawnEnemy()
     {
-        _spawnCts = Timer.StartRepeat(SpawnIntervalMs, _ => SpawnEnemy(), -1, true);
+        _spawnCts = FrameworkMgr.Timer.StartRepeat(SpawnIntervalMs, _ => SpawnEnemy(), -1, true);
     }
 
     private void SpawnEnemy()
@@ -69,7 +70,7 @@ public class BattleSurvival : BattleBase
         Vector3 spawnVp = new Vector3(x, 0.95f, 0);
         Vector3 worldPos = _camera.ViewportToWorldPoint(spawnVp);
         Vector3 spawnPos = new Vector3(worldPos.x, 0, worldPos.z);
-        EntityMgr.Instance.CreateEntity(EnemyEid, _aircraftRoot, entity =>
+        GameMgr.Entity.CreateEntity(EnemyEid, _aircraftRoot, entity =>
         {
             EnemyPlane enemy = entity as EnemyPlane;
             if (enemy != null)

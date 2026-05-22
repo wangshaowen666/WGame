@@ -1,8 +1,8 @@
 ﻿/*--------------------------------------------------------------
  * File: ClassPoolFactory.cs
- * Author: Wang ShaoWen
- * Time: 2024/03/20 18:23:22 
+ * Author: Wsw
  * Feedback: 614270423@qq.com
+ * Time: 2024/03/20 18:23:22 
  * Copyright: Copyright © 2024 wangshaowen. All rights reserved.
  *--------------------------------------------------------------
  */

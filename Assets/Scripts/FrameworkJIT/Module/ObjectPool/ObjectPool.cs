@@ -53,7 +53,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
         _autoReleaseTime = autoReleaseTime;
         if (autoReleaseTime > 0)
         {
-            _cancel = Timer.StartSecondDelay(autoReleaseTime, AutoReleaseObj);
+            _cancel = FrameworkMgr.Timer.StartSecondDelay(autoReleaseTime, AutoReleaseObj);
         }
     }
     
@@ -181,7 +181,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
                 }
             }
             
-            _cancel = Timer.StartSecondDelay(_autoReleaseTime, AutoReleaseObj);
+            _cancel = FrameworkMgr.Timer.StartSecondDelay(_autoReleaseTime, AutoReleaseObj);
         }
     }
     
@@ -217,7 +217,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
         {
             Object.Destroy(obj);
         }
-        ResMgr.Instance.Unload(key);
+        FrameworkMgr.Res.Unload(key);
     }
     
 #if STATS_ON && UNITY_EDITOR

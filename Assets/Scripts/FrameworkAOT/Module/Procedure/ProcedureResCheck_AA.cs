@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: ProcudureResCheck.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/12/11 14:09:47 
  *--------------------------------------------------------------
  */
@@ -49,7 +50,7 @@ public class ProcedureResCheck_AA : ProcedureBase
             
             await _helper.Download(_tokenSource.Token);
             
-            ProcedureMgr.Instance.RunProcedure<ProcedureLoadDll>();
+            ProcedureMgr.RunProcedure<ProcedureLoadDll>();
         }
         catch (OperationCanceledException e)
         {
@@ -67,7 +68,7 @@ public class ProcedureResCheck_AA : ProcedureBase
         {
             case 1:
                 // 尝试跳过热更直接进游戏玩，前提是远端bundle全部下载完成过
-                ProcedureMgr.Instance.RunProcedure<ProcedureLoadDll>();
+                ProcedureMgr.RunProcedure<ProcedureLoadDll>();
                 break;
         }
         Log.Info("执行加载出错回调");

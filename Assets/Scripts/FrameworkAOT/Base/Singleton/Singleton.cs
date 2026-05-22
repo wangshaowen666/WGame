@@ -1,8 +1,8 @@
 ﻿﻿/*--------------------------------------------------------------
  * File: Singleton.cs
- * Author: Wang ShaoWen
- * Time: 2024/03/14 15:52:25 
+ * Author: Wsw
  * Feedback: 614270423@qq.com
+ * Time: 2024/03/14 15:52:25 
  * Copyright: Copyright © 2024 wangshaowen. All rights reserved.
  *--------------------------------------------------------------
  */
@@ -25,6 +25,11 @@ public class Singleton<T> where T:Singleton<T>
     {
         get
         {
+            if (instance != null)
+            {
+                return instance;
+            }
+            
             lock (lockObject)
             {
                 if (isDisposed)
@@ -40,7 +45,8 @@ public class Singleton<T> where T:Singleton<T>
                     if (ctor == null)
                         throw new GameException(typeof(T).Name + "缺少无参的私有构造函数，请私有化构造");
                     instance = ctor.Invoke(null) as T;
-                    instance.OnInit();
+                    if (instance != null) 
+                        instance.OnInit();
                 }
             }
             return instance;

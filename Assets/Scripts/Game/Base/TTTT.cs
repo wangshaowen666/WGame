@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: TTTT.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/11/12 18:09:09 
  *--------------------------------------------------------------
  */
@@ -19,7 +20,7 @@ public class TTTT : MonoBehaviour
     {
         //GCProfiler.RecordGC(A);
         int a = 100;
-        Timer.StartDelay(1000, i =>
+        FrameworkMgr.Timer.StartDelay(1000, i =>
         {
             Log.Info(a);
         });

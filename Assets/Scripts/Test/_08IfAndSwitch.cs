@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: _08IfAndSwitch.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/12/08 13:28:29 
  *--------------------------------------------------------------
  */
@@ -19,7 +20,7 @@ public class _08IfAndSwitch : MonoBehaviour
     
     void Start()
     {
-        Timer.StartDelay(5000, i =>
+        FrameworkMgr.Timer.StartDelay(5000, i =>
         {
             TimeProfiler.LogDurationTime();
         });

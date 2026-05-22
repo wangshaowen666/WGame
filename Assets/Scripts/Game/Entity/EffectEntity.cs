@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: EffectEntity.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/05/11 16:36:15 
  *--------------------------------------------------------------
  */
@@ -13,15 +14,15 @@ public class EffectEntity : EntityBase
     public override void OnInit(int id)
     {
         base.OnInit(id);
-        var time = DataTableMgr.Instance.TbEffect[id].Time;
+        var time = GameMgr.DataTable.TbEffect[id].Time;
         if (time > 0)
         {
-            Timer.StartDelay((int)(time * 1000), OnFinish);
+            FrameworkMgr.Timer.StartDelay((int)(time * 1000), OnFinish);
         }
     }
 
     private void OnFinish(int _)
     {
-        EntityMgr.Instance.RecycleEntity(_id, this);
+        GameMgr.Entity.RecycleEntity(_id, this);
     }
 }

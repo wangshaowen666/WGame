@@ -1,43 +1,41 @@
 /*--------------------------------------------------------------
  * File: PanelCtr.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/12/18 14:42:43 
  *--------------------------------------------------------------
  */
 
-using System;
 using System.Collections.Generic;
 using cfg;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-public class UIMgr : Singleton<UIMgr>
+public class UIMgr : ManagerBase
 {
     private const string UILayerName = "UI";
     private const string UIRootName = "UIRoot";
     
-    private readonly Dictionary<DUIGroup, UIGroup> _layerGroupMap;
+    private readonly Dictionary<DUIGroup, UIGroup> _layerGroupMap = new();
     // 正在加载中的界面，如果还没加载完就被关闭了，value会被置为0
-    private readonly Dictionary<uint, DPnlId> _loadingPanelIdMap;
-    private readonly int _uiLayerId;
+    private readonly Dictionary<uint, DPnlId> _loadingPanelIdMap = new();
+    private readonly int _uiLayerId = LayerMask.NameToLayer(UILayerName);
     
     private Transform _uiRoot;
-    private ObjectPool<UIPanelBase> _uiPanelPool;
-    
-    private UIMgr()
+    private ObjectPool<UIPanelBase> _uiPanelPool = FrameworkMgr.ObjectPool.RegisterPool<UIPanelBase>(5);
+
+    public void CreateUIRoot()
     {
-        _layerGroupMap = new Dictionary<DUIGroup, UIGroup>();
-        _loadingPanelIdMap = new Dictionary<uint, DPnlId>();
+        var uiRoot = new GameObject { name = UIRootName, layer = _uiLayerId };
+        uiRoot.transform.SetParent(FrameworkMgr.Screen.UICanvas.transform, false);
+        uiRoot.AddComponent<RectTransform>();
         
-        _uiLayerId = LayerMask.NameToLayer(UILayerName);
-        _uiPanelPool = ObjectMgr.Instance.RegisterPool<UIPanelBase>(5);
-        
-        CreateUIRoot();
+        _uiRoot = uiRoot.transform;
     }
 
     public void PanelOn(DPnlId id, object userData = null)
     {
-        var cfg = DataTableMgr.Instance.TbUIPanel[id];
+        var cfg = GameMgr.DataTable.TbUIPanel[id];
         if (cfg == null)
         {
             throw new GameException("不存在的界面：" + id);
@@ -68,7 +66,7 @@ public class UIMgr : Singleton<UIMgr>
         {
             _loadingPanelIdMap.Add(loadingId, id);
             var info = LoadPanelArg.Create(loadingId, cfg, group, userData);
-            ResMgr.Instance.LoadAsync<GameObject>(cfg.Name, OnLoadFinish, info);
+            FrameworkMgr.Res.LoadAsync<GameObject>(cfg.Name, OnLoadFinish, info);
         }
         else
         {
@@ -99,7 +97,7 @@ public class UIMgr : Singleton<UIMgr>
 
     public void PanelOff(UIPanelBase panel)
     {
-        var cfg = DataTableMgr.Instance.TbUIPanel[panel.PnlId];
+        var cfg = GameMgr.DataTable.TbUIPanel[panel.PnlId];
         _uiPanelPool.PutObj(panel.PnlId.ToString(), panel);
         
         var group = _layerGroupMap[cfg.Group];
@@ -121,7 +119,7 @@ public class UIMgr : Singleton<UIMgr>
 
     public UIPanelBase HasPanel(DPnlId id)
     {
-        var cfg = DataTableMgr.Instance.TbUIPanel[id];
+        var cfg = GameMgr.DataTable.TbUIPanel[id];
         var group = _layerGroupMap[cfg.Group];
         return group.HasPanel(id);
     }
@@ -149,15 +147,6 @@ public class UIMgr : Singleton<UIMgr>
         panel.OnInit(arg.Cfg);
         arg.Group.AddPanel(panel, arg.UserData);
         ClassPool.Recycle(arg);
-    }
-
-    private void CreateUIRoot()
-    {
-        var uiRoot = new GameObject { name = UIRootName, layer = _uiLayerId };
-        uiRoot.transform.SetParent(ScreenCtr.Instance.UICanvas.transform, false);
-        uiRoot.AddComponent<RectTransform>();
-        
-        _uiRoot = uiRoot.transform;
     }
 
     private UIGroup CreateUIGroup(DUIGroup groupId)

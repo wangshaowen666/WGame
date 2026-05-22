@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: NetworkPlayer.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/01/27 19:06:53 
  *--------------------------------------------------------------
  */
@@ -31,7 +32,7 @@ public class NetworkPlayer : NetworkBehaviour
         if (IsServer)
         {
             //fireCooldown.Value -= _fireRate;
-            objectPool = ObjectMgr.Instance.RegisterPool<GameObject>();
+            objectPool = FrameworkMgr.ObjectPool.RegisterPool<GameObject>();
         }
     }
 
@@ -66,7 +67,7 @@ public class NetworkPlayer : NetworkBehaviour
         var bullet = objectPool.GetObj("bullet");
         if (bullet == null)
         {
-            ResMgr.Instance.LoadAsync<GameObject>("PlayerBullet", OnLoadBulletFinish);
+            FrameworkMgr.Res.LoadAsync<GameObject>("PlayerBullet", OnLoadBulletFinish);
         }
         else
         {

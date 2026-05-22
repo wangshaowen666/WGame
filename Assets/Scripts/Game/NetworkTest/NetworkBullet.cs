@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: NetworkBullet.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/01/29 16:55:38 
  *--------------------------------------------------------------
  */
@@ -18,8 +19,8 @@ public class NetworkBullet : NetworkBehaviour
         base.OnNetworkSpawn();
         if (IsServer)
         {
-            _bulletPool = ObjectMgr.Instance.GetPool<GameObject>();
-            Timer.StartRepeat(20, OnMove, 100, true);
+            _bulletPool = FrameworkMgr.ObjectPool.GetPool<GameObject>();
+            FrameworkMgr.Timer.StartRepeat(20, OnMove, 100, true);
         }
     }
 
@@ -27,7 +28,7 @@ public class NetworkBullet : NetworkBehaviour
     {
         if (IsServer)
         {
-            Timer.StartRepeat(20, OnMove, 100, true);
+            FrameworkMgr.Timer.StartRepeat(20, OnMove, 100, true);
         }
     }
 

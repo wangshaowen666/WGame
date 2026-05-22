@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: ProcedureVersionCheck.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/12/10 11:44:33 
  *--------------------------------------------------------------
  */
@@ -25,7 +26,7 @@ public class ProcedureVersionCheck : ProcedureBase
             var panel = _fsm.GetData<LoginPanel>("loginPanel");
             panel.SetTip("获取服务器信息...", 0.2f);
             
-            ProcedureMgr.Instance.RunProcedure<ProcedureResCheck_AA>();
+            ProcedureMgr.RunProcedure<ProcedureResCheck_AA>();
             return;
         }
         

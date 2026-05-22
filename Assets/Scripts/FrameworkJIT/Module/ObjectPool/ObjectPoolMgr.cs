@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: ObjectFactory.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/01/15 10:16:15 
  *--------------------------------------------------------------
  */
@@ -10,16 +11,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-public class ObjectMgr : Singleton<ObjectMgr>
+public class ObjectPoolMgr : ManagerBase
 {
     // 如果多人游戏，所有角色是共用工厂中的对象池的
-    private ObjectMgr()
-    {
-        _poolMap = new Dictionary<Type, IObjectPool>();
-    }
-    
     // 存储所有对象池
-    private readonly Dictionary<Type, IObjectPool> _poolMap;
+    private readonly Dictionary<Type, IObjectPool> _poolMap = new Dictionary<Type, IObjectPool>();
     
     /// <summary>
     /// 获取对象池

@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: ToolBox.Stats.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/01/19 10:26:20 
  *--------------------------------------------------------------
  */
@@ -25,7 +26,7 @@ public partial class ToolBox
         {
             try
             {
-                var contents = ObjectMgr.Instance.DealPoolStats();
+                var contents = FrameworkMgr.ObjectPool.DealPoolStats();
                 AddLogInfo(ParseUtil.ToJson(contents));
                 int index = 0;
                 string[] data = new string[contents.Count + 1];

@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: ProcedureMain.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/01/06 15:58:20 
  *--------------------------------------------------------------
  */
@@ -20,27 +21,28 @@ public class ProcedureMain : ProcedureBase
         if (_firstEnter)
             FirstEnter();
         
-        EventMgr.Instance.Register(GameEvent.ProcedureExitMain, RunProcedure);
-        
-        ScreenCtr.Instance.SetMainCamera(GameConfig.MapCamera);
-        UIMgr.Instance.PanelOn(DPnlId.MainPanel);
+        FrameworkMgr.Event.Register(GameEvent.ProcedureExitMain, RunProcedure);
+        FrameworkMgr.Screen.SetMainCamera(FrameworkConfig.MapCamera);
+        GameMgr.UI.PanelOn(DPnlId.MainPanel);
     }
 
     public override void OnExit()
     {
         base.OnExit();
-        EventMgr.Instance.UnRegister(GameEvent.ProcedureExitMain, RunProcedure);
+        FrameworkMgr.Event.UnRegister(GameEvent.ProcedureExitMain, RunProcedure);
     }
 
     private void FirstEnter()
     {
         _firstEnter = false;
-        ScreenCtr.Instance.Init();
+        
+        FrameworkMgr.Screen.Init();
+        GameMgr.UI.CreateUIRoot();
     }
 
     private void RunProcedure()
     {
         _fsm.SetData("sceneNm", "Battle");
-        ProcedureMgr.Instance.RunProcedure<ProcedureChangeScene>();
+        ProcedureMgr.RunProcedure<ProcedureChangeScene>();
     }
 }

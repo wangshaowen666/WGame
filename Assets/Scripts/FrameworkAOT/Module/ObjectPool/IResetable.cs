@@ -1,8 +1,8 @@
 ﻿/*--------------------------------------------------------------
  * File: IClass.cs
- * Author: Wang ShaoWen
- * Time: 2024/03/20 11:43:25 
+ * Author: Wsw
  * Feedback: 614270423@qq.com
+ * Time: 2024/03/20 11:43:25 
  * Copyright: Copyright © 2024 wangshaowen. All rights reserved.
  *--------------------------------------------------------------
  */

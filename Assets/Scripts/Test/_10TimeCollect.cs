@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: _10TimeCollect.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/12/23 19:26:28 
  *--------------------------------------------------------------
  */
@@ -21,7 +22,7 @@ public class _10TimeCollect : MonoBehaviour
     void Start()
     {
         _sw = new Stopwatch();
-        Timer.StartDelay(5000, i =>
+        FrameworkMgr.Timer.StartDelay(5000, i =>
         {
             Log.Info(Log.LogColor.Cyan, "共耗时", _sw.Elapsed.TotalMilliseconds, "毫秒");
             TimeProfiler.LogDurationTime();

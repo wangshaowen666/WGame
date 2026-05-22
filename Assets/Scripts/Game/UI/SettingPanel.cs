@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: SettingPanel.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/01/06 14:09:22 
  *--------------------------------------------------------------
  */
@@ -23,11 +24,11 @@ public class SettingPanel : UIPanelBase
 
     private void ClickCancel()
     {
-        UIMgr.Instance.PanelOff(this);
+        GameMgr.UI.PanelOff(this);
     }
 
     private void ClickConfirm()
     {
-        UIMgr.Instance.PanelOff(this);
+        GameMgr.UI.PanelOff(this);
     }
 }

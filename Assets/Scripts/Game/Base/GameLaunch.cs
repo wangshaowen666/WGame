@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: GameStart.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/01/04 18:41:15 
  *--------------------------------------------------------------
  */
@@ -20,7 +21,7 @@ public class GameLaunch
         ReplenishMeta();
         InitGameProcedure();
       
-        ProcedureMgr.Instance.RunProcedure<ProcedurePreload>();
+        ProcedureMgr.RunProcedure<ProcedurePreload>();
     }
 
     /// <summary>
@@ -28,10 +29,10 @@ public class GameLaunch
     /// </summary>
     private static void InitGameProcedure()
     {
-        ProcedureMgr.Instance.AddProcedure(new ProcedureChangeScene());
-        ProcedureMgr.Instance.AddProcedure(new ProcedurePreload());
-        ProcedureMgr.Instance.AddProcedure(new ProcedureMain());
-        ProcedureMgr.Instance.AddProcedure(new ProcedureBattle());
+        ProcedureMgr.AddProcedure(new ProcedureChangeScene());
+        ProcedureMgr.AddProcedure(new ProcedurePreload());
+        ProcedureMgr.AddProcedure(new ProcedureMain());
+        ProcedureMgr.AddProcedure(new ProcedureBattle());
     }
     
     /// <summary>
@@ -48,7 +49,7 @@ public class GameLaunch
 
         foreach (var aotDllName in aotDllList)
         {
-            byte[] dllBytes = ResMgr.Instance.LoadSync<TextAsset>(aotDllName).bytes;
+            byte[] dllBytes = FrameworkMgr.Res.LoadSync<TextAsset>(aotDllName).bytes;
             RuntimeApi.LoadMetadataForAOTAssembly(dllBytes, HomologousImageMode.SuperSet);
             Log.Info("补充元数据dll:", aotDllName);
         }

@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: UIGroup.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/01/08 10:13:06 
  *--------------------------------------------------------------
  */
@@ -37,7 +38,7 @@ public class UIGroup
 
     public void RemoveAll()
     {
-        var pool = ObjectMgr.Instance.GetPool<UIPanelBase>();
+        var pool = FrameworkMgr.ObjectPool.GetPool<UIPanelBase>();
         var panelNode = _uiPanels.First;
         while (panelNode != null)
         {

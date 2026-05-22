@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: ProcedureChangeScene.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/12/22 18:26:05 
  *--------------------------------------------------------------
  */
@@ -34,16 +35,16 @@ public class ProcedureChangeScene : ProcedureBase
             Log.Info("场景名：", nm);
         }
        
-        await SceneCtr.Instance.LoadScene(nm);
+        await FrameworkMgr.Scene.LoadScene(nm);
         switch (nm)
         {
             case "Main":
-                ProcedureMgr.Instance.RunProcedure<ProcedureMain>();
+                ProcedureMgr.RunProcedure<ProcedureMain>();
                 break;
             
             case "Battle":
             case "Network":
-                ProcedureMgr.Instance.RunProcedure<ProcedureBattle>();
+                ProcedureMgr.RunProcedure<ProcedureBattle>();
                 break;
             
             default:

@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: ProcedureBattle.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/01/06 15:58:41 
  *--------------------------------------------------------------
  */
@@ -15,8 +16,8 @@ public class ProcedureBattle : ProcedureBase
     {
         base.OnEnter();
         
-        ScreenCtr.Instance.SetMainCamera(GameConfig.BattleCamera);
-        UIMgr.Instance.PanelOn(DPnlId.BattlePanel);
-        BattleMgr.Instance.EnterBattle();
+        FrameworkMgr.Screen.SetMainCamera(FrameworkConfig.BattleCamera);
+        GameMgr.UI.PanelOn(DPnlId.BattlePanel);
+        GameMgr.Battle.EnterBattle();
     }
 }

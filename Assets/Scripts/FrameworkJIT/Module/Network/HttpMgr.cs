@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: HttpMgr.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/11/26 15:31:12 
  *--------------------------------------------------------------
  */
@@ -14,15 +15,10 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class HttpMgr : Singleton<HttpMgr>
+public class HttpMgr : ManagerBase
 {
     // todo 通信要有proto，后续添加
     // todo 数据处理部分放在其他线程，SendWebRequest放在主线程
-
-    private HttpMgr()
-    {
-        
-    }
 
     public async UniTask<Dictionary<string, object>> Post(string url, object args = null)
     {

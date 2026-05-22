@@ -1,8 +1,8 @@
 ﻿/*--------------------------------------------------------------
  * File: Log.cs
- * Author: Wang ShaoWen
- * Time: 2024/03/20 15:46:16 
+ * Author: Wsw
  * Feedback: 614270423@qq.com
+ * Time: 2024/03/20 15:46:16 
  * Copyright: Copyright © 2024 wangshaowen. All rights reserved.
  *--------------------------------------------------------------
  */

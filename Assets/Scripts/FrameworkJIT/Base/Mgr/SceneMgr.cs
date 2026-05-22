@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: SceneCtr.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/12/22 18:43:02 
  *--------------------------------------------------------------
  */
@@ -13,14 +14,10 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.SceneManagement;
 
-public class SceneCtr : Singleton<SceneCtr>
+public class SceneMgr : ManagerBase
 {
     private SceneInstance _curScene;
     private bool _isLoading;
-
-    private SceneCtr()
-    {
-    }
 
     // 先实现，后续把AA移走，面向接口实现
     public async UniTask LoadScene(string sceneName, LoadSceneMode mode = LoadSceneMode.Single)

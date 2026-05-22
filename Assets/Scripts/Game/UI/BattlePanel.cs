@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: BattlePanel.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2026/05/12 14:28:45
  *--------------------------------------------------------------
  */
@@ -23,7 +24,7 @@ public class BattlePanel : UIPanelBase, IUpdateable
         EnhancedTouchSupport.Enable();
         UpdateMgr.RegisterUpdate(this);
 
-        if (BattleMgr.Instance.CurrentBattle is BattleSurvival battle)
+        if (GameMgr.Battle.CurrentBattle is BattleSurvival battle)
         {
             _playerPlane = battle.PlayerPlane;
             if (_playerPlane != null && _camera != null)

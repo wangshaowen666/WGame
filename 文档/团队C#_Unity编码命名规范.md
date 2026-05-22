@@ -86,6 +86,15 @@
 |命名空间|PascalCase|`Game.Player`、`Game.UI`|按项目模块划分，和类名规则一致|
 ---
 
+## 管理类、工具类
+
+|元素|命名规则|示例|说明|
+|---|---|---|---|
+|有状态、需清理的管理类|XXXMgr|`UIMgr`、`BattleMgr`|普通类、统一在GameManager中实例管理|
+|无状态的管理类|XXXCtr|`ProcedureCtr`|静态类、专注提供功能接口，切场景、重启等不需要清理操作|
+|独立的功能|按功能命名|Fsm|普通类、提供静态的Create方法供其他模块使用|
+|工具类|XXXUtil|FileUtil|普通类、提供静态的Create方法供其他模块使用|
+
 ## 完整代码示例
 
 ```csharp

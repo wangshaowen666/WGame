@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: ProcedurePreload.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/11/13 13:36:48 
  *--------------------------------------------------------------
  */
@@ -22,15 +23,15 @@ public class ProcedurePreload : ProcedureBase
         // todo 预加载配置表、图集、字体等
         
         // 加载配置表
-        DataTableMgr.Instance.LoadTable();
+        GameMgr.DataTable.LoadTable();
         
         // 启动lua
-        LuaCtr.Instance.InitLuaEnv();
+        FrameworkMgr.Lua.InitLuaEnv();
         
         await UniTask.Delay(300);
         
         _fsm.RemoveData("loginPanel");
         _fsm.SetData("sceneNm", "Main");
-        ProcedureMgr.Instance.RunProcedure<ProcedureChangeScene>();
+        ProcedureMgr.RunProcedure<ProcedureChangeScene>();
     }
 }

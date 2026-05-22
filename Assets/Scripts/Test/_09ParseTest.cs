@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------
  * File: _09MiniJson.cs
- * Author: Wang ShaoWen
+ * Author: Wsw
+ * Feedback: 614270423@qq.com
  * Time: 2025/12/08 15:43:37 
  *--------------------------------------------------------------
  */
@@ -22,7 +23,7 @@ public class _09ParseTest : MonoBehaviour
     {
         List<string> m = new List<string>{"sfs", "kjk", "435"};
 
-        Timer.StartDelay(0, _i =>
+        FrameworkMgr.Timer.StartDelay(0, _i =>
         {
             int count = 100000;
             TimeProfiler.RecordTimeStart("二进制转化1");
