@@ -16,9 +16,8 @@ public partial class ToolBox
 {
 #if STATS_ON && UNITY_EDITOR
     [TitleGroup("统计工具")]
-    [HorizontalGroup("统计工具/水平布局", width:150)]
-    [ButtonGroup("统计工具/水平布局/统计")]
-    [Button("导出对象池统计数据", 30)]
+    [HorizontalGroup("统计工具/水平布局", Width = 130)]
+    [Button("导出对象池统计数据", ButtonSizes.Large)]
     public void ExportObjectPoolInfo()
     {
         string exportFileName = EditorUtility.SaveFilePanel("Export CSV Data", string.Empty, $"对象池统计数据 {DateTime.Now}.csv", string.Empty);
@@ -46,8 +45,8 @@ public partial class ToolBox
         }
     }
     
-    [ButtonGroup("统计工具/水平布局/统计")]
-    [Button("导出类池统计数据")]
+    [HorizontalGroup("统计工具/水平布局", Width = 120, PaddingLeft = 0)]
+    [Button("导出类池统计数据", ButtonSizes.Large)]
     public void ExportClassPoolInfo()
     {
         string exportFileName = EditorUtility.SaveFilePanel("Export CSV Data", string.Empty, $"类池统计数据 {DateTime.Now}.csv", string.Empty);
@@ -71,6 +70,35 @@ public partial class ToolBox
             catch (Exception exception)
             {
                 AddLogInfo(string.Format("导出类池统计信息 '{0}' 失败, 原因'{1}'.", exportFileName, exception));
+            }
+        }
+    }
+    
+    [HorizontalGroup("统计工具/水平布局", Width = 160)]
+    [Button("导出AssetBundle统计数据", ButtonSizes.Large)]
+    public void ExportAssetBundleInfo()
+    {
+        string exportFileName = EditorUtility.SaveFilePanel("Export CSV Data", string.Empty, $"AssetBundle统计数据 {DateTime.Now}.csv", string.Empty);
+        if (!string.IsNullOrEmpty(exportFileName))
+        {
+            try
+            {
+                var contents = FrameworkMgr.Res.DealPoolStats();
+                AddLogInfo(ParseUtil.ToJson(contents));
+                int index = 0;
+                string[] data = new string[contents.Count + 1];
+                data[index++] = "资源名,当前引用数量,峰值引用数量,总获取次数,总释放次数";
+                foreach (string str in contents)
+                {
+                    data[index++] = str;
+                }
+
+                File.WriteAllLines(exportFileName, data, Encoding.UTF8);
+                AddLogInfo(string.Format("导出AssetBundle统计信息 '{0}' 成功.", exportFileName));
+            }
+            catch (Exception exception)
+            {
+                AddLogInfo(string.Format("导出AssetBundle统计信息 '{0}' 失败, 原因'{1}'.", exportFileName, exception));
             }
         }
     }

@@ -23,8 +23,7 @@ public partial class ToolBox
 {
     [TitleGroup("打包工具")]
     [HorizontalGroup("打包工具/水平布局", width:100)]
-    [ButtonGroup("打包工具/水平布局/打包")]
-    [Button("构建热更Bundle", 30)]
+    [Button("构建热更Bundle", ButtonSizes.Large)]
     [GUIColor(0, 1, 0)]
     public void UpdateBuild()
     {
@@ -40,8 +39,8 @@ public partial class ToolBox
         CopyBundle();
     }
 
-    [ButtonGroup("打包工具/水平布局/打包")]
-    [Button("构建新Bundle")]
+    [HorizontalGroup("打包工具/水平布局", width:90)]
+    [Button("构建新Bundle", ButtonSizes.Large)]
     public void NewBuild()
     {
         EditorApplication.ExecuteMenuItem("HybridCLR/Generate/All");
@@ -56,8 +55,8 @@ public partial class ToolBox
         CopyBundle();
     }
 
-    [ButtonGroup("打包工具/水平布局/打包")]
-    [Button("构建安装包")]
+    [HorizontalGroup("打包工具/水平布局", width:80)]
+    [Button("构建安装包", ButtonSizes.Large)]
     public void BuildPackage()
     {
         try

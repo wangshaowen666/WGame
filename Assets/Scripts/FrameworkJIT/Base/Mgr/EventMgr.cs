@@ -11,8 +11,6 @@ using System.Collections.Generic;
 
 /// <summary>
 /// 抛事件时，如果注册的回调参数结构、数量不一致都将不会触发;
-/// 用范型存在的问题：后续事件需要新增、修改参数数量或类型等都会影响到旧方法，需要全部修改；
-/// 如果用EventArg专门定义相关类，只需要在参数类和新的回调中处理即可。
 /// </summary>
 public class EventMgr : ManagerBase
 {

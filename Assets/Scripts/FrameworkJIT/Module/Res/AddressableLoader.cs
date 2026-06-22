@@ -20,23 +20,31 @@ public class AddressableLoader : IResLoader
 
     public T LoadSync<T>(string key)
     {
+#if STATS_ON && UNITY_EDITOR
+        UpdateStats(key,1);
+#endif
+
         if (_handleMap.TryGetValue(key, out AsyncOperationHandle tempHandle))
         {
             _refMap.TryGetValue(key, out int c);
             _refMap[key] = c + 1;
             return (T)tempHandle.Result;
         }
-        
+
         var handle = Addressables.LoadAssetAsync<T>(key);
         T ret = handle.WaitForCompletion();
         _handleMap.TryAdd(key, handle);
         _refMap.TryGetValue(key, out int count);
         _refMap[key] = count + 1;
+
         return ret;
     }
 
     public void LoadAsync<T>(string key, LoadAssetCallback<T> callback = null, object userData = null)
     {
+#if STATS_ON && UNITY_EDITOR
+        UpdateStats(key,1);
+#endif
         LoadRes(key, callback, userData).Forget();
     }
 
@@ -51,7 +59,7 @@ public class AddressableLoader : IResLoader
                 callback?.Invoke((T)tempHandle.Result, userData);
                 return;
             }
-            
+
             AsyncOperationHandle<T> handle = Addressables.LoadAssetAsync<T>(key);
             await handle.Task;
 
@@ -61,6 +69,7 @@ public class AddressableLoader : IResLoader
             _handleMap.TryAdd(key, handle);
             _refMap.TryGetValue(key, out int count);
             _refMap[key] = count + 1;
+
             callback?.Invoke(handle.Result, userData);
         }
         catch (Exception e)
@@ -77,13 +86,16 @@ public class AddressableLoader : IResLoader
             return;
         }
 
-        Addressables.Release(handle);
-        int count = _refMap[key] - 1;
+#if STATS_ON && UNITY_EDITOR
+        UpdateStats(key,2, 1);
+#endif
 
+        int count = _refMap[key] - 1;
         if (count <= 0)
         {
             _handleMap.Remove(key);
             _refMap.Remove(key);
+            Addressables.Release(handle);
         }
         else
         {
@@ -97,8 +109,13 @@ public class AddressableLoader : IResLoader
         {
             if (kv.Value.IsValid() && _refMap.TryGetValue(kv.Key, out int count))
             {
-                for (int i = 0; i < count; i++)
+                if (count > 0)
+                {
                     Addressables.Release(kv.Value);
+#if STATS_ON && UNITY_EDITOR
+                    UpdateStats(kv.Key,2, count);
+#endif
+                }
             }
         }
 
@@ -122,4 +139,64 @@ public class AddressableLoader : IResLoader
             Log.Info("资源加载成功：", asset);
         }
     }
+    
+#if STATS_ON && UNITY_EDITOR
+    private readonly Dictionary<string, AssetBundleStats> _statsMap = new();
+
+    /// <summary>
+    /// 更新统计信息
+    /// </summary>
+    /// <param name="key">bundle名</param>
+    /// <param name="flag">操作标识。1获取 2释放</param>
+    /// <param name="count">数量</param>
+    private void UpdateStats(string key, int flag, int count = 1)
+    {
+        if (!_statsMap.TryGetValue(key, out var stats))
+        {
+            stats = new AssetBundleStats();
+            _statsMap[key] = stats;
+        }
+        switch (flag)
+        {
+            case 1:
+                stats.currentNum += count;
+                stats.totalGets += count;
+
+                if (stats.peakNUm < stats.currentNum)
+                    stats.peakNUm = stats.currentNum;
+                break;
+
+            case 2:
+                stats.currentNum -= count;
+                stats.totalPuts -= count;
+                break;
+        }
+    }
+
+    public List<string> DealPoolStats()
+    {
+        List<string> result = new List<string>();
+        foreach (var statsKV in _statsMap)
+        {
+            var stats = statsKV.Value;
+            result.Add($"{statsKV.Key},{stats.currentNum},{stats.peakNUm}," +
+                       $"{stats.totalGets},{stats.totalPuts}");
+        }
+
+        return result;
+    }
+#endif
 }
+
+#if STATS_ON && UNITY_EDITOR
+/// <summary>
+/// 对象池统计信息
+/// </summary>
+public class AssetBundleStats
+{
+    public int currentNum;      // 当前引用数量
+    public int peakNUm;         // 峰值引用数量
+    public long totalGets;      // 总获取次数
+    public long totalPuts;      // 总释放次数
+}
+#endif

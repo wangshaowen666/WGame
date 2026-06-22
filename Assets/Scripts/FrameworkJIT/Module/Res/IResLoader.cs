@@ -6,9 +6,6 @@
  *--------------------------------------------------------------
  */
 
-using System;
-using UnityEngine;
-
 public interface IResLoader
 {
     /// <summary>
@@ -38,4 +35,8 @@ public interface IResLoader
     /// 卸载所有已加载的资源
     /// </summary>
     void UnloadAll();
+    
+#if STATS_ON && UNITY_EDITOR
+    public System.Collections.Generic.List<string> DealPoolStats();
+#endif
 }

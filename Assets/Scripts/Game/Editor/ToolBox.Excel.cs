@@ -19,8 +19,7 @@ public partial class ToolBox
 {
     [TitleGroup("导表工具")]
     [HorizontalGroup("导表工具/水平布局", Width = 80)] 
-    [ButtonGroup("导表工具/水平布局/导表")]
-    [Button("导表", 30)]
+    [Button("导表", ButtonSizes.Large)]
     public void ImportExcel()
     {
         var ret = ShellUtil.Run(editorPathConfig.excelShellPath);

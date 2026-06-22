@@ -96,4 +96,11 @@ public class ResMgr : ManagerBase
             Log.Error("反射加载类型出错：", type);
         }
     }
+    
+#if STATS_ON && UNITY_EDITOR
+    public List<string> DealPoolStats()
+    {
+        return _resLoader.DealPoolStats();
+    }
+#endif
 }
