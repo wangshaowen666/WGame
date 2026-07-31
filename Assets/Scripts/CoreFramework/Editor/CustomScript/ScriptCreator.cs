@@ -17,12 +17,25 @@ using Object = UnityEngine.Object;
 
 public class ScriptCreator
 {
-    private const string ScriptTemplatePath = "Assets/Scripts/FrameworkAOT/Base/ScriptTemplates/CustomC#Script.txt";
-    
+    private const string ScriptTemplateName = "CustomC#Script";
+
     [MenuItem("Assets/Create/Custom C# Script", false, 70)]
     private static void CreateCustomCSharpScript()
     {
-        Create(ScriptTemplatePath, "NewCSharpScript.cs");
+        string templatePath = FindTemplatePath(ScriptTemplateName);
+        if (templatePath == null) return;
+        Create(templatePath, "NewCSharpScript.cs");
+    }
+
+    private static string FindTemplatePath(string fileName)
+    {
+        string[] guids = AssetDatabase.FindAssets(fileName);
+        if (guids.Length == 0)
+        {
+            Log.Error($"找不到脚本模板文件: {fileName}");
+            return null;
+        }
+        return AssetDatabase.GUIDToAssetPath(guids[0]);
     }
 
     private static void Create(string path, string defaultName)

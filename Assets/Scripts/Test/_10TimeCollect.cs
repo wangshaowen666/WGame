@@ -22,7 +22,7 @@ public class _10TimeCollect : MonoBehaviour
     void Start()
     {
         _sw = new Stopwatch();
-        FrameworkMgr.Timer.StartDelay(5000, () =>
+        CoreMgr.Timer.StartDelay(5000, () =>
         {
             Log.Info(Log.LogColor.Cyan, "共耗时", _sw.Elapsed.TotalMilliseconds, "毫秒");
             TimeProfiler.LogDurationTime();

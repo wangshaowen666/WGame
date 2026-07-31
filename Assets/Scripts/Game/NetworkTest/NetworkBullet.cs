@@ -22,7 +22,7 @@ public class NetworkBullet : NetworkBehaviour
         {
             _bulletPool = FrameworkMgr.ObjectPool.GetPool<GameObject>();
             _moveCount = 0;
-            FrameworkMgr.Timer.StartRepeat(20, OnMove, 100, true);
+            CoreMgr.Timer.StartRepeat(20, OnMove, 100, true);
         }
     }
 
@@ -31,7 +31,7 @@ public class NetworkBullet : NetworkBehaviour
         if (IsServer)
         {
             _moveCount = 0;
-            FrameworkMgr.Timer.StartRepeat(20, OnMove, 100, true);
+            CoreMgr.Timer.StartRepeat(20, OnMove, 100, true);
         }
     }
 

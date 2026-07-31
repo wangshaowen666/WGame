@@ -1,135 +1,192 @@
 ﻿/*--------------------------------------------------------------
- * File: ClassPoolFactory.cs
+ * File: ClassPool.cs
  * Author: Wsw
  * Feedback: 614270423@qq.com
- * Time: 2024/03/20 18:23:22 
+ * Time: 2024/03/14 19:14:37 
  * Copyright: Copyright © 2024 wangshaowen. All rights reserved.
  *--------------------------------------------------------------
  */
 
-/*
- * 每帧100次获取持续5s 测试发现 耗时比直接new更久(无任何成员的空类) （已优化）
- * 实测当类字段增多，所占内存字节增多，new耗时指数级增长，对象池只会在预创建的时候有一次开销，后续缓存获取耗时变化不大
- *
- * 主要性能问题   
-   1. 字典查找开销过大   
-   每次Get/Recycle都要进行字典查找，这是最大的性能瓶颈。   
-   2. 类型检查过于严格   
-   泛型方法中不必要的类型检查增加了开销。   
-   3. 堆栈操作可能不如数组高效   
-   Stack的Push/Pop操作相比数组索引有额外开销。
-   
-   自己测试统计发现var type = typeof(T);同样有一定开销
-   类型获取 58ms    字典查找85ms    池类型检查 58ms  栈操作 66ms
-   
-   修改后测试，原版208ms  优化了工厂类型获取和字典查找 取消了池的类型检查  101ms   用数组替换栈后 34ms， 纯new开销 41ms   
-   如果去掉[MethodImpl(MethodImplOptions.AggressiveInlining)]  耗时变成69ms，所以数组替换栈的提升没有翻倍这么大
-   
-   [MethodImpl(MethodImplOptions.AggressiveInlining)] 强制内联建议
-   方法内联是JIT（Just-In-Time）编译器的一种优化技术，它将方法调用替换为方法体本身的代码，从而消除方法调用的开销。
-   消除的开销：方法调用指令（call指令）参数压栈/出栈 栈帧创建和销毁 寄存器保存和恢复
-   性能提升：减少CPU指令数 更好的CPU缓存局部性 减少分支预测失败
-   缺点：内联后，每个调用点都会插入完整的代码，可能导致生成的机器代码体积过大；难以断点；调用堆栈不完整；
-   
- *
- * 对象池的主要优势是减少GC压力，而不是提升速度。在GC频繁触发时，对象池可以减少GC带来的卡顿。所以，即使对象池的获取速度稍慢，但整体性能可能更稳定。 
- */
-
 using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
-public static class ClassPool
+public class ClassPool
 {
-    // 新增池的缓存，使工厂字典查找池的操作由每次都查询改成只在构造时查询一次
-    private static class PoolCache<T> where T: class, IResetable, new()
+    // 用数组替代栈，减少方法调用开销，比链表性能也好
+    // 在现代CPU架构下，缓存命中率对性能影响巨大；无额外指针开销，内存使用更紧凑；支持批量预分配，减少运行时开销
+    // 测试下来数组比栈耗时减少1倍多，主要是因为[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private IResetable[] _poolArray = new IResetable[Capacity];
+    private int _index = 0;
+    
+    // 默认初始容量
+    private const int Capacity = 8;
+
+    /// <summary>
+    /// 手动预分配对象
+    /// </summary>
+    /// <param name="count">分配数量</param>
+    public void PreAllocate<T>(int count) where T : class, IResetable, new()
     {
-        public static ClassContainer Container;
-        static PoolCache()
+        if (count <= 0)
         {
-            var type = typeof(T);
-            if (!_poolMap.TryGetValue(type, out Container))
+            Log.Error(Log.LogColor.Red, "预分配数量必须大于0");
+            return;
+        }
+
+        int targetCount = _index + count;
+        if (targetCount > _poolArray.Length)
+        {
+            int newCapacity = Math.Max(_poolArray.Length * 2, targetCount);
+            Array.Resize(ref _poolArray, newCapacity);
+        }
+        
+        for (int i = 0; i < count; i++)
+        {
+            var obj = new T();
+            _poolArray[_index++] = obj;
+        }
+
+#if STATS_ON && UNITY_EDITOR
+        UpdateStats(1, count);
+#endif
+    }
+
+    public T Get<T>() where T : class, IResetable, new()
+    {
+        T ret;
+
+        if (_index > 0)
+        {
+            ret = _poolArray[--_index] as T;
+            _poolArray[_index] = null;
+#if STATS_ON && UNITY_EDITOR
+            UpdateStats(4);
+#endif
+        }
+        else
+        {
+            ret = new T();
+#if STATS_ON && UNITY_EDITOR
+            UpdateStats(3);
+#endif
+        }
+
+        return ret;
+    }
+
+    public void Recycle<T>(T item) where T : IResetable
+    {
+#if UNITY_EDITOR 
+        for (int i = 0; i < _index; i++)
+        {
+            if (ReferenceEquals(_poolArray[i], item))
             {
-                Container = new ClassContainer();
-                _poolMap[type] = Container;
+                Log.Error(Log.LogColor.Red, "对象池中已经包含该对象，请检查回收逻辑");
+                return;
             }
         }
-    }
-    
-    private static readonly Dictionary<Type, ClassContainer> _poolMap = new Dictionary<Type, ClassContainer>();
-    
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void PreAllocate<T>(int count) where T : class, IResetable, new()
-    {
-        PoolCache<T>.Container.PreAllocate<T>(count);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T Get<T>() where T : class, IResetable, new()
-    {
-        return PoolCache<T>.Container.Get<T>();
-    }
-
-    public static void Recycle(IResetable item)
-    {
-        var type = item.GetType();
-        if (!_poolMap.TryGetValue(type, out var pool))
+#endif
+        if (_index >= _poolArray.Length)
         {
-            Log.Error(Log.LogColor.Red, "正在回收未经对象池工厂创建的对象：", type.Name);
-            return;
+            var newSize = _poolArray.Length * 2;
+            Array.Resize(ref _poolArray, newSize);
         }
-        
-        pool.Recycle(item);
-    }
-    
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Recycle<T>(T item) where T : class, IResetable, new()
-    {
-        PoolCache<T>.Container.Recycle(item);
-    }
-
-    public static void Release(Type type)
-    {
-        if (!_poolMap.TryGetValue(type, out var pool))
-        {
-            Log.Error(Log.LogColor.Red, "正在清除工厂中不存在的池子类型：", type.Name);
-            return;
-        }
-        
-        pool.Release();
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Release<T>() where T : class, IResetable, new()
-    {
-        PoolCache<T>.Container.Release();
-    }
-
-    public static void ReleaseAll()
-    {
-        foreach (var pool in _poolMap.Values)
-        {
-            pool.Release();
-        }
-        
-        // _poolMap始终不清理，清理之后，PoolCache<T>中的Container依旧存在，get依然能够获取，但是非泛型方法_poolMap会找不到。
-        // 静态PoolCache在构造时创建了Container，无销毁逻辑
-        //_poolMap.Clear();
-    }
+            
+        item.Reset();
+        _poolArray[_index++] = item;
         
 #if STATS_ON && UNITY_EDITOR
-    public static List<string> DealPoolStats()
+        UpdateStats(2);
+#endif
+    }
+
+    public void Release()
     {
-        List<string> result = new List<string>();
-        foreach (var pool in _poolMap)
-        {
-            var stats = pool.Value.GetStats();
-            result.Add($"{pool.Key.Name},{stats.capacity},{stats.preAllocate}," +
-                       $"{stats.createNum},{stats.totalNum},{stats.peakNUm}," +
-                       $"{stats.totalGets},{stats.totalPuts},{stats.releaseNum}");
-        }
+#if STATS_ON && UNITY_EDITOR
+        UpdateStats(5, _index + 1);
+#endif
+        // 释放后数组容量缩回默认
+        if (_index > Capacity)
+            _poolArray = new IResetable[Capacity];
         
-        return result;
+        Array.Clear(_poolArray, 0, _index);
+        _index = 0;
+    }
+       
+#if STATS_ON && UNITY_EDITOR
+    // 统计信息
+    private ClassPoolStats _stats = new ClassPoolStats{capacity = Capacity};
+    
+    /// <summary>
+    /// 更新统计信息
+    /// </summary>
+    /// <param name="flag">操作标识。1预热 2存 3取新 4取旧 5释放</param>
+    /// <param name="count">数量</param>
+    private void UpdateStats(int flag, int count = 1)
+    {
+        switch (flag)
+        {
+            case 1:
+                _stats.preAllocate += count;
+                _stats.capacity = _poolArray.Length;
+                _stats.totalNum += count;
+                _stats.createNum += count;
+                
+                if (_stats.peakNUm < _stats.totalNum)
+                    _stats.peakNUm = _stats.totalNum;
+                break;
+            
+            case 3:
+            case 4:
+                _stats.totalGets++;
+                if (flag == 3)
+                {
+                    _stats.createNum++;
+                }
+                else
+                {
+                    _stats.totalNum--;
+                }
+                break;
+            
+            case 2:
+                _stats.totalPuts++;
+                _stats.totalNum++;
+                _stats.capacity = _poolArray.Length;
+                if (_stats.peakNUm < _stats.totalNum)
+                    _stats.peakNUm = _stats.totalNum;
+                break;
+            
+            case 5:
+                _stats.totalNum -= count;
+                _stats.releaseNum += count;
+                break;
+        }
+    }
+    
+    /// <summary>
+    /// 获取对象池统计信息
+    /// </summary>
+    /// <returns>统计信息</returns>
+    public ClassPoolStats GetStats()
+    {
+        return _stats;
     }
 #endif
 }
+
+#if STATS_ON && UNITY_EDITOR
+/// <summary>
+/// 对象池统计信息
+/// </summary>
+public class ClassPoolStats
+{
+    public int capacity;        // 容量
+    public int preAllocate;     // 预热数量
+    public int createNum;       // 创建数量
+    public int totalNum;        // 池中总数量
+    public int peakNUm;         // 峰值数量
+    public long totalGets;      // 总获取次数
+    public long totalPuts;      // 总放回次数
+    public long releaseNum;     // 总释放数量
+}
+#endif

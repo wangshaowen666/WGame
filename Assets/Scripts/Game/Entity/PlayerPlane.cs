@@ -34,7 +34,7 @@ public class PlayerPlane : EntityBase, IUpdateable
         base.OnInit(id);
         _cfg = GameMgr.DataTable.TbPlane[id];
         _battle = battle as BattleSurvival;
-        _stats = ClassPool.Get<PlaneStats>();
+        _stats = CoreMgr.ClassPool.Get<PlaneStats>();
         _stats.Init(_cfg);
         _stats.OnDeath += OnDeath;
         _stats.OnHpChanged += OnHpChanged;
@@ -77,7 +77,7 @@ public class PlayerPlane : EntityBase, IUpdateable
     private void AutoAttack()
     {
         int ms = (int)(_cfg.Interval * 1000);
-        _cancel = FrameworkMgr.Timer.StartRepeat(ms, OnAttack);
+        _cancel = CoreMgr.Timer.StartRepeat(ms, OnAttack);
     }
 
     private void OnAttack()
@@ -107,7 +107,7 @@ public class PlayerPlane : EntityBase, IUpdateable
     {
         _cancel?.Cancel();
         GameMgr.Entity.CreateEntity(_cfg.DeadEffId, transform, null);
-        FrameworkMgr.Timer.StartDelay(2000, () => GameMgr.Entity.RecycleEntity(_id, this));
+        CoreMgr.Timer.StartDelay(2000, () => GameMgr.Entity.RecycleEntity(_id, this));
     }
 
     private void OnHpChanged(int damage, int currentHp)
@@ -133,7 +133,7 @@ public class PlayerPlane : EntityBase, IUpdateable
         {
             _stats.OnDeath -= OnDeath;
             _stats.OnHpChanged -= OnHpChanged;
-            ClassPool.Recycle(_stats);
+            CoreMgr.ClassPool.Recycle(_stats);
             _stats = null;
         }
         

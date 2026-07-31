@@ -20,7 +20,7 @@ public class _08IfAndSwitch : MonoBehaviour
     
     void Start()
     {
-        FrameworkMgr.Timer.StartDelay(5000, () =>
+        CoreMgr.Timer.StartDelay(5000, () =>
         {
             TimeProfiler.LogDurationTime();
         });

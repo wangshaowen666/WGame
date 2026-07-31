@@ -1,31 +1,28 @@
 /*--------------------------------------------------------------
- * File: GameMgr.cs
+ * File: CoreMgr.cs
  * Author: Wsw
  * Feedback: 614270423@qq.com
- * Time: 2026/05/20 10:17:32
+ * Time: 2026/07/31 15:58:44
  *--------------------------------------------------------------
  */
 
-/// <summary>
-/// 游戏管理类容器，有状态需清除的加入此容器中，不需要的声明为静态
-/// </summary>
-public static class GameMgr
-{
-    public static readonly DataTableMgr DataTable = new();
-    public static readonly UIMgr UI = new();
-    public static readonly BattleMgr Battle = new();
-    public static readonly EntityMgr Entity = new();
+using System;
 
+public static class CoreMgr
+{
+    public static readonly UpdateMgr Update = new();
+    public static readonly TimerMgr Timer = new();
+    public static readonly ClassPoolMgr ClassPool = new();
+    
     private static readonly ManagerBase[] s_managers;
 
-    static GameMgr()
+    static CoreMgr()
     {
         s_managers = new ManagerBase[]
         {
-            DataTable,
-            UI,
-            Battle,
-            Entity,
+            Update,
+            Timer,
+            ClassPool,
         };
     }
 

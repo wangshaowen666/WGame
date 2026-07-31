@@ -11,6 +11,6 @@ public class ProcedureBase : FsmState
 {
     protected void ChangeTo<T>() where T : ProcedureBase
     {
-        ProcedureMgr.ChangeProcedure<T>();
+        Procedure.ChangeProcedure<T>();
     }
 }

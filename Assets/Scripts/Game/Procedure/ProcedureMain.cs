@@ -33,13 +33,13 @@ public class ProcedureMain : ProcedureBase
     {
         _fsm.SetData("isLoginFinish", true);
         
-        FrameworkMgr.Screen.Init();
-        GameMgr.UI.CreateUIRoot();
+        //FrameworkMgr.Screen.Init();
+        //GameMgr.UI.CreateUIRoot();
     }
 
     private void RunProcedure()
     {
         _fsm.SetData("sceneNm", "Battle");
-        ProcedureMgr.ChangeProcedure<ProcedureChangeScene>();
+        ChangeTo<ProcedureChangeScene>();
     }
 }

@@ -12,12 +12,25 @@ using UnityEngine;
 
 public class LuaCreator 
 {
-    private const string LuaTemplatePath = "Assets/Scripts/FrameworkAOT/Base/ScriptTemplates/CustomLuaScript.txt";
+    private const string LuaTemplateName = "CustomLuaScript";
     
     [MenuItem("Assets/Create/Custom Lua Script", false, 71)]
     private static void CreateCustomCSharpScript()
     {
-        Create(LuaTemplatePath, "NewLuaScript.lua.txt");
+        string templatePath = FindTemplatePath(LuaTemplateName);
+        if (templatePath == null) return;
+        Create(templatePath, "NewLuaScript.lua.txt");
+    }
+
+    private static string FindTemplatePath(string fileName)
+    {
+        string[] guids = AssetDatabase.FindAssets(fileName);
+        if (guids.Length == 0)
+        {
+            Log.Error($"找不到Lua模板文件: {fileName}");
+            return null;
+        }
+        return AssetDatabase.GUIDToAssetPath(guids[0]);
     }
 
     private static void Create(string path, string defaultName)

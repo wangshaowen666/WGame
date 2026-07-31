@@ -59,7 +59,7 @@ public class BattleSurvival : BattleBase
 
     private void StartSpawnEnemy()
     {
-        _spawnCts = FrameworkMgr.Timer.StartRepeat(SpawnIntervalMs, () => SpawnEnemy(), -1, true);
+        _spawnCts = CoreMgr.Timer.StartRepeat(SpawnIntervalMs, () => SpawnEnemy(), -1, true);
     }
 
     private void SpawnEnemy()

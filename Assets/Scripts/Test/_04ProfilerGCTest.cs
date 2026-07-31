@@ -129,7 +129,7 @@ public class _04ProfilerGCTest : MonoBehaviour
                 {
                     Variable<int> intVal = i;
                     T(intVal);
-                    ClassPool.Recycle(intVal);
+                    CoreMgr.ClassPool.Recycle(intVal);
                 }
             }
             TimeProfiler.RecordTimeStop("Variable赋值");

@@ -34,7 +34,7 @@ public abstract class EntityBase : MonoBehaviour
     {
         if (!_updateRegistered && this is IUpdateable updatable)
         {
-            UpdateMgr.RegisterUpdate(updatable);
+            CoreMgr.Update.RegisterUpdate(updatable);
             _updateRegistered = true;
         }
     }
@@ -43,7 +43,7 @@ public abstract class EntityBase : MonoBehaviour
     {
         if (_updateRegistered && this is IUpdateable updatable)
         {
-            UpdateMgr.UnRegisterUpdate(updatable);
+            CoreMgr.Update.UnRegisterUpdate(updatable);
             _updateRegistered = false;
         }
     }

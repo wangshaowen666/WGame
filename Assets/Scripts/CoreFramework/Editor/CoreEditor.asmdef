@@ -1,7 +1,9 @@
 {
-    "name": "WFrameworkEditor",
+    "name": "CoreEditor",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:24248ba87ffaf463ab22492ca837fdba"
+    ],
     "includePlatforms": [
         "Editor"
     ],

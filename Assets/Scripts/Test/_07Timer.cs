@@ -22,7 +22,7 @@ public class _07Timer : MonoBehaviour
         WaitKeyDown().Forget();
 
         //_cts = Timer.StartDelay(5000, TimerDelayTest, false);
-        _cts = FrameworkMgr.Timer.StartRepeat(500, TimerRepeatTest, 20, false);
+        _cts = CoreMgr.Timer.StartRepeat(500, TimerRepeatTest, 20, false);
     }
 
     async UniTaskVoid WaitKeyDown()

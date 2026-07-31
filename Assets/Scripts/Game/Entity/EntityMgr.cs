@@ -66,7 +66,7 @@ public class EntityMgr : ManagerBase
         var entity = prefab.GetComponent<EntityBase>();
         arg.Callback?.Invoke(entity);
         
-        ClassPool.Recycle(arg);
+        CoreMgr.ClassPool.Recycle(arg);
     }
 }
 
@@ -78,7 +78,7 @@ public sealed class LoadEntityArg : IResetable
 
     public static LoadEntityArg Create(uint loadingID, Transform parent, Action<EntityBase> callback)
     {
-        LoadEntityArg arg = ClassPool.Get<LoadEntityArg>();
+        LoadEntityArg arg = CoreMgr.ClassPool.Get<LoadEntityArg>();
         arg.LoadingID = loadingID;
         arg.Parent = parent;
         arg.Callback = callback;

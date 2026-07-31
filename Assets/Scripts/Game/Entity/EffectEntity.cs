@@ -17,7 +17,7 @@ public class EffectEntity : EntityBase
         var time = GameMgr.DataTable.TbEffect[id].Time;
         if (time > 0)
         {
-            FrameworkMgr.Timer.StartDelay((int)(time * 1000), OnFinish);
+            CoreMgr.Timer.StartDelay((int)(time * 1000), OnFinish);
         }
     }
 

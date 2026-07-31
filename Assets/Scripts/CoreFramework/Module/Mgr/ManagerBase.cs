@@ -12,12 +12,20 @@ using UnityEngine;
 public abstract class ManagerBase 
 {
     /// <summary>
+    /// 初始化
+    /// </summary>
+    public virtual void OnInit()
+    {
+
+    }
+
+    /// <summary>
     /// 场景退出
     /// </summary>
-    /// <param name="sceneTp">场景类型 1主界面 2战斗界面</param>
+    /// <param name="sceneTp">场景类型</param>
     public virtual void OnSceneExit(int sceneTp)
     {
-        
+
     }
 
     /// <summary>
@@ -25,6 +33,14 @@ public abstract class ManagerBase
     /// </summary>
     public virtual void OnGameRestart()
     {
-        
+
+    }
+
+    /// <summary>
+    /// 程序关闭，释放所有资源
+    /// </summary>
+    public virtual void OnShutdown()
+    {
+
     }
 }

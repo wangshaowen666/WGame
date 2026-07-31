@@ -21,7 +21,7 @@ public class BattlePanel : UIPanelBase, IUpdateable
         base.OnOpen(userData);
         _camera = Camera.main;
         EnhancedTouchSupport.Enable();
-        UpdateMgr.RegisterUpdate(this);
+        CoreMgr.Update.RegisterUpdate(this);
 
         if (GameMgr.Battle.CurrentBattle is BattleSurvival battle)
         {
@@ -50,12 +50,12 @@ public class BattlePanel : UIPanelBase, IUpdateable
     {
         base.OnRecycle();
         EnhancedTouchSupport.Disable();
-        UpdateMgr.UnRegisterUpdate(this);
+        CoreMgr.Update.UnRegisterUpdate(this);
     }
 
     private void OnDestroy()
     {
-        UpdateMgr.UnRegisterUpdate(this);
+        CoreMgr.Update.UnRegisterUpdate(this);
     }
 
     private Vector3? GetTouchWorldPosition()

@@ -24,15 +24,6 @@ public class UIMgr : ManagerBase
     private Transform _uiRoot;
     private ObjectPool<UIPanelBase> _uiPanelPool = FrameworkMgr.ObjectPool.RegisterPool<UIPanelBase>(5);
 
-    public void CreateUIRoot()
-    {
-        var uiRoot = new GameObject { name = UIRootName, layer = _uiLayerId };
-        uiRoot.transform.SetParent(FrameworkMgr.Screen.UICanvas.transform, false);
-        uiRoot.AddComponent<RectTransform>();
-        
-        _uiRoot = uiRoot.transform;
-    }
-
     public void PanelOn(DPnlId id, object userData = null)
     {
         var cfg = GameMgr.DataTable.TbUIPanel[id];
@@ -135,7 +126,7 @@ public class UIMgr : ManagerBase
         if (pnlId == 0)
         {
             // todo 这里加载到内存，但没有实例化，卸载的时候要注意
-            ClassPool.Recycle(arg);
+            CoreMgr.ClassPool.Recycle(arg);
             return;
         }
 
@@ -146,7 +137,7 @@ public class UIMgr : ManagerBase
         
         panel.OnInit(arg.Cfg);
         arg.Group.AddPanel(panel, arg.UserData);
-        ClassPool.Recycle(arg);
+        CoreMgr.ClassPool.Recycle(arg);
     }
 
     private UIGroup CreateUIGroup(DUIGroup groupId)
@@ -177,7 +168,7 @@ public sealed class LoadPanelArg : IResetable
 
     public static LoadPanelArg Create(uint loadingId, DUIPanel cfg, UIGroup group, object userData)
     {
-        var info = ClassPool.Get<LoadPanelArg>();
+        var info = CoreMgr.ClassPool.Get<LoadPanelArg>();
         info.LoadingId = loadingId;
         info.Cfg = cfg;
         info.Group = group;

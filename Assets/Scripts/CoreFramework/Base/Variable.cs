@@ -27,7 +27,7 @@ public sealed class Variable<T> : Variable
 
     public static implicit operator Variable<T>(T value)
     {
-        var varValue = ClassPool.Get<Variable<T>>();
+        var varValue = CoreMgr.ClassPool.Get<Variable<T>>();
         varValue.Value = value;
         return varValue;
     }

@@ -20,8 +20,6 @@ public class GameLaunch
         //Application.targetFrameRate = 60;
         ReplenishMeta();
         InitGameProcedure();
-      
-        ProcedureMgr.ChangeProcedure<ProcedurePreload>();
     }
 
     /// <summary>
@@ -29,10 +27,12 @@ public class GameLaunch
     /// </summary>
     private static void InitGameProcedure()
     {
-        ProcedureMgr.AddProcedure(new ProcedureChangeScene());
-        ProcedureMgr.AddProcedure(new ProcedurePreload());
-        ProcedureMgr.AddProcedure(new ProcedureMain());
-        ProcedureMgr.AddProcedure(new ProcedureBattle());
+        Procedure.AddProcedure(new ProcedureChangeScene());
+        Procedure.AddProcedure(new ProcedurePreload());
+        Procedure.AddProcedure(new ProcedureMain());
+        Procedure.AddProcedure(new ProcedureBattle());
+        
+        Procedure.ChangeProcedure<ProcedurePreload>();
     }
     
     /// <summary>

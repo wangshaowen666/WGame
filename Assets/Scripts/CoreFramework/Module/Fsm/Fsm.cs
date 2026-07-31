@@ -18,17 +18,24 @@ public class Fsm : IResetable
     private FsmState _curState;
 
     public FsmState CurState => _curState;
+    
+    public static Fsm Create()
+    {
+        Fsm fsm = CoreMgr.ClassPool.Get<Fsm>();
+        fsm.Init();
+        return fsm;
+    }
 
     public static Fsm Create<T>(params T[] states) where T : FsmState
     {
-        Fsm fsm = ClassPool.Get<Fsm>();
+        Fsm fsm = CoreMgr.ClassPool.Get<Fsm>();
         fsm.Init(states.ToList());
         return fsm;
     }
 
     public static Fsm Create<T>(List<T> states) where T : FsmState
     {
-        Fsm fsm = ClassPool.Get<Fsm>();
+        Fsm fsm = CoreMgr.ClassPool.Get<Fsm>();
         fsm.Init(states.ToList());
         return fsm;
     }
@@ -80,7 +87,7 @@ public class Fsm : IResetable
     public void SetData<T>(string name, T value)
     {
         if (_datas.TryGetValue(name, out var old))
-            ClassPool.Recycle(old);
+            CoreMgr.ClassPool.Recycle(old);
 
         if (value is Variable varValue)
         {
@@ -88,7 +95,7 @@ public class Fsm : IResetable
             return;
         }
 
-        var newVar = ClassPool.Get<Variable<T>>();
+        var newVar = CoreMgr.ClassPool.Get<Variable<T>>();
         newVar.Value = value;
         _datas[name] = newVar;
     }
@@ -96,17 +103,22 @@ public class Fsm : IResetable
     public void RemoveData(string name)
     {
         if (_datas.Remove(name, out var old))
-            ClassPool.Recycle(old);
+            CoreMgr.ClassPool.Recycle(old);
     }
 
     public void Reset()
     {
         foreach (var kv in _datas)
-            ClassPool.Recycle(kv.Value);
+            CoreMgr.ClassPool.Recycle(kv.Value);
 
         _datas.Clear();
         _states.Clear();
         _curState = null;
+    }
+
+    private void Init()
+    {
+        
     }
     
     private void Init<T>(List<T> states) where T : FsmState

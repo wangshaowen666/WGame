@@ -23,7 +23,7 @@ public class _09ParseTest : MonoBehaviour
     {
         List<string> m = new List<string>{"sfs", "kjk", "435"};
 
-        FrameworkMgr.Timer.StartDelay(0, () =>
+        CoreMgr.Timer.StartDelay(0, () =>
         {
             int count = 100000;
             TimeProfiler.RecordTimeStart("二进制转化1");

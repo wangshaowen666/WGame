@@ -47,12 +47,12 @@ public class ProcedureChangeScene : ProcedureBase
         switch (nm)
         {
             case "Main":
-                ProcedureMgr.ChangeProcedure<ProcedureMain>();
+                ChangeTo<ProcedureMain>();
                 break;
             
             case "Battle":
             case "Network":
-                ProcedureMgr.ChangeProcedure<ProcedureBattle>();
+                ChangeTo<ProcedureBattle>();
                 break;
             
             default:

@@ -27,7 +27,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
 
         public static ObjectItem Create(Object target)
         {
-            var obj = ClassPool.Get<ObjectItem>();
+            var obj = CoreMgr.ClassPool.Get<ObjectItem>();
             obj.Target = target;
             obj.LastUseTime = Time.time;
             obj.IsUsing = false;
@@ -53,7 +53,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
         _autoReleaseTime = autoReleaseTime;
         if (autoReleaseTime > 0)
         {
-            _cancel = FrameworkMgr.Timer.StartSecondDelay(autoReleaseTime, AutoReleaseObj);
+            _cancel = CoreMgr.Timer.StartSecondDelay(autoReleaseTime, AutoReleaseObj);
         }
     }
     
@@ -163,7 +163,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
                 if (!items[i].IsUsing && currentTime - items[i].LastUseTime > _autoReleaseTime)
                 {
                     ReleaseObj(key, items[i].Target);
-                    ClassPool.Recycle(items[i]);
+                    CoreMgr.ClassPool.Recycle(items[i]);
                     items.RemoveAt(i);
 
 #if STATS_ON && UNITY_EDITOR
@@ -178,7 +178,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
             }
         }
 
-        _cancel = FrameworkMgr.Timer.StartSecondDelay(_autoReleaseTime, AutoReleaseObj);
+        _cancel = CoreMgr.Timer.StartSecondDelay(_autoReleaseTime, AutoReleaseObj);
     }
     
     /// <summary>
@@ -193,7 +193,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
             foreach (var item in kv.Value)
             {
                 ReleaseObj(kv.Key, item.Target);
-                ClassPool.Recycle(item);
+                CoreMgr.ClassPool.Recycle(item);
             }
         }
         

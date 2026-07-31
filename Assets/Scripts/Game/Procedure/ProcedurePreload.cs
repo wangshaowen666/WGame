@@ -32,6 +32,6 @@ public class ProcedurePreload : ProcedureBase
         
         _fsm.RemoveData("loginPanel");
         _fsm.SetData("sceneNm", "Main");
-        ProcedureMgr.ChangeProcedure<ProcedureChangeScene>();
+        ChangeTo<ProcedureChangeScene>();
     }
 }

@@ -6,28 +6,15 @@
  *--------------------------------------------------------------
  */
 
-using System.Collections.Generic;
 
 /// <summary>
-/// 基于状态机的游戏管理流程
-/// 管理类数据、各流程数据共享都靠fsm
+/// 基于状态机的游戏流程
+/// 各流程数据共享都靠fsm
 /// </summary>
-public static class ProcedureMgr
+public static class Procedure 
 {
-    private static Fsm s_fsm;
-    static ProcedureMgr()
-    {
-        // 原本是通过反射自动收集所有流程，用华佗热更拆分程序集后，反射拿不到热更程序集中的流程
-        var procedures = new List<ProcedureBase>
-        {
-            new ProcedureLaunch(),
-            new ProcedureVersionCheck(),
-            new ProcedureResCheck_AA(),
-            new ProcedureLoadDll()
-        };
-        s_fsm = Fsm.Create(procedures);
-    }
-    
+    private static Fsm s_fsm= Fsm.Create();
+
     public static void AddProcedure(ProcedureBase procedure)
     {
         s_fsm.AddState(procedure);
@@ -38,6 +25,7 @@ public static class ProcedureMgr
         s_fsm.ChangeState<T>();
     }
 
+    // 原本是通过反射自动收集所有流程，用华佗热更拆分程序集后，反射拿不到热更程序集中的流程
     // 通过反射获取业务逻辑的所有流程
     // private static List<ProcedureBase> GetAllProcedures()
     // {

@@ -8,10 +8,16 @@
 
 using UnityEngine;
 
-public static class AOTConfig
+public static class LaunchConfig
 {
+    // 游戏ui根节点名
+    public const string UIRoot = "UIRoot";
+    
+    // ui相机名
+    public const string UICamera = "UICamera";
+    
     // 登陆界面路径
-    public const string LoginPath = "LoginPanel/LoginRoot";
+    public const string LoginPath = "LoginPanel/LoginPanel";
     
     // 屏幕标准尺寸
     public static Vector2Int ScreenSize = new Vector2Int(1080, 1920);
