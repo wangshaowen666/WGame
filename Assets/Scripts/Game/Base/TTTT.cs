@@ -20,7 +20,7 @@ public class TTTT : MonoBehaviour
     {
         //GCProfiler.RecordGC(A);
         int a = 100;
-        FrameworkMgr.Timer.StartDelay(1000, i =>
+        FrameworkMgr.Timer.StartDelay(1000, () =>
         {
             Log.Info(a);
         });

@@ -22,7 +22,7 @@ public class _07Timer : MonoBehaviour
         WaitKeyDown().Forget();
 
         //_cts = Timer.StartDelay(5000, TimerDelayTest, false);
-        _cts = FrameworkMgr.Timer.StartRepeat(500, TimerRepeatTest, 20, false, true);
+        _cts = FrameworkMgr.Timer.StartRepeat(500, TimerRepeatTest, 20, false);
     }
 
     async UniTaskVoid WaitKeyDown()
@@ -34,16 +34,16 @@ public class _07Timer : MonoBehaviour
         }
     }
 
-    private void TimerDelayTest(int state)
+    private void TimerDelayTest()
     {
-        Log.Info("延迟执行", state);
+        Log.Info("延迟执行");
         //Log.Info(_t.GetType());
         transform.position += Vector3.one;
     }
 
-    private void TimerRepeatTest(int count)
+    private void TimerRepeatTest()
     {
         transform.position += Vector3.one;
-        Log.Info("重复执行", count);
+        Log.Info("重复执行");
     }
 }

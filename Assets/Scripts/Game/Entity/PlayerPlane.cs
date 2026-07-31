@@ -80,7 +80,7 @@ public class PlayerPlane : EntityBase, IUpdateable
         _cancel = FrameworkMgr.Timer.StartRepeat(ms, OnAttack);
     }
 
-    private void OnAttack(int i)
+    private void OnAttack()
     {
         if (_stats.IsDead)
             return;
@@ -107,7 +107,7 @@ public class PlayerPlane : EntityBase, IUpdateable
     {
         _cancel?.Cancel();
         GameMgr.Entity.CreateEntity(_cfg.DeadEffId, transform, null);
-        FrameworkMgr.Timer.StartDelay(2000, _ => GameMgr.Entity.RecycleEntity(_id, this));
+        FrameworkMgr.Timer.StartDelay(2000, () => GameMgr.Entity.RecycleEntity(_id, this));
     }
 
     private void OnHpChanged(int damage, int currentHp)

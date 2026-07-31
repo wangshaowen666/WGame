@@ -90,7 +90,7 @@ public class EnemyPlane : EntityBase, IUpdateable
         _attackCts = FrameworkMgr.Timer.StartRepeat(ms, OnAttack);
     }
 
-    private void OnAttack(int count)
+    private void OnAttack()
     {
         if (_stats.IsDead)
             return;
@@ -112,7 +112,7 @@ public class EnemyPlane : EntityBase, IUpdateable
     {
         _attackCts?.Cancel();
         GameMgr.Entity.CreateEntity(_cfg.DeadEffId, transform, null);
-        FrameworkMgr.Timer.StartDelay(200, _ => GameMgr.Entity.RecycleEntity(_eid, this));
+        FrameworkMgr.Timer.StartDelay(200, () => GameMgr.Entity.RecycleEntity(_eid, this));
     }
 
     private void OnHpChanged(int damage, int currentHp)

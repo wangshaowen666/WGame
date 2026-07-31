@@ -145,44 +145,40 @@ public class ObjectPool<T> : IObjectPool where T : Object
         }
     }
 
-    private void AutoReleaseObj(int state)
+    private void AutoReleaseObj()
     {
-        // 正常计时完成
-        if (state == 1)
+        float currentTime = Time.time;
+        // 创建键的副本，避免在遍历过程中修改字典导致异常
+        var keysToCheck = new List<string>(_pool.Keys);
+        foreach (var key in keysToCheck)
         {
-            float currentTime = Time.time;
-            // 创建键的副本，避免在遍历过程中修改字典导致异常
-            var keysToCheck = new List<string>(_pool.Keys);
-            foreach (var key in keysToCheck)
+            if (!_pool.TryGetValue(key, out var items))
             {
-                if (!_pool.TryGetValue(key, out var items))
-                {
-                    continue;
-                }
-                
-                // 检查是否需要释放长时间未使用的对象
-                for (int i = items.Count - 1; i >= 0; i--)
-                {
-                    if (!items[i].IsUsing && currentTime - items[i].LastUseTime > _autoReleaseTime)
-                    {
-                        ReleaseObj(key, items[i].Target);
-                        ClassPool.Recycle(items[i]);
-                        items.RemoveAt(i);
-                        
-#if STATS_ON && UNITY_EDITOR
-                        UpdateStats(key, 3);
-#endif
-                    }
-                }
+                continue;
+            }
 
-                if (items.Count == 0)
+            // 检查是否需要释放长时间未使用的对象
+            for (int i = items.Count - 1; i >= 0; i--)
+            {
+                if (!items[i].IsUsing && currentTime - items[i].LastUseTime > _autoReleaseTime)
                 {
-                    _pool.Remove(key);
+                    ReleaseObj(key, items[i].Target);
+                    ClassPool.Recycle(items[i]);
+                    items.RemoveAt(i);
+
+#if STATS_ON && UNITY_EDITOR
+                    UpdateStats(key, 3);
+#endif
                 }
             }
-            
-            _cancel = FrameworkMgr.Timer.StartSecondDelay(_autoReleaseTime, AutoReleaseObj);
+
+            if (items.Count == 0)
+            {
+                _pool.Remove(key);
+            }
         }
+
+        _cancel = FrameworkMgr.Timer.StartSecondDelay(_autoReleaseTime, AutoReleaseObj);
     }
     
     /// <summary>

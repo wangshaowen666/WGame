@@ -23,7 +23,7 @@ public class _09ParseTest : MonoBehaviour
     {
         List<string> m = new List<string>{"sfs", "kjk", "435"};
 
-        FrameworkMgr.Timer.StartDelay(0, _i =>
+        FrameworkMgr.Timer.StartDelay(0, () =>
         {
             int count = 100000;
             TimeProfiler.RecordTimeStart("二进制转化1");
@@ -34,7 +34,7 @@ public class _09ParseTest : MonoBehaviour
                 //Log.Info("反序列化二进制", ParseUtil.ToJson(n));
             }
             TimeProfiler.RecordTimeStop("二进制转化1");
-        
+
             TimeProfiler.RecordTimeStart("二进制转化2");
             for (int i = 0; i < count; i++)
             {
@@ -43,9 +43,9 @@ public class _09ParseTest : MonoBehaviour
                 //Log.Info("反序列化二进制2", ParseUtil.ToJson(n2));
             }
             TimeProfiler.RecordTimeStop("二进制转化2");
-        
+
             TimeProfiler.LogDurationTime();
-        }, false);
+        });
     }
     
     private void _09JsonTest()

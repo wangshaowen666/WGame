@@ -29,7 +29,7 @@ public class ResMgr : ManagerBase
     {
         Log.Info("要加载图集了：", tag);
         var b = LoadSync<SpriteAtlas>(tag);
-        FrameworkMgr.Timer.StartDelay(5000, i =>
+        FrameworkMgr.Timer.StartDelay(5000, () =>
         {
             callback(b, null);
         });

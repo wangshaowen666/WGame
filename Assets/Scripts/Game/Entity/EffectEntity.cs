@@ -21,7 +21,7 @@ public class EffectEntity : EntityBase
         }
     }
 
-    private void OnFinish(int _)
+    private void OnFinish()
     {
         GameMgr.Entity.RecycleEntity(_id, this);
     }
