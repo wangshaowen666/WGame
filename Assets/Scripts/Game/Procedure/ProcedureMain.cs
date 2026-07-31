@@ -15,7 +15,7 @@ public class ProcedureMain : ProcedureBase
     public override void OnEnter()
     {
         base.OnEnter();
-        if (!ProcedureMgr.LoginFinish)
+        if (!_fsm.GetData<bool>("isLoginFinish"))
             FirstEnter();
         
         FrameworkMgr.Event.Register(GameEvent.ProcedureExitMain, RunProcedure);
@@ -31,7 +31,7 @@ public class ProcedureMain : ProcedureBase
 
     private void FirstEnter()
     {
-        ProcedureMgr.LoginFinish = true;
+        _fsm.SetData("isLoginFinish", true);
         
         FrameworkMgr.Screen.Init();
         GameMgr.UI.CreateUIRoot();
@@ -40,6 +40,6 @@ public class ProcedureMain : ProcedureBase
     private void RunProcedure()
     {
         _fsm.SetData("sceneNm", "Battle");
-        ProcedureMgr.RunProcedure<ProcedureChangeScene>();
+        ProcedureMgr.ChangeProcedure<ProcedureChangeScene>();
     }
 }

@@ -13,7 +13,7 @@ using System.Collections.Generic;
 /// </summary>
 public static class UpdateMgr
 {
-    private static readonly List<IUpdateable> s_updateMaps = new List<IUpdateable>();
+    private static readonly List<IUpdateable> s_updateList = new List<IUpdateable>();
     // Update时可能触发注册和移除，放到缓存中，在下一帧的遍历中才生效
     private static readonly List<IUpdateable> s_addCaches = new List<IUpdateable>();
     // 安全性和偷懒性，允许同一个IUpdateable多次调用移除，通过HashSet保证唯一
@@ -21,6 +21,7 @@ public static class UpdateMgr
 
     private static bool s_addItem;
     private static bool s_rmvItem;
+    private static int s_addIndex;
     
 #if STATS_ON && UNITY_EDITOR
     private static readonly Unity.Profiling.ProfilerMarker s_updateMarker = new ("WGame.Update");
@@ -28,6 +29,12 @@ public static class UpdateMgr
 
     public static void RegisterUpdate(IUpdateable updateable)
     {
+        if (s_updateList.Contains(updateable) || s_addCaches.Contains(updateable))
+        {
+            Log.Error("重复注册 Updateable:", updateable.GetType().Name);
+            return;
+        }
+        
         s_addItem = true;
         for (int i = 0; i < s_addCaches.Count; i++)
         {
@@ -60,13 +67,13 @@ public static class UpdateMgr
 #if STATS_ON && UNITY_EDITOR
         using (s_updateMarker.Auto())
         {
-            foreach (var u in s_updateMaps)
+            foreach (var u in s_updateList)
             {
                 u.MyUpdate(deltaTime, realDeltaTime);
             }
         }
 #else
-        foreach (var u in s_updateMaps)
+        foreach (var u in s_updateList)
         {
             u.MyUpdate(deltaTime, realDeltaTime);
         }
@@ -75,36 +82,36 @@ public static class UpdateMgr
 
     private static void DealCache()
     {
-        for (int i = 0; i < s_updateMaps.Count; i++)
+        s_addIndex = 0;
+        for (int i = 0; i < s_updateList.Count; i++)
         {
-            if (s_addItem && s_addCaches.Count > 0)
+            if (s_addItem && s_addIndex < s_addCaches.Count)
             {
-                if (s_updateMaps[i].Priority < s_addCaches[0].Priority)
+                if (s_updateList[i].Priority < s_addCaches[s_addIndex].Priority)
                 {
-                    s_updateMaps.Insert(i, s_addCaches[0]);
-                    s_addCaches.RemoveAt(0);
+                    s_updateList.Insert(i, s_addCaches[s_addIndex]);
+                    s_addIndex++;
                 }
             }
             
-            // 先减后加，有可能0号元素移除，下标变成-1，加的时候报错
+            // 如果先减后加，有可能0号元素移除，下标变成-1，加的时候报错
             if (s_rmvItem && s_rmvCaches.Count > 0)
             {
-                if (s_rmvCaches.Remove(s_updateMaps[i]))
+                if (s_rmvCaches.Remove(s_updateList[i]))
                 {
-                    s_updateMaps.RemoveAt(i);
+                    s_updateList.RemoveAt(i);
                     i--;
                 }
             }
         }
 
-        if (s_addCaches.Count > 0)
+        for (; s_addIndex < s_addCaches.Count; s_addIndex++)
         {
-            foreach (var updateable in s_addCaches)
-            {
-                s_updateMaps.Add(updateable);
-            }
-            s_addCaches.Clear();
+            // 解决同一帧，既加又删且优先级比当前s_updateList中都低时，上方遍历s_rmvCaches并未移除
+            if (!s_rmvCaches.Remove(s_addCaches[s_addIndex]))
+                s_updateList.Add(s_addCaches[s_addIndex]);
         }
+        s_addCaches.Clear();
 
         if (s_rmvCaches.Count > 0)
         {

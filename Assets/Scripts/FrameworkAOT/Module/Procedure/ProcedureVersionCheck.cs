@@ -21,12 +21,12 @@ public class ProcedureVersionCheck : ProcedureBase
 
     private async UniTaskVoid AsyncRun()
     {
-        if (true)
+        if (AOTConfig.SkipVersionCheck)
         {
             var panel = _fsm.GetData<LoginPanel>("loginPanel");
             panel.SetTip("获取服务器信息...", 0.2f);
             
-            ProcedureMgr.RunProcedure<ProcedureResCheck_AA>();
+            ChangeTo<ProcedureResCheck_AA>();
             return;
         }
         

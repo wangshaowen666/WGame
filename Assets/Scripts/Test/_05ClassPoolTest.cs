@@ -144,7 +144,7 @@ public class _05Test : IResetable
     //private List<Variable> v = new List<Variable>(100);
     private List<Variable> v;
 
-    private VarInt v2 = 5;
+    private Variable<int> v2 = 5;
     
     public void Reset()
     {

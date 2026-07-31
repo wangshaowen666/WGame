@@ -127,7 +127,7 @@ public class _04ProfilerGCTest : MonoBehaviour
             {
                 for (int i = 0; i < _count; i++)
                 {
-                    VarInt intVal = i;
+                    Variable<int> intVal = i;
                     T(intVal);
                     ClassPool.Recycle(intVal);
                 }

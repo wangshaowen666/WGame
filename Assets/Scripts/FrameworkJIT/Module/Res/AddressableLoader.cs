@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
@@ -28,12 +29,14 @@ public class AddressableLoader : IResLoader
         {
             _refMap.TryGetValue(key, out int c);
             _refMap[key] = c + 1;
+            if (!tempHandle.IsDone)
+                tempHandle.WaitForCompletion();
             return (T)tempHandle.Result;
         }
 
         var handle = Addressables.LoadAssetAsync<T>(key);
         T ret = handle.WaitForCompletion();
-        _handleMap.TryAdd(key, handle);
+        _handleMap[key] = handle;
         _refMap.TryGetValue(key, out int count);
         _refMap[key] = count + 1;
 
@@ -56,25 +59,38 @@ public class AddressableLoader : IResLoader
             {
                 _refMap.TryGetValue(key, out int c);
                 _refMap[key] = c + 1;
-                callback?.Invoke((T)tempHandle.Result, userData);
+                if (!tempHandle.IsDone)
+                    await tempHandle.Task;
+                if (tempHandle.Status == AsyncOperationStatus.Succeeded)
+                    callback?.Invoke((T)tempHandle.Result, userData);
+                else
+                    callback?.Invoke(default, userData);
                 return;
             }
 
             AsyncOperationHandle<T> handle = Addressables.LoadAssetAsync<T>(key);
+            // 不等待完成，直接添加到map中。如果等完成后再添加，需要处理加载中又触发了相同key的加载。
+            // 后者TryGetValue失败，引用未被管理，但Addressables 的 ResourceManager 内部列表持有，gc不会将其回收，且该bundle计数始终+1了，导致bundle常驻内存，无法卸载
+            _handleMap[key] = handle;
+            _refMap.TryGetValue(key, out int count);
+            _refMap[key] = count + 1;
+
             await handle.Task;
 
             if (handle.Status != AsyncOperationStatus.Succeeded)
+            {
+                _handleMap.Remove(key);
+                _refMap.Remove(key);
+                Addressables.Release(handle);
                 throw new Exception($"资源加载失败:{key}  {handle.OperationException}");
-
-            _handleMap.TryAdd(key, handle);
-            _refMap.TryGetValue(key, out int count);
-            _refMap[key] = count + 1;
+            }
 
             callback?.Invoke(handle.Result, userData);
         }
         catch (Exception e)
         {
             Log.Error($"资源异步加载异常: {key}", e);
+            callback?.Invoke(default, userData);
         }
     }
 
@@ -86,11 +102,17 @@ public class AddressableLoader : IResLoader
             return;
         }
 
+        if (!_refMap.TryGetValue(key, out int refCount))
+        {
+            Log.Error("要卸载的资源引用计数不存在", key);
+            return;
+        }
+
 #if STATS_ON && UNITY_EDITOR
         UpdateStats(key,2, 1);
 #endif
 
-        int count = _refMap[key] - 1;
+        int count = refCount - 1;
         if (count <= 0)
         {
             _handleMap.Remove(key);
@@ -107,15 +129,14 @@ public class AddressableLoader : IResLoader
     {
         foreach (var kv in _handleMap)
         {
-            if (kv.Value.IsValid() && _refMap.TryGetValue(kv.Key, out int count))
+            if (kv.Value.IsValid())
             {
-                if (count > 0)
-                {
-                    Addressables.Release(kv.Value);
+                _refMap.TryGetValue(kv.Key, out int count);
 #if STATS_ON && UNITY_EDITOR
+                if (count > 0)
                     UpdateStats(kv.Key,2, count);
 #endif
-                }
+                Addressables.Release(kv.Value);
             }
         }
 
@@ -131,17 +152,60 @@ public class AddressableLoader : IResLoader
 
     public async UniTaskVoid PreloadWithLabel<T>(string label, Action<T> callback = null, object userData = null)
     {
-        var handle = Addressables.LoadAssetsAsync<T>(label, callback);
-        await handle.Task;
-
-        foreach (var asset in handle.Result)
+        try
         {
-            Log.Info("资源加载成功：", asset);
+            var handle = Addressables.LoadAssetsAsync<T>(label, callback);
+            _handleMap[label] = handle;
+            _refMap.TryGetValue(label, out int count);
+            _refMap[label] = count + 1;
+
+            await handle.Task;
+
+            if (handle.Status != AsyncOperationStatus.Succeeded)
+            {
+                _handleMap.Remove(label);
+                _refMap.Remove(label);
+                Addressables.Release(handle);
+                Log.Error($"预加载失败:{label}  {handle.OperationException}");
+                return;
+            }
+
+            foreach (var asset in handle.Result)
+            {
+                Log.Info("资源加载成功：", asset);
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Error($"预加载异常: {label}", e);
         }
     }
     
 #if STATS_ON && UNITY_EDITOR
     private readonly Dictionary<string, AssetBundleStats> _statsMap = new();
+
+    public AddressableLoader()
+    {
+        Application.quitting += CheckLeaks;
+    }
+
+    /// <summary>
+    /// 程序退出时检测资源泄漏
+    /// </summary>
+    private void CheckLeaks()
+    {
+        bool hasLeak = false;
+        foreach (var statsKV in _statsMap)
+        {
+            if (statsKV.Value.currentNum != 0)
+            {
+                hasLeak = true;
+                Log.Warning($"资源泄漏: {statsKV.Key}, 当前引用数={statsKV.Value.currentNum}");
+            }
+        }
+        if (!hasLeak)
+            Log.Info("资源泄漏检测通过，无泄漏资源");
+    }
 
     /// <summary>
     /// 更新统计信息
@@ -168,7 +232,7 @@ public class AddressableLoader : IResLoader
 
             case 2:
                 stats.currentNum -= count;
-                stats.totalPuts -= count;
+                stats.totalPuts += count;
                 break;
         }
     }

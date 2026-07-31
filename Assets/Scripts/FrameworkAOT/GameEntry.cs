@@ -12,7 +12,7 @@ public class GameEntry : MonoBehaviour
 {
     void Start()
     {
-        ProcedureMgr.RunProcedure<ProcedureLaunch>();
+        ProcedureMgr.ChangeProcedure<ProcedureLaunch>();
         DontDestroyOnLoad(gameObject);
     }
     

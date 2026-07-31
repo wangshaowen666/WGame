@@ -50,7 +50,7 @@ public static class ClassPool
             var type = typeof(T);
             if (!_poolMap.TryGetValue(type, out Container))
             {
-                Container = new ClassContainer(type);
+                Container = new ClassContainer();
                 _poolMap[type] = Container;
             }
         }
@@ -61,7 +61,7 @@ public static class ClassPool
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PreAllocate<T>(int count) where T : class, IResetable, new()
     {
-        PoolCache<T>.Container.PreAllocate(count);
+        PoolCache<T>.Container.PreAllocate<T>(count);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -99,6 +99,12 @@ public static class ClassPool
         pool.Release();
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Release<T>() where T : class, IResetable, new()
+    {
+        PoolCache<T>.Container.Release();
+    }
+
     public static void ReleaseAll()
     {
         foreach (var pool in _poolMap.Values)
@@ -106,7 +112,9 @@ public static class ClassPool
             pool.Release();
         }
         
-        _poolMap.Clear();
+        // _poolMap始终不清理，清理之后，PoolCache<T>中的Container依旧存在，get依然能够获取，但是非泛型方法_poolMap会找不到。
+        // 静态PoolCache在构造时创建了Container，无销毁逻辑
+        //_poolMap.Clear();
     }
         
 #if STATS_ON && UNITY_EDITOR

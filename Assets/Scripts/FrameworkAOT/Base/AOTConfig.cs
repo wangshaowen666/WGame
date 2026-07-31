@@ -18,4 +18,7 @@ public static class AOTConfig
     
     // 启动游戏获取服务器设置网址
     public const string ServerSettingURL = "http://localhost:6666/?CH=Api&Opt=GetServerSetting";
+    
+    // 跳过版本检查
+    public const bool SkipVersionCheck = true;
 }

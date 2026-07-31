@@ -17,7 +17,7 @@ public class ProcedureChangeScene : ProcedureBase
         base.OnEnter();
         
         // todo 释放资源等
-        if (ProcedureMgr.LoginFinish)
+        if (_fsm.GetData<bool>("isLoginFinish"))
             GameMgr.UI.PanelOn(DPnlId.LoadingPanel);
         
         AsyncRun().Forget();
@@ -27,7 +27,7 @@ public class ProcedureChangeScene : ProcedureBase
     {
         var nm = _fsm.GetData<string>("sceneNm");
 
-        _fsm.SetData("hah", (VarInt)1);
+        _fsm.SetData("hah", 1);
         if (string.IsNullOrEmpty(nm))
         {
             Log.Error("场景名未赋值");
@@ -41,18 +41,18 @@ public class ProcedureChangeScene : ProcedureBase
         await UniTask.Delay(3000);
         await FrameworkMgr.Scene.LoadScene(nm);
 
-        if (ProcedureMgr.LoginFinish)
+        if (_fsm.GetData<bool>("isLoginFinish"))
             GameMgr.UI.PanelOff(DPnlId.LoadingPanel);
         
         switch (nm)
         {
             case "Main":
-                ProcedureMgr.RunProcedure<ProcedureMain>();
+                ProcedureMgr.ChangeProcedure<ProcedureMain>();
                 break;
             
             case "Battle":
             case "Network":
-                ProcedureMgr.RunProcedure<ProcedureBattle>();
+                ProcedureMgr.ChangeProcedure<ProcedureBattle>();
                 break;
             
             default:

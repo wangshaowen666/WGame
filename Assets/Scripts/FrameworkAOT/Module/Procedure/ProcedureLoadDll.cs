@@ -24,21 +24,29 @@ public class ProcedureLoadDll : ProcedureBase
         Assembly hotUpdateAss = Assembly.Load(LoadDllBytes("Game.dll"));
 #else
         // Editor下无需加载，直接查找获得HotUpdate程序集
-        Assembly hotUpdateAss = AppDomain.CurrentDomain.GetAssemblies().First(a => a.GetName().Name == "Game");
+        Assembly hotUpdateAss = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == "Game");
 #endif
+        if (hotUpdateAss == null)
+        {
+            Log.Error("热更程序集Game 找不到");
+            return;
+        }
+        
         Type type = hotUpdateAss.GetType("GameLaunch");
-        type.GetMethod("StartGame").Invoke(null, null);
+        if (type == null)
+        {
+            Log.Error("未找到启动类 GameLaunch");
+            return;
+        }
+        type.GetMethod("StartGame")?.Invoke(null, null);
     }
     
     private byte[] LoadDllBytes(string key)
     {
-        AsyncOperationHandle<TextAsset> handle = Addressables.LoadAssetAsync<TextAsset>(key);
-        if (handle.IsDone)
-        {
-            return handle.Result.bytes;
-        }
-
+        var handle = Addressables.LoadAssetAsync<TextAsset>(key);
         var ret = handle.WaitForCompletion();
-        return ret.bytes;
+        byte[] bytes = ret.bytes;
+        Addressables.Release(handle);
+        return bytes;
     }
 }

@@ -8,33 +8,23 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 public class ClassContainer
 {
-    // 用数组替代栈，减少方法调用开销，比链表性能也好      在现代CPU架构下，缓存命中率对性能影响巨大；无额外指针开销，内存使用更紧凑；支持批量预分配，减少运行时开销
+    // 用数组替代栈，减少方法调用开销，比链表性能也好
+    // 在现代CPU架构下，缓存命中率对性能影响巨大；无额外指针开销，内存使用更紧凑；支持批量预分配，减少运行时开销
     // 测试下来数组比栈耗时减少1倍多，主要是因为[MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private IResetable[] _poolArray;
-    private int _index;
-    private Type _type;
+    private IResetable[] _poolArray = new IResetable[Capacity];
+    private int _index = 0;
     
     // 默认初始容量
     private const int Capacity = 8;
-
-    public ClassContainer(Type type)
-    {
-        _type = type;
-        _poolArray = new IResetable[Capacity];
-        _index = 0;
-    }
 
     /// <summary>
     /// 手动预分配对象
     /// </summary>
     /// <param name="count">分配数量</param>
-    /// <param name="allowChangeMax">超上限是否修改上限值</param>
-    public void PreAllocate(int count)
+    public void PreAllocate<T>(int count) where T : class, IResetable, new()
     {
         if (count <= 0)
         {
@@ -42,7 +32,22 @@ public class ClassContainer
             return;
         }
 
-        InnerPreAllocate(count);
+        int targetCount = _index + count;
+        if (targetCount > _poolArray.Length)
+        {
+            int newCapacity = Math.Max(_poolArray.Length * 2, targetCount);
+            Array.Resize(ref _poolArray, newCapacity);
+        }
+        
+        for (int i = 0; i < count; i++)
+        {
+            var obj = new T();
+            _poolArray[_index++] = obj;
+        }
+
+#if STATS_ON && UNITY_EDITOR
+        UpdateStats(1, count);
+#endif
     }
 
     public T Get<T>() where T : class, IResetable, new()
@@ -68,22 +73,7 @@ public class ClassContainer
         return ret;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Recycle<T>(T item) where T : IResetable
-    {
-        RecycleItem(item);
-    }
-
-    public void Release()
-    {
-#if STATS_ON && UNITY_EDITOR
-        UpdateStats(5, _index + 1);
-#endif
-        Array.Clear(_poolArray, 0, _index);
-        _index = 0;
-    }
-
-    private void RecycleItem(IResetable item)
     {
 #if UNITY_EDITOR 
         for (int i = 0; i < _index; i++)
@@ -109,27 +99,18 @@ public class ClassContainer
 #endif
     }
 
-    private void InnerPreAllocate(int count)
+    public void Release()
     {
-        int targetCount = _index + count;
-        if (targetCount > _poolArray.Length)
-        {
-            int newCapacity = Math.Max(_poolArray.Length * 2, targetCount);
-            Array.Resize(ref _poolArray, newCapacity);
-        }
-        
-        // 创建新对象并加入池中
-        for (int i = 0; i < count; i++)
-        {
-            var obj = Activator.CreateInstance(_type) as IResetable;
-            _poolArray[_index++] = obj;
-        }
-
 #if STATS_ON && UNITY_EDITOR
-        UpdateStats(1, count);
+        UpdateStats(5, _index + 1);
 #endif
+        // 释放后数组容量缩回默认
+        if (_index > Capacity)
+            _poolArray = new IResetable[Capacity];
+        
+        Array.Clear(_poolArray, 0, _index);
+        _index = 0;
     }
-    
        
 #if STATS_ON && UNITY_EDITOR
     // 统计信息

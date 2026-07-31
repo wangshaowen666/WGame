@@ -21,7 +21,7 @@ public class GameLaunch
         ReplenishMeta();
         InitGameProcedure();
       
-        ProcedureMgr.RunProcedure<ProcedurePreload>();
+        ProcedureMgr.ChangeProcedure<ProcedurePreload>();
     }
 
     /// <summary>

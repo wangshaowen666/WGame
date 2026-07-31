@@ -9,13 +9,11 @@
 using System.Collections.Generic;
 
 /// <summary>
-/// 基于状态机的游戏生命周期管理流程
+/// 基于状态机的游戏管理流程
+/// 管理类数据、各流程数据共享都靠fsm
 /// </summary>
 public static class ProcedureMgr
 {
-    // 登陆流程结束的标识
-    public static bool LoginFinish { get; set; }
-
     private static Fsm s_fsm;
     static ProcedureMgr()
     {
@@ -35,7 +33,7 @@ public static class ProcedureMgr
         s_fsm.AddState(procedure);
     }
 
-    public static void RunProcedure<T>() where T : ProcedureBase
+    public static void ChangeProcedure<T>() where T : ProcedureBase
     {
         s_fsm.ChangeState<T>();
     }

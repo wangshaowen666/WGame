@@ -26,11 +26,9 @@ public interface IUpdateable
 
 /// <summary>
 /// 模块优先级，高的优先轮询
-/// 统一配置在这里，直观一点
+/// 框架层只提供default，具体优先级类型由业务提供
 /// </summary>
 public enum UpdatePriority
 {
-    Test = -10,
     Default = 0,
-    Fsm,
 }

@@ -29,10 +29,6 @@ public abstract class FsmState
     {
     }
 
-    public virtual void OnUpdate(float deltaTime, float realDeltaTime)
-    {
-    }
-
     public virtual void OnExit()
     {
     }
