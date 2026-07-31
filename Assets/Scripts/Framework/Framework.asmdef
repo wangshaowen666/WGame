@@ -1,5 +1,5 @@
 {
-    "name": "Framework.JIT",
+    "name": "Framework",
     "rootNamespace": "",
     "references": [
         "GUID:24248ba87ffaf463ab22492ca837fdba",
