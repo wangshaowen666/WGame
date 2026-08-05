@@ -38,7 +38,7 @@ public class UIGroup
 
     public void RemoveAll()
     {
-        var pool = FrameworkMgr.ObjectPool.GetPool<UIPanelBase>();
+        var pool = CoreMgr.ObjectPool.GetPool<UIPanelBase>();
         var panelNode = _uiPanels.First;
         while (panelNode != null)
         {

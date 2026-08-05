@@ -18,21 +18,25 @@ using Object = UnityEngine.Object;
 public delegate void LoadAssetCallback<in T>(T asset, object userData);
 public class ResMgr : ManagerBase
 {
-    private readonly IResLoader _resLoader = new AddressableLoader();
-    private readonly Dictionary<string, MethodInfo> _genericMap = new();
+    private IResLoader _resLoader;
     
     // 图集有不同配置的时候使用
     // SpriteAtlasManager.atlasRequested -= RequestAtlas;
     // SpriteAtlasManager.atlasRequested += RequestAtlas;
 
-    private void RequestAtlas(string tag, LoadAssetCallback<SpriteAtlas> callback)
+    // private void RequestAtlas(string tag, LoadAssetCallback<SpriteAtlas> callback)
+    // {
+    //     var b = LoadSync<SpriteAtlas>(tag);
+    //     CoreMgr.Timer.StartDelay(5000, () =>
+    //     {
+    //         callback(b, null);
+    //     });
+    // }
+
+    public override void OnInit()
     {
-        Log.Info("要加载图集了：", tag);
-        var b = LoadSync<SpriteAtlas>(tag);
-        CoreMgr.Timer.StartDelay(5000, () =>
-        {
-            callback(b, null);
-        });
+        base.OnInit();
+        _resLoader = new AddressableLoader();
     }
 
     public T LoadSync<T>(string key)
@@ -53,48 +57,6 @@ public class ResMgr : ManagerBase
     public void UnloadAll()
     {
         _resLoader.UnloadAll();
-    }
-    
-    public void LoadPrefab(string key, LoadAssetCallback<GameObject> callback, object userData = null)
-    {
-        LoadAsync(key, callback, userData);
-    }
-
-    /// <summary>
-    /// 提供给Lua的接口，只加载Unity资产，继承自UnityEngine.Object
-    /// </summary>
-    /// <param name="type">资源类型</param>
-    /// <param name="key">资源名称</param>
-    /// <param name="callback">回调</param>
-    /// <exception cref="GameException">类型不存在</exception>
-    public void LoadRes(string type, string key, Action<Object> callback)
-    {
-        if (!_genericMap.TryGetValue(type, out MethodInfo info))
-        {
-            Assembly unityEngineCore = Assembly.Load("UnityEngine.CoreModule");
-            Type tp = unityEngineCore.GetType($"UnityEngine.{type}");
-            if (tp == null)
-            {
-                Debug.Log(typeof(Sprite).AssemblyQualifiedName);
-                throw new Exception("不存在的类型" + type);
-            }
-            
-            var methodInfo = typeof(IResLoader).GetMethod("LoadAsync");
-            if (methodInfo != null)
-            {
-                info = methodInfo.MakeGenericMethod(tp);
-                _genericMap.Add(type, info);
-            }
-        }
-
-        if (info != null)
-        {
-            info.Invoke(_resLoader, new object[] { key, callback });
-        }
-        else
-        {
-            Log.Error("反射加载类型出错：", type);
-        }
     }
     
 #if STATS_ON && UNITY_EDITOR

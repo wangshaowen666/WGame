@@ -20,7 +20,7 @@ public class NetworkBullet : NetworkBehaviour
         base.OnNetworkSpawn();
         if (IsServer)
         {
-            _bulletPool = FrameworkMgr.ObjectPool.GetPool<GameObject>();
+            _bulletPool = CoreMgr.ObjectPool.GetPool<GameObject>();
             _moveCount = 0;
             CoreMgr.Timer.StartRepeat(20, OnMove, 100, true);
         }

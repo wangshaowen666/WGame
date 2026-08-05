@@ -23,11 +23,11 @@ public class LaunchEntry : MonoBehaviour
 
     private void InitProcedure()
     {
-        Procedure.AddProcedure(new ProcedureLaunch());
-        Procedure.AddProcedure(new ProcedureVersionCheck());
-        Procedure.AddProcedure(new ProcedureResCheck_AA());
-        Procedure.AddProcedure(new ProcedureLoadDll());
+        CoreMgr.Procedure.AddProcedure(new ProcedureLaunch());
+        CoreMgr.Procedure.AddProcedure(new ProcedureVersionCheck());
+        CoreMgr.Procedure.AddProcedure(new ProcedureResCheckAA());
+        CoreMgr.Procedure.AddProcedure(new ProcedureLoadDll());
         
-        Procedure.ChangeProcedure<ProcedureLaunch>();
+        CoreMgr.Procedure.ChangeProcedure<ProcedureLaunch>();
     }
 }

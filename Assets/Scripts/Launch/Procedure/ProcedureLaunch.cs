@@ -13,13 +13,12 @@ using UnityEngine.UI;
 public class ProcedureLaunch : ProcedureBase
 {
     private readonly int _layer = LayerMask.NameToLayer("UI");
-    private Camera _uiCamera;
     private Transform _uiRoot;
     
     public override void OnEnter()
     {
         base.OnEnter();
-        CreateUICamera();
+        GameCamera.CreateUICamera();
         CreateUICanvas();
         
         var panel = LoadLoginPanel();
@@ -42,19 +41,6 @@ public class ProcedureLaunch : ProcedureBase
         return loginInstance.GetComponent<LoginPanel>();
     }
     
-    private void CreateUICamera()
-    {
-        var obj = new GameObject(LaunchConfig.UICamera);
-        var camera = obj.AddComponent<Camera>();
-            
-        camera.orthographic = true;
-        camera.cullingMask = LayerMask.GetMask("UI");;
-        camera.clearFlags = CameraClearFlags.Depth;
-            
-        Object.DontDestroyOnLoad(obj);
-        _uiCamera = camera;
-    }
-    
     private void CreateUICanvas()
     {
         var obj = new GameObject()
@@ -66,7 +52,7 @@ public class ProcedureLaunch : ProcedureBase
         var canvas = obj.AddComponent<Canvas>();
         obj.AddComponent<GraphicRaycaster>();
         canvas.renderMode = RenderMode.ScreenSpaceCamera;
-        canvas.worldCamera = _uiCamera;
+        canvas.worldCamera = GameCamera.UICamera;
         
         var uiRoot = new GameObject { name = LaunchConfig.UIRoot, layer = _layer };
         uiRoot.transform.SetParent(obj.transform, false);

@@ -18,15 +18,15 @@ public class ProcedureMain : ProcedureBase
         if (!_fsm.GetData<bool>("isLoginFinish"))
             FirstEnter();
         
-        FrameworkMgr.Event.Register(GameEvent.ProcedureExitMain, RunProcedure);
-        FrameworkMgr.Screen.SetMainCamera(FrameworkConfig.MapCamera);
+        CoreMgr.Event.Register(GameEvent.ProcedureExitMain, RunProcedure);
+        GameCamera.SetMainCamera(GameCamera.MapCameraName);
         GameMgr.UI.PanelOn(DPnlId.MainPanel);
     }
 
     public override void OnExit()
     {
         base.OnExit();
-        FrameworkMgr.Event.UnRegister(GameEvent.ProcedureExitMain, RunProcedure);
+        CoreMgr.Event.UnRegister(GameEvent.ProcedureExitMain, RunProcedure);
     }
 
     private void FirstEnter()

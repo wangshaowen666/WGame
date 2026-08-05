@@ -36,6 +36,12 @@ public class AddressableLoader : IResLoader
 
         var handle = Addressables.LoadAssetAsync<T>(key);
         T ret = handle.WaitForCompletion();
+        if (handle.Status != AsyncOperationStatus.Succeeded)
+        {
+            Addressables.Release(handle);
+            Log.Error($"资源同步加载失败: {key}", handle.OperationException);
+            return default;
+        }
         _handleMap[key] = handle;
         _refMap.TryGetValue(key, out int count);
         _refMap[key] = count + 1;
@@ -70,7 +76,7 @@ public class AddressableLoader : IResLoader
 
             AsyncOperationHandle<T> handle = Addressables.LoadAssetAsync<T>(key);
             // 不等待完成，直接添加到map中。如果等完成后再添加，需要处理加载中又触发了相同key的加载。
-            // 后者TryGetValue失败，引用未被管理，但Addressables 的 ResourceManager 内部列表持有，gc不会将其回收，且该bundle计数始终+1了，导致bundle常驻内存，无法卸载
+            // 后者TryGetValue失败，引用未被管理，但Addressable 的 ResourceManager 内部列表持有，gc不会将其回收，且该bundle计数始终+1了，导致bundle常驻内存，无法卸载
             _handleMap[key] = handle;
             _refMap.TryGetValue(key, out int count);
             _refMap[key] = count + 1;

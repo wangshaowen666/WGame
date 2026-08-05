@@ -22,7 +22,7 @@ public class UIMgr : ManagerBase
     private readonly int _uiLayerId = LayerMask.NameToLayer(UILayerName);
     
     private Transform _uiRoot;
-    private ObjectPool<UIPanelBase> _uiPanelPool = FrameworkMgr.ObjectPool.RegisterPool<UIPanelBase>(5);
+    private ObjectPool<UIPanelBase> _uiPanelPool = CoreMgr.ObjectPool.RegisterPool<UIPanelBase>(5);
 
     public void PanelOn(DPnlId id, object userData = null)
     {
@@ -57,7 +57,7 @@ public class UIMgr : ManagerBase
         {
             _loadingPanelIdMap.Add(loadingId, id);
             var info = LoadPanelArg.Create(loadingId, cfg, group, userData);
-            FrameworkMgr.Res.LoadAsync<GameObject>(cfg.Name, OnLoadFinish, info);
+            CoreMgr.Res.LoadAsync<GameObject>(cfg.Name, OnLoadFinish, info);
         }
         else
         {

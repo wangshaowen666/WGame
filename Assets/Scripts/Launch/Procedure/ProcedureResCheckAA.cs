@@ -10,7 +10,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
-public class ProcedureResCheck_AA : ProcedureBase
+public class ProcedureResCheckAA : ProcedureBase
 {
     private const int MB = 1024 * 1024;
     

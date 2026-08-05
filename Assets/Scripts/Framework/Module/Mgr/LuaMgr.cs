@@ -16,7 +16,7 @@ public class LuaMgr : ManagerBase
     
     private byte[] CustomLoader(ref string filepath)
     {
-        var file = FrameworkMgr.Res.LoadSync<TextAsset>(filepath + ".lua");
+        var file = CoreMgr.Res.LoadSync<TextAsset>(filepath + ".lua");
         if (file == null)
         {
             Debug.LogError("未找到Lua文件: " + filepath);

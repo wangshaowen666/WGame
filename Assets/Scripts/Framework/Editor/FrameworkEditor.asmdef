@@ -1,10 +1,14 @@
 {
-    "name": "CoreFramework",
+    "name": "FrameworkEditor",
     "rootNamespace": "",
     "references": [
-        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+        "GUID:24248ba87ffaf463ab22492ca837fdba",
+        "GUID:2373f786d14518f44b0f475db77ba4de",
+        "GUID:69448af7b92c7f342b298e06a37122aa"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

@@ -26,7 +26,7 @@ public class ProcedurePreload : ProcedureBase
         GameMgr.DataTable.LoadTable();
         
         // 启动lua
-        FrameworkMgr.Lua.InitLuaEnv();
+        CoreMgr.Lua.InitLuaEnv();
         
         await UniTask.Delay(300);
         

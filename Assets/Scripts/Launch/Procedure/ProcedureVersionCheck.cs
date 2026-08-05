@@ -26,7 +26,7 @@ public class ProcedureVersionCheck : ProcedureBase
             var panel = _fsm.GetData<LoginPanel>("loginPanel");
             panel.SetTip("获取服务器信息...", 0.2f);
             
-            ChangeTo<ProcedureResCheck_AA>();
+            ChangeTo<ProcedureResCheckAA>();
             return;
         }
         

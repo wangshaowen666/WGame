@@ -12,7 +12,7 @@ using UnityEngine;
 
 public class EntityMgr : ManagerBase
 {
-    private ObjectPool<EntityBase> _pool = FrameworkMgr.ObjectPool.RegisterPool<EntityBase>(10);
+    private ObjectPool<EntityBase> _pool = CoreMgr.ObjectPool.RegisterPool<EntityBase>(10);
     private List<uint> _loadingIdMap = new List<uint>();
 
     public void CreateEntity(int eId, Transform parent, Action<EntityBase> callback)
@@ -31,7 +31,7 @@ public class EntityMgr : ManagerBase
             var loadingID = AutoID.GetID();
             _loadingIdMap.Add(loadingID);
             LoadEntityArg arg = LoadEntityArg.Create(loadingID, parent, callback);
-            FrameworkMgr.Res.LoadAsync<GameObject>(nm, OnLoadFinish, arg);
+            CoreMgr.Res.LoadAsync<GameObject>(nm, OnLoadFinish, arg);
         }
         else
         {

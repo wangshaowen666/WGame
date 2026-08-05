@@ -16,40 +16,23 @@ public interface IObjectPool
 }
 
 // 对象从Addressable加载为异步，池只提供缓存功能，不负责创建；预热功能也由外部自行按需实现
+// 外部创建的对象，需要清理时，只需执行将其放回池中，池负责清理
 public class ObjectPool<T> : IObjectPool where T : Object
 {
-    // 对象池项，包含对象和相关元数据
-    private class ObjectItem : IResetable
-    {
-        public Object Target;       // 实际对象
-        public float LastUseTime;   // 最后使用时间
-        public bool IsUsing;        // 是否正在使用中
+    // 空闲对象栈，
+    private readonly Dictionary<string, Stack<T>> _freePool = new();
 
-        public static ObjectItem Create(Object target)
-        {
-            var obj = CoreMgr.ClassPool.Get<ObjectItem>();
-            obj.Target = target;
-            obj.LastUseTime = Time.time;
-            obj.IsUsing = false;
-        
-            return obj;
-        }
+    // 活跃对象集合
+    private readonly Dictionary<string, HashSet<T>> _activeObjs = new();
 
-        public void Reset()
-        {
-            Target = null;
-        }
-    }
-    
-    // 存储对象池数据
-    private readonly Dictionary<string, List<ObjectItem>> _pool;
+    // 按 key 记录最后放入时间，自动释放按 key 级别判断
+    private readonly Dictionary<string, float> _lastPutTime = new();
     
     // 自动释放时间，单位秒
     private float _autoReleaseTime;
     private CancellationTokenSource _cancel;
     public ObjectPool(float autoReleaseTime = 0)
     {
-        _pool = new Dictionary<string, List<ObjectItem>>();
         _autoReleaseTime = autoReleaseTime;
         if (autoReleaseTime > 0)
         {
@@ -66,19 +49,16 @@ public class ObjectPool<T> : IObjectPool where T : Object
     {
         T obj = null;
         
-        // 尝试从对象池中获取
-        if (_pool.TryGetValue(key, out List<ObjectItem> objs))
+        if (_freePool.TryGetValue(key, out var stack) && stack.Count > 0)
         {
-            for (int i = objs.Count - 1; i >= 0; i--)
+            obj = stack.Pop();
+
+            if (!_activeObjs.TryGetValue(key, out var active))
             {
-                if (!objs[i].IsUsing)
-                {
-                    obj = objs[i].Target as T;
-                    objs[i].IsUsing = true;
-                    objs[i].LastUseTime = Time.time;
-                    break;
-                }
+                active = new HashSet<T>();
+                _activeObjs[key] = active;
             }
+            active.Add(obj);
         }
 
         if (obj == null)
@@ -102,83 +82,76 @@ public class ObjectPool<T> : IObjectPool where T : Object
     /// <param name="obj">要放回的对象</param>
     public void PutObj(string key, T obj)
     {
-        // 检查对象池是否存在
-        if (!_pool.TryGetValue(key, out List<ObjectItem> objs))
-        {
-            objs = new List<ObjectItem>();
-            _pool.Add(key, objs);
-        }
+        if (obj == null) return;
 
-        // 检查对象是否已经在对象池中
-        ObjectItem poolItem = null;
-        foreach (var item in objs)
+        // 从活跃集合移除
+        bool wasActive = _activeObjs.TryGetValue(key, out var active) && active.Remove(obj);
+
+        if (!wasActive)
         {
-            if (item.Target == obj)
+            // 不在活跃集合中，可能是新对象或重复放入
+            if (_freePool.TryGetValue(key, out var stack) && stack.Contains(obj))
             {
-                if (!item.IsUsing)
-                {
-                    Log.Error(typeof(T), $"对象已经在对象池中: {obj.name}");
-                    return;
-                }
-                
-                poolItem = item;
-                break;
+                Log.Error($"对象已在对象池中: {obj.name}");
+                return;
             }
         }
+
+        // 放入空闲栈
+        if (!_freePool.TryGetValue(key, out var freeStack))
+        {
+            freeStack = new Stack<T>();
+            _freePool[key] = freeStack;
+        }
+        freeStack.Push(obj);
+        _lastPutTime[key] = Time.time;
         
-        // 如果对象不在对象池中，创建新的池项
-        if (poolItem == null)
-        {
-            poolItem = ObjectItem.Create(obj);
-            objs.Add(poolItem);
 #if STATS_ON && UNITY_EDITOR
-            UpdateStats(key, 1);
+        UpdateStats(key, wasActive ? 4 : 1);
 #endif
-        }
-        else
-        {
-            poolItem.IsUsing = false;
-            poolItem.LastUseTime = Time.time;
-#if STATS_ON && UNITY_EDITOR
-            UpdateStats(key, 4);
-#endif
-        }
     }
 
     private void AutoReleaseObj()
     {
-        float currentTime = Time.time;
-        // 创建键的副本，避免在遍历过程中修改字典导致异常
-        var keysToCheck = new List<string>(_pool.Keys);
-        foreach (var key in keysToCheck)
+        try
         {
-            if (!_pool.TryGetValue(key, out var items))
+            float currentTime = Time.time;
+            List<string> keysToRemove = null;
+            
+            foreach (var kv in _freePool)
             {
-                continue;
-            }
+                if (kv.Value.Count == 0) continue;
 
-            // 检查是否需要释放长时间未使用的对象
-            for (int i = items.Count - 1; i >= 0; i--)
-            {
-                if (!items[i].IsUsing && currentTime - items[i].LastUseTime > _autoReleaseTime)
+                // 按 key 级别判断：该 key 最后一次放入距今超过 autoReleaseTime
+                if (currentTime - _lastPutTime.GetValueOrDefault(kv.Key) > _autoReleaseTime)
                 {
-                    ReleaseObj(key, items[i].Target);
-                    CoreMgr.ClassPool.Recycle(items[i]);
-                    items.RemoveAt(i);
-
+                    while (kv.Value.Count > 0)
+                    {
+                        ReleaseObj(kv.Key, kv.Value.Pop());
 #if STATS_ON && UNITY_EDITOR
-                    UpdateStats(key, 3);
+                        UpdateStats(kv.Key, 3);
 #endif
+                    }
+
+                    keysToRemove ??= new List<string>();
+                    keysToRemove.Add(kv.Key);
                 }
             }
-
-            if (items.Count == 0)
+            
+            
+            if (keysToRemove != null)
             {
-                _pool.Remove(key);
+                foreach (var key in keysToRemove)
+                {
+                    _freePool.Remove(key);
+                    _lastPutTime.Remove(key);
+                }
             }
         }
-
-        _cancel = CoreMgr.Timer.StartSecondDelay(_autoReleaseTime, AutoReleaseObj);
+        finally
+        {
+            _cancel = CoreMgr.Timer.StartSecondDelay(_autoReleaseTime, AutoReleaseObj);
+        }
     }
     
     /// <summary>
@@ -186,18 +159,34 @@ public class ObjectPool<T> : IObjectPool where T : Object
     /// </summary>
     public void Release()
     {
-        _cancel?.Cancel();
-        // 销毁所有对象
-        foreach (var kv in _pool)
+        if (_cancel != null)
         {
-            foreach (var item in kv.Value)
-            {
-                ReleaseObj(kv.Key, item.Target);
-                CoreMgr.ClassPool.Recycle(item);
-            }
+            CoreMgr.Timer.Stop(_cancel);
+            _cancel = null;
         }
         
-        _pool.Clear();
+        foreach (var kv in _freePool)
+        {
+            while (kv.Value.Count > 0)
+                ReleaseObj(kv.Key, kv.Value.Pop());
+        }
+        
+        foreach (var kv in _activeObjs)
+        {
+            if (kv.Value.Count > 0)
+            {
+                foreach (var v in kv.Value)
+                {
+                    ReleaseObj(kv.Key, v);
+                }
+            }
+        }
+
+        _freePool.Clear();
+        _activeObjs.Clear();
+        _lastPutTime.Clear();
+
+        // 这里不应该清空，而是统计释放
 #if STATS_ON && UNITY_EDITOR
         _stats.Clear();
 #endif    
@@ -205,15 +194,14 @@ public class ObjectPool<T> : IObjectPool where T : Object
 
     private void ReleaseObj(string key, Object obj)
     {
-        if (obj is MonoBehaviour monoBehaviour)
-        {
-            Object.Destroy(monoBehaviour.gameObject);
-        }
+        if (obj == null) return;
+
+        if (obj is MonoBehaviour mono)
+            Object.Destroy(mono.gameObject);
         else
-        {
             Object.Destroy(obj);
-        }
-        FrameworkMgr.Res.Unload(key);
+
+        CoreMgr.Res.Unload(key);
     }
     
 #if STATS_ON && UNITY_EDITOR
@@ -224,7 +212,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
     /// 更新统计信息
     /// </summary>
     /// <param name="key">对象key</param>
-    /// <param name="flag">操作标识。1存新的 2取 3释放 4存已有的 5取但没取到</param>
+    /// <param name="flag">操作标识。1存新的 2取 3释放 4存旧的 5取但没取到</param>
     private void UpdateStats(string key, int flag)
     {
         if (!_stats.TryGetValue(key, out ObjectPoolStats stats))

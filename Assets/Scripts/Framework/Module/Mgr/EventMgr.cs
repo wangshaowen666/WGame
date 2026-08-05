@@ -14,51 +14,66 @@ using System.Collections.Generic;
 /// </summary>
 public class EventMgr : ManagerBase
 {
-    private readonly Dictionary<Enum, List<Delegate>> _eventMap = new Dictionary<Enum, List<Delegate>>();
-
-    public void Register(Enum eventId, Action callback)
-    {
-        RegisterEvent(eventId, callback);
-    }
+    // Enum Dictionary<Enum, ...> 内部用 EqualityComparer<Enum>.Default 做比较，它的 GetHashCode 和 Equals 实现会把 enum 值 装箱为 object 再比较。
+    // 用具体的enum类型 .Net做过优化，直接比较底层int值，无装箱
+    //private readonly Dictionary<Enum, List<Delegate>> _eventMap = new Dictionary<Enum, List<Delegate>>();
     
-    public void Register<T>(Enum eventId, Action<T> callback)
-    {
-        RegisterEvent(eventId, callback);
-    }
+    // 具体的enum只能业务层提供，框架层无法提供，故只能用int
+    private readonly Dictionary<int, List<Delegate>> _eventMap = new Dictionary<int, List<Delegate>>();
     
-    public void Register<T1, T2>(Enum eventId, Action<T1, T2> callback)
+    private static int GetKey<TEnum>(TEnum eventId) where TEnum : struct, Enum
     {
-        RegisterEvent(eventId, callback);
-    }
-    
-    public void Register<T1, T2, T3>(Enum eventId, Action<T1, T2, T3> callback)
-    {
-        RegisterEvent(eventId, callback);
-    }
-    
-    public void UnRegister(Enum eventId, Action callback)
-    {
-        UnRegisterEvent(eventId, callback);
-    }
-    
-    public void UnRegister<T>(Enum eventId, Action<T> callback)
-    {
-        UnRegisterEvent(eventId, callback);
-    }
-    
-    public void UnRegister<T1, T2>(Enum eventId, Action<T1, T2> callback)
-    {
-        UnRegisterEvent(eventId, callback);
-    }
-    
-    public void UnRegister<T1, T2, T3>(Enum eventId, Action<T1, T2, T3> callback)
-    {
-        UnRegisterEvent(eventId, callback);
+        // EqualityComparer<TEnum>.Default 对具体 enum 不装箱
+        //return typeof(TEnum).GetHashCode() ^ EqualityComparer<TEnum>.Default.GetHashCode(eventId);
+        
+        // 暂定业务层只有一个TEnum，无须GetHashCode(),上述的GetHashCode还有理论上的哈希碰撞问题。
+        return EqualityComparer<TEnum>.Default.GetHashCode(eventId);
     }
 
-    public void UnRegisterAll(Enum eventId)
+    public void Register<TEnum>(TEnum eventId, Action callback) where TEnum : struct, Enum
     {
-        _eventMap.Remove(eventId);
+        RegisterEvent(eventId, callback);
+    }
+    
+    public void Register<TEnum, T>(TEnum eventId, Action<T> callback) where TEnum : struct, Enum
+    {
+        RegisterEvent(eventId, callback);
+    }
+    
+    public void Register<TEnum, T1, T2>(TEnum eventId, Action<T1, T2> callback) where TEnum : struct, Enum
+    {
+        RegisterEvent(eventId, callback);
+    }
+    
+    public void Register<TEnum, T1, T2, T3>(TEnum eventId, Action<T1, T2, T3> callback) where TEnum : struct, Enum
+    {
+        RegisterEvent(eventId, callback);
+    }
+    
+    public void UnRegister<TEnum>(TEnum eventId, Action callback) where TEnum : struct, Enum
+    {
+        UnRegisterEvent(eventId, callback);
+    }
+    
+    public void UnRegister<TEnum, T>(TEnum eventId, Action<T> callback) where TEnum : struct, Enum
+    {
+        UnRegisterEvent(eventId, callback);
+    }
+    
+    public void UnRegister<TEnum, T1, T2>(TEnum eventId, Action<T1, T2> callback) where TEnum : struct, Enum
+    {
+        UnRegisterEvent(eventId, callback);
+    }
+    
+    public void UnRegister<TEnum, T1, T2, T3>(TEnum eventId, Action<T1, T2, T3> callback) where TEnum : struct, Enum
+    {
+        UnRegisterEvent(eventId, callback);
+    }
+
+    public void UnRegisterAll<TEnum>(TEnum eventId) where TEnum : struct, Enum
+    {
+        var key = GetKey(eventId);
+        _eventMap.Remove(key);
     }
 
     public void Clear()
@@ -66,9 +81,10 @@ public class EventMgr : ManagerBase
         _eventMap.Clear();
     }
 
-    public void Send(Enum eventId)
+    public void Send<TEnum>(TEnum eventId) where TEnum : struct, Enum
     {
-        if (_eventMap.TryGetValue(eventId, out var list))
+        var key = GetKey(eventId);
+        if (_eventMap.TryGetValue(key, out var list))
         {
             for (int i = list.Count - 1; i >= 0; i--)
             {
@@ -77,53 +93,64 @@ public class EventMgr : ManagerBase
         }
     }
     
-    public void Send<T>(Enum eventId, T arg)
+    public void Send<TEnum, T>(TEnum eventId, T arg) where TEnum : struct, Enum
     {
-        if (_eventMap.TryGetValue(eventId, out var list))
+        var key = GetKey(eventId);
+        if (_eventMap.TryGetValue(key, out var list))
         {
-            foreach (var handler in list)
+            for (int i = list.Count - 1; i >= 0; i--)
             {
-                (handler as Action<T>)?.Invoke(arg);
-            }       
+                (list[i] as Action<T>)?.Invoke(arg);
+            }         
         }
     }
     
-    public void Send<T1, T2>(Enum eventId, T1 arg1, T2 arg2)
+    public void Send<TEnum, T1, T2>(TEnum eventId, T1 arg1, T2 arg2) where TEnum : struct, Enum
     {
-        if (_eventMap.TryGetValue(eventId, out var list))
+        var key = GetKey(eventId);
+        if (_eventMap.TryGetValue(key, out var list))
         {
-            foreach (var handler in list)
+            for (int i = list.Count - 1; i >= 0; i--)
             {
-                (handler as Action<T1, T2>)?.Invoke(arg1, arg2);
-            }       
+                (list[i] as Action<T1, T2>)?.Invoke(arg1, arg2);
+            }         
         }
     }
     
-    public void Send<T1, T2, T3>(Enum eventId, T1 arg1, T2 arg2, T3 arg3)
+    public void Send<TEnum, T1, T2, T3>(TEnum eventId, T1 arg1, T2 arg2, T3 arg3) where TEnum : struct, Enum
     {
-        if (_eventMap.TryGetValue(eventId, out var list))
+        var key = GetKey(eventId);
+        if (_eventMap.TryGetValue(key, out var list))
         {
-            foreach (var handler in list)
+            for (int i = list.Count - 1; i >= 0; i--)
             {
-                (handler as Action<T1, T2, T3>)?.Invoke(arg1, arg2, arg3);
+                (list[i] as Action<T1, T2, T3>)?.Invoke(arg1, arg2, arg3);
             }       
         }
     }
 
-    private void RegisterEvent(Enum eventId, Delegate callback)
+    private void RegisterEvent<TEnum>(TEnum eventId, Delegate callback) where TEnum : struct, Enum
     {
-        if (!_eventMap.TryGetValue(eventId, out var list))
+        int key = GetKey<TEnum>(eventId);
+        if (!_eventMap.TryGetValue(key, out var list))
         {
             list = new List<Delegate>();
-            _eventMap[eventId] = list;
+            _eventMap[key] = list;
+        }
+
+        if (list.Contains(callback))
+        {
+            Log.Warning("重复注册事件回调", eventId);
+            return;
         }
         
         list.Add(callback);
     }
 
-    private void UnRegisterEvent(Enum eventId, Delegate callback)
+    private void UnRegisterEvent<TEnum>(TEnum eventId, Delegate callback) where TEnum : struct, Enum
     {
-        if (_eventMap.TryGetValue(eventId, out var list))
+        int key = GetKey<TEnum>(eventId);
+        if (_eventMap.TryGetValue(key, out var list))
         {
             var ret = list.Remove(callback);
             if (!ret)
@@ -134,7 +161,7 @@ public class EventMgr : ManagerBase
             {
                 if (list.Count == 0)
                 {
-                    _eventMap.Remove(eventId);
+                    _eventMap.Remove(key);
                 }
             }
         }

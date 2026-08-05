@@ -32,7 +32,7 @@ public class NetworkPlayer : NetworkBehaviour
         if (IsServer)
         {
             //fireCooldown.Value -= _fireRate;
-            objectPool = FrameworkMgr.ObjectPool.RegisterPool<GameObject>();
+            objectPool = CoreMgr.ObjectPool.RegisterPool<GameObject>();
         }
     }
 
@@ -67,7 +67,7 @@ public class NetworkPlayer : NetworkBehaviour
         var bullet = objectPool.GetObj("bullet");
         if (bullet == null)
         {
-            FrameworkMgr.Res.LoadAsync<GameObject>("PlayerBullet", OnLoadBulletFinish);
+            CoreMgr.Res.LoadAsync<GameObject>("PlayerBullet", OnLoadBulletFinish);
         }
         else
         {

@@ -10,9 +10,15 @@ using System;
 
 public static class CoreMgr
 {
+    public static readonly ProcedureMgr Procedure = new();
     public static readonly UpdateMgr Update = new();
     public static readonly TimerMgr Timer = new();
     public static readonly ClassPoolMgr ClassPool = new();
+    public static readonly EventMgr Event = new();
+    public static readonly ResMgr Res = new();
+    public static readonly ObjectPoolMgr ObjectPool = new();
+    public static readonly SceneMgr Scene = new();
+    public static readonly LuaMgr Lua = new();
     
     private static readonly ManagerBase[] s_managers;
 
@@ -20,9 +26,15 @@ public static class CoreMgr
     {
         s_managers = new ManagerBase[]
         {
+            Procedure,
             Update,
             Timer,
             ClassPool,
+            Event,
+            Res,
+            ObjectPool,
+            Scene,
+            Lua,
         };
     }
 

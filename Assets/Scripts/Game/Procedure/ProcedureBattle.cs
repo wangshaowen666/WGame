@@ -16,7 +16,7 @@ public class ProcedureBattle : ProcedureBase
     {
         base.OnEnter();
         
-        FrameworkMgr.Screen.SetMainCamera(FrameworkConfig.BattleCamera);
+        GameCamera.SetMainCamera(GameCamera.BattleCameraName);
         GameMgr.UI.PanelOn(DPnlId.BattlePanel);
         GameMgr.Battle.EnterBattle();
     }

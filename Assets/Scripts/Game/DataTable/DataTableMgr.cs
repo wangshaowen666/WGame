@@ -45,7 +45,7 @@ public class DataTableMgr : ManagerBase
     
     private static ByteBuf LoadByteBuf(string file)
     {
-        var cfg = FrameworkMgr.Res.LoadSync<TextAsset>($"Bin/{file}.bytes");
+        var cfg = CoreMgr.Res.LoadSync<TextAsset>($"Bin/{file}.bytes");
         return new ByteBuf(cfg.bytes);
     }
     

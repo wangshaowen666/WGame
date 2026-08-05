@@ -28,7 +28,7 @@ public partial class ToolBox
             Directory.CreateDirectory(s_exportDir);
             string exportFileName = Path.Combine(s_exportDir, $"对象池统计数据 {DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv");
 
-            var contents = FrameworkMgr.ObjectPool.DealPoolStats();
+            var contents = CoreMgr.ObjectPool.DealPoolStats();
             AddLogInfo(ParseUtil.ToJson(contents));
             int index = 0;
             string[] data = new string[contents.Count + 1];
@@ -84,7 +84,7 @@ public partial class ToolBox
             Directory.CreateDirectory(s_exportDir);
             string exportFileName = Path.Combine(s_exportDir, $"AssetBundle统计数据 {DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv");
 
-            var contents = FrameworkMgr.Res.DealPoolStats();
+            var contents = CoreMgr.Res.DealPoolStats();
             AddLogInfo(ParseUtil.ToJson(contents));
             int index = 0;
             string[] data = new string[contents.Count + 1];

@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 本地存档，string默认值为“”，int和float默认值为-404
+/// 本地存档，string默认值为“”，int和float默认值为0
 /// </summary>
 public static class PlayerPrefsUtil 
 {
@@ -45,7 +45,7 @@ public static class PlayerPrefsUtil
     {
         if (!IntCache.TryGetValue(key, out int value))
         {
-            value = PlayerPrefs.GetInt(key, -404);
+            value = PlayerPrefs.GetInt(key, 0);
             IntCache[key] = value;
         }
         return value;
@@ -61,7 +61,7 @@ public static class PlayerPrefsUtil
     {
         if (!FloatCache.TryGetValue(key, out float value))
         {
-            value = PlayerPrefs.GetFloat(key, -404f);
+            value = PlayerPrefs.GetFloat(key, 0f);
             FloatCache[key] = value;
         }
         return value;
@@ -73,10 +73,10 @@ public static class PlayerPrefsUtil
             StrCache[key] = "";
         
         else if (IntCache.ContainsKey(key))
-            IntCache[key] = -404;
+            IntCache[key] = 0;
 
         else if (FloatCache.ContainsKey(key))
-            FloatCache[key] = -404f;
+            FloatCache[key] = 0f;
         
         PlayerPrefs.DeleteKey(key);
     }

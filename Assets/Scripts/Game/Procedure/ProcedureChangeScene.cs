@@ -39,7 +39,7 @@ public class ProcedureChangeScene : ProcedureBase
         }
        
         await UniTask.Delay(3000);
-        await FrameworkMgr.Scene.LoadScene(nm);
+        await CoreMgr.Scene.LoadScene(nm);
 
         if (_fsm.GetData<bool>("isLoginFinish"))
             GameMgr.UI.PanelOff(DPnlId.LoadingPanel);

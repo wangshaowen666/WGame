@@ -11,18 +11,18 @@
 /// 基于状态机的游戏流程
 /// 各流程数据共享都靠fsm
 /// </summary>
-public static class Procedure 
+public class ProcedureMgr : ManagerBase
 {
-    private static Fsm s_fsm= Fsm.Create();
+    private Fsm _fsm= Fsm.Create();
 
-    public static void AddProcedure(ProcedureBase procedure)
+    public void AddProcedure(ProcedureBase procedure)
     {
-        s_fsm.AddState(procedure);
+        _fsm.AddState(procedure);
     }
 
-    public static void ChangeProcedure<T>() where T : ProcedureBase
+    public void ChangeProcedure<T>() where T : ProcedureBase
     {
-        s_fsm.ChangeState<T>();
+        _fsm.ChangeState<T>();
     }
 
     // 原本是通过反射自动收集所有流程，用华佗热更拆分程序集后，反射拿不到热更程序集中的流程

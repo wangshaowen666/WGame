@@ -27,12 +27,12 @@ public class GameLaunch
     /// </summary>
     private static void InitGameProcedure()
     {
-        Procedure.AddProcedure(new ProcedureChangeScene());
-        Procedure.AddProcedure(new ProcedurePreload());
-        Procedure.AddProcedure(new ProcedureMain());
-        Procedure.AddProcedure(new ProcedureBattle());
+        CoreMgr.Procedure.AddProcedure(new ProcedureChangeScene());
+        CoreMgr.Procedure.AddProcedure(new ProcedurePreload());
+        CoreMgr.Procedure.AddProcedure(new ProcedureMain());
+        CoreMgr.Procedure.AddProcedure(new ProcedureBattle());
         
-        Procedure.ChangeProcedure<ProcedurePreload>();
+        CoreMgr.Procedure.ChangeProcedure<ProcedurePreload>();
     }
     
     /// <summary>
@@ -49,7 +49,7 @@ public class GameLaunch
 
         foreach (var aotDllName in aotDllList)
         {
-            byte[] dllBytes = FrameworkMgr.Res.LoadSync<TextAsset>(aotDllName).bytes;
+            byte[] dllBytes = CoreMgr.Res.LoadSync<TextAsset>(aotDllName).bytes;
             RuntimeApi.LoadMetadataForAOTAssembly(dllBytes, HomologousImageMode.SuperSet);
             Log.Info("补充元数据dll:", aotDllName);
         }

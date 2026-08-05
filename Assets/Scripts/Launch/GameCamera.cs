@@ -1,24 +1,32 @@
-/*--------------------------------------------------------------
- * File: ScreenCtr.cs
- * Author: Wsw
- * Feedback: 614270423@qq.com
- * Time: 2025/12/31 16:01:13 
- *--------------------------------------------------------------
- */
-
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.InputSystem.UI;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.UI;
 
-public class ScreenMgr : ManagerBase
+public static class GameCamera 
 {
-    public Canvas UICanvas { get; private set; }
-    public Camera UICamera { get; private set; }
-    public Camera MainCamera { get; private set; }
+    public const string MapCameraName = "MapCamera";
+    public const string BattleCameraName = "BattleCamera";
+    public const string UICameraName = "UICamera";
+    
+    public static Camera UICamera { get; private set; }
+    public static Camera MainCamera { get; private set; }
 
-    public void SetMainCamera(string cameraName)
+    public static void CreateUICamera()
+    {
+        var obj = new GameObject(LaunchConfig.UICamera);
+        var camera = obj.AddComponent<Camera>();
+            
+        camera.orthographic = true;
+        camera.cullingMask = LayerMask.GetMask("UI");;
+        camera.clearFlags = CameraClearFlags.Depth;
+            
+        Object.DontDestroyOnLoad(obj);
+        UICamera = camera;
+    }
+    
+    public static void SetMainCamera(string cameraName)
     {
         var camera = Camera.allCameras.FirstOrDefault(cam => string.Equals(cam.name, cameraName));
         if (!camera)
