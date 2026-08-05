@@ -8,7 +8,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 public class Fsm : IResetable
 {
@@ -29,14 +28,14 @@ public class Fsm : IResetable
     public static Fsm Create<T>(params T[] states) where T : FsmState
     {
         Fsm fsm = CoreMgr.ClassPool.Get<Fsm>();
-        fsm.Init(states.ToList());
+        fsm.Init(states);
         return fsm;
     }
 
     public static Fsm Create<T>(List<T> states) where T : FsmState
     {
         Fsm fsm = CoreMgr.ClassPool.Get<Fsm>();
-        fsm.Init(states.ToList());
+        fsm.Init(states);
         return fsm;
     }
 
@@ -121,7 +120,7 @@ public class Fsm : IResetable
         
     }
     
-    private void Init<T>(List<T> states) where T : FsmState
+    private void Init<T>(IList<T> states) where T : FsmState
     {
         if (states == null || states.Count == 0)
         {
@@ -156,6 +155,7 @@ public class Fsm : IResetable
             return null;
         }
 
-        return _states.GetValueOrDefault(type);
+        _states.TryGetValue(type, out var state);
+        return state;
     }
 }

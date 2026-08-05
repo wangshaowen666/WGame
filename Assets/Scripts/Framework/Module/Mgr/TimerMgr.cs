@@ -13,7 +13,7 @@ using Cysharp.Threading.Tasks;
 
 public class TimerMgr : ManagerBase
 {
-    private readonly List<CancellationTokenSource> _activeCts = new();
+    private readonly HashSet<CancellationTokenSource> _activeCts = new();
     private readonly object _ctsLock = new();
 
     #region 延迟执行

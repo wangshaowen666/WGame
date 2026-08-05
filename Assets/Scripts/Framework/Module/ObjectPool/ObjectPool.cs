@@ -1,7 +1,4 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -19,7 +16,7 @@ public interface IObjectPool
 // 外部创建的对象，需要清理时，只需执行将其放回池中，池负责清理
 public class ObjectPool<T> : IObjectPool where T : Object
 {
-    // 空闲对象栈，
+    // 空闲对象栈
     private readonly Dictionary<string, Stack<T>> _freePool = new();
 
     // 活跃对象集合
@@ -29,11 +26,16 @@ public class ObjectPool<T> : IObjectPool where T : Object
     private readonly Dictionary<string, float> _lastPutTime = new();
     
     // 自动释放时间，单位秒
-    private float _autoReleaseTime;
+    private readonly float _autoReleaseTime;
+    // 每个 key 的空闲对象最大容量
+    private readonly int _maxCapacity;
+    // 是否已释放，防止定时器竞争
+    private bool _isReleased;
     private CancellationTokenSource _cancel;
-    public ObjectPool(float autoReleaseTime = 0)
+    public ObjectPool(float autoReleaseTime = 0, int maxCapacity = 100)
     {
         _autoReleaseTime = autoReleaseTime;
+        _maxCapacity = maxCapacity;
         if (autoReleaseTime > 0)
         {
             _cancel = CoreMgr.Timer.StartSecondDelay(autoReleaseTime, AutoReleaseObj);
@@ -84,27 +86,38 @@ public class ObjectPool<T> : IObjectPool where T : Object
     {
         if (obj == null) return;
 
+        // 获取或创建空闲栈
+        if (!_freePool.TryGetValue(key, out var freeStack))
+        {
+            freeStack = new Stack<T>();
+            _freePool[key] = freeStack;
+        }
+
         // 从活跃集合移除
         bool wasActive = _activeObjs.TryGetValue(key, out var active) && active.Remove(obj);
 
         if (!wasActive)
         {
             // 不在活跃集合中，可能是新对象或重复放入
-            if (_freePool.TryGetValue(key, out var stack) && stack.Contains(obj))
+            if (freeStack.Contains(obj))
             {
                 Log.Error($"对象已在对象池中: {obj.name}");
                 return;
             }
         }
 
-        // 放入空闲栈
-        if (!_freePool.TryGetValue(key, out var freeStack))
-        {
-            freeStack = new Stack<T>();
-            _freePool[key] = freeStack;
-        }
-        freeStack.Push(obj);
         _lastPutTime[key] = Time.time;
+        // 容量检查
+        if (freeStack.Count >= _maxCapacity)
+        {
+            ReleaseObj(key, obj);
+#if STATS_ON && UNITY_EDITOR
+            UpdateStats(key, 3);
+#endif
+            return;
+        }
+
+        freeStack.Push(obj);
         
 #if STATS_ON && UNITY_EDITOR
         UpdateStats(key, wasActive ? 4 : 1);
@@ -150,7 +163,8 @@ public class ObjectPool<T> : IObjectPool where T : Object
         }
         finally
         {
-            _cancel = CoreMgr.Timer.StartSecondDelay(_autoReleaseTime, AutoReleaseObj);
+            if (!_isReleased)
+                _cancel = CoreMgr.Timer.StartSecondDelay(_autoReleaseTime, AutoReleaseObj);
         }
     }
     
@@ -159,6 +173,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
     /// </summary>
     public void Release()
     {
+        _isReleased = true;
         if (_cancel != null)
         {
             CoreMgr.Timer.Stop(_cancel);
@@ -192,7 +207,7 @@ public class ObjectPool<T> : IObjectPool where T : Object
 #endif    
     }
 
-    private void ReleaseObj(string key, Object obj)
+    private void ReleaseObj(string key, T obj)
     {
         if (obj == null) return;
 

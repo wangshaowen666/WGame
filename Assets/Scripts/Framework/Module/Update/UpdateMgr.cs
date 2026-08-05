@@ -16,12 +16,15 @@ public class UpdateMgr : ManagerBase
     private readonly List<IUpdateable> _updateList = new List<IUpdateable>();
     // Update时可能触发注册和移除，放到缓存中，在下一帧的遍历中才生效
     private readonly List<IUpdateable> _addCaches = new List<IUpdateable>();
-    // 安全性和偷懒性，允许同一个IUpdateable多次调用移除，通过HashSet保证唯一
+    // 避免注册时列表每次Contains遍历的性能开销
+    private readonly HashSet<IUpdateable> _registered = new();
+    // 允许同一个IUpdateable多次调用移除，通过HashSet保证唯一
     private readonly HashSet<IUpdateable> _rmvCaches = new HashSet<IUpdateable>();
+    // 合并用的复用列表，避免每次 DealCache 分配 GC
+    private readonly List<IUpdateable> _merged = new();
 
     private bool _isAdd;
     private bool _isRmv;
-    private int _addIndex;
     
 #if STATS_ON && UNITY_EDITOR
     private readonly Unity.Profiling.ProfilerMarker _updateMarker = new ("WGame.Update");
@@ -29,12 +32,19 @@ public class UpdateMgr : ManagerBase
 
     public void RegisterUpdate(IUpdateable updateable)
     {
-        if (_updateList.Contains(updateable) || _addCaches.Contains(updateable))
+        // 同一帧 添加 移除 又添加会出现的问题，但实际触发可能极低，先不考虑
+        // if (_rmvCaches.Remove(updateable))
+        // {
+        //     _registered.Add(updateable);
+        //     return;
+        // }
+
+        if (!_registered.Add(updateable))
         {
             Log.Error("重复注册 Updateable:", updateable.GetType().Name);
             return;
         }
-        
+
         _isAdd = true;
         for (int i = 0; i < _addCaches.Count; i++)
         {
@@ -52,11 +62,11 @@ public class UpdateMgr : ManagerBase
     {
         _isRmv = true;
         _rmvCaches.Add(updateable);
+        _registered.Remove(updateable);
     }
     
     public void MyUpdate(float deltaTime, float realDeltaTime)
     {
-        // 有些在update之前执行的添加或销毁，当帧就生效，比如OnTriggerEnter碰撞后即移除
         if (_isAdd || _isRmv)
         {
             DealCache();
@@ -82,41 +92,64 @@ public class UpdateMgr : ManagerBase
 
     private void DealCache()
     {
-        _addIndex = 0;
-        for (int i = 0; i < _updateList.Count; i++)
+        if (_isRmv && _rmvCaches.Count > 0)
         {
-            if (_isAdd && _addIndex < _addCaches.Count)
-            {
-                if (_updateList[i].Priority < _addCaches[_addIndex].Priority)
-                {
-                    _updateList.Insert(i, _addCaches[_addIndex]);
-                    _addIndex++;
-                }
-            }
-            
-            // 如果先减后加，有可能0号元素移除，下标变成-1，加的时候报错
-            if (_isRmv && _rmvCaches.Count > 0)
+            for (int i = _updateList.Count - 1; i >= 0; i--)
             {
                 if (_rmvCaches.Remove(_updateList[i]))
-                {
                     _updateList.RemoveAt(i);
-                    i--;
-                }
             }
         }
 
-        for (; _addIndex < _addCaches.Count; _addIndex++)
+        if (_isAdd && _addCaches.Count > 0)
         {
-            // 解决同一帧，既加又删且优先级比当前s_updateList中都低时，上方遍历s_rmvCaches并未移除
-            if (!_rmvCaches.Remove(_addCaches[_addIndex]))
-                _updateList.Add(_addCaches[_addIndex]);
+            // 过滤掉同时被移除的项
+            if (_isRmv)
+            {
+                for (int i = _addCaches.Count - 1; i >= 0; i--)
+                {
+                    if (_rmvCaches.Remove(_addCaches[i]))
+                        _addCaches.RemoveAt(i);
+                }
+            }
+
+            // _updateList 和 _addCaches 都按优先级降序，O(n+m)
+            if (_addCaches.Count > 0)
+            {
+                _merged.Clear();
+                int i = 0, j = 0;
+                while (i < _updateList.Count && j < _addCaches.Count)
+                {
+                    if (_updateList[i].Priority >= _addCaches[j].Priority)
+                        _merged.Add(_updateList[i++]);
+                    else
+                        _merged.Add(_addCaches[j++]);
+                }
+                while (i < _updateList.Count) _merged.Add(_updateList[i++]);
+                while (j < _addCaches.Count) _merged.Add(_addCaches[j++]);
+
+                _updateList.Clear();
+                _updateList.AddRange(_merged);
+            }
+
+            _addCaches.Clear();
         }
-        _addCaches.Clear();
 
         if (_rmvCaches.Count > 0)
         {
             Log.Error("尝试移除未注册的Updateable");
             _rmvCaches.Clear();
         }
+    }
+
+    public override void OnSceneExit(int sceneTp)
+    {
+        // _updateList.Clear();
+        // _addCaches.Clear();
+        // _registered.Clear();
+        // _rmvCaches.Clear();
+        // _merged.Clear();
+        // _isAdd = false;
+        // _isRmv = false;
     }
 }
