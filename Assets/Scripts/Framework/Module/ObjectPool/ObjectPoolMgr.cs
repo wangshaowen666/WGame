@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------
- * File: ObjectPoolMgr.cs
+ * File: ObjectFactory.cs
  * Author: Wsw
  * Feedback: 614270423@qq.com
  * Time: 2026/01/15 10:16:15 
@@ -7,7 +7,8 @@
  */
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Generic; 
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 public class ObjectPoolMgr : ManagerBase
@@ -38,9 +39,8 @@ public class ObjectPoolMgr : ManagerBase
     /// </summary>
     /// <typeparam name="T">对象类型</typeparam>
     /// <param name="autoReleaseTime">对象池自动释放闲置对象时间</param>
-    /// <param name="maxCapacity">每个 key 的空闲对象最大容量</param>
     /// <returns>对象池实例</returns>
-    public ObjectPool<T> RegisterPool<T>(float autoReleaseTime = 0, int maxCapacity = 100) where T : Object
+    public ObjectPool<T> RegisterPool<T>(float autoReleaseTime = 0) where T : Object
     {
         Type type = typeof(T);
         if (_poolMap.TryGetValue(type, out var value))
@@ -48,7 +48,7 @@ public class ObjectPoolMgr : ManagerBase
             return value as ObjectPool<T>;
         }
         
-        var pool = new ObjectPool<T>(autoReleaseTime, maxCapacity);
+        var pool = new ObjectPool<T>(autoReleaseTime);
         _poolMap.Add(type, pool);
         return pool;
     }
@@ -66,19 +66,14 @@ public class ObjectPoolMgr : ManagerBase
         }
         
         // 从对象池映射中移除
-        Type keyToRemove = null;
-        foreach (var kv in _poolMap)
+        foreach (var kv in new Dictionary<Type, IObjectPool>(_poolMap))
         {
             if (kv.Value == pool)
             {
-                keyToRemove = kv.Key;
-                break;
+                pool.Release();
+                _poolMap.Remove(kv.Key);
+                return;
             }
-        }
-        if (keyToRemove != null)
-        {
-            pool.Release();
-            _poolMap.Remove(keyToRemove);
         }
     }
     
@@ -101,15 +96,15 @@ public class ObjectPoolMgr : ManagerBase
     public void ReleaseAll()
     {
         // 释放所有对象池
-        var keys = new List<Type>(_poolMap.Keys);
-        foreach (var key in keys)
+        foreach (var kv in new Dictionary<Type, IObjectPool>(_poolMap))
         {
-            _poolMap[key].Release();
+            kv.Value.Release();
         }
         
         _poolMap.Clear();
     }
-
+    
+    
 #if STATS_ON && UNITY_EDITOR
     public List<string> DealPoolStats()
     {

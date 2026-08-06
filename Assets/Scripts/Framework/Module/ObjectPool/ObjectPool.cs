@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -22,8 +23,6 @@ public class ObjectPool<T> : IObjectPool where T : Object
     private readonly float _autoReleaseTime;
     private readonly int _maxCapacity;
 
-    // 是否已释放，防止定时器竞争
-    private bool _isReleased;
     private CancellationTokenSource _cancel;
 
 #if STATS_ON && UNITY_EDITOR
@@ -40,31 +39,18 @@ public class ObjectPool<T> : IObjectPool where T : Object
 
     public T GetObj(string key)
     {
-        T obj = null;
-
-        if (_freePool.TryGetValue(key, out var stack) && stack.Count > 0)
+        if (!_freePool.TryGetValue(key, out var stack) || stack.Count == 0)
         {
-            obj = stack.Pop();
-
-            if (!_activeObjs.TryGetValue(key, out var active))
-            {
-                active = new HashSet<T>();
-                _activeObjs[key] = active;
-            }
-            active.Add(obj);
-        }
-
-        if (obj == null)
-        {
-#if STATS_ON && UNITY_EDITOR
-            UpdateStats(key, 5);
-#endif
+            RecordStats(key, 5);
             return null;
         }
 
-#if STATS_ON && UNITY_EDITOR
-        UpdateStats(key, 2);
-#endif
+        var obj = stack.Pop();
+        if (!_activeObjs.TryGetValue(key, out var active))
+            _activeObjs[key] = active = new HashSet<T>();
+        active.Add(obj);
+        
+        RecordStats(key, 2);
         return obj;
     }
 
@@ -73,12 +59,9 @@ public class ObjectPool<T> : IObjectPool where T : Object
         if (obj == null) return;
 
         if (!_freePool.TryGetValue(key, out var freeStack))
-        {
-            freeStack = new Stack<T>();
-            _freePool[key] = freeStack;
-        }
-
-        bool wasActive = _activeObjs.TryGetValue(key, out var active) && active.Remove(obj);
+            _freePool[key] = freeStack = new Stack<T>();
+        
+        var wasActive = _activeObjs.TryGetValue(key, out var active) && active.Remove(obj);
         if (!wasActive && freeStack.Contains(obj))
         {
             Log.Error($"对象已在对象池中: {obj.name}");
@@ -88,39 +71,26 @@ public class ObjectPool<T> : IObjectPool where T : Object
         if (freeStack.Count >= _maxCapacity)
         {
             ReleaseObj(key, obj);
-#if STATS_ON && UNITY_EDITOR
-            UpdateStats(key, 3);
-#endif
+            RecordStats(key, 3);
             return;
         }
 
         freeStack.Push(obj);
         _lastPutTime[key] = Time.time;
-#if STATS_ON && UNITY_EDITOR
-        UpdateStats(key, wasActive ? 4 : 1);
-#endif
+        RecordStats(key, wasActive ? 4 : 1);
     }
 
     public void Release()
     {
-        _isReleased = true;
-        if (_cancel != null)
-        {
-            CoreMgr.Timer.Stop(_cancel);
-            _cancel = null;
-        }
+        CoreMgr.Timer.Stop(_cancel);
 
-        foreach (var kv in _freePool)
-        {
-            while (kv.Value.Count > 0)
-                ReleaseObj(kv.Key, kv.Value.Pop());
-        }
+        foreach (var (key, stack) in _freePool)
+            while (stack.Count > 0)
+                ReleaseObj(key, stack.Pop());
 
-        foreach (var kv in _activeObjs)
-        {
-            foreach (var v in kv.Value)
-                ReleaseObj(kv.Key, v);
-        }
+        foreach (var (key, active) in _activeObjs)
+            foreach (var obj in active)
+                ReleaseObj(key, obj);
 
         _freePool.Clear();
         _activeObjs.Clear();
@@ -130,7 +100,6 @@ public class ObjectPool<T> : IObjectPool where T : Object
 #endif
     }
 
-    // 定时自动释放：按 key 级别判断，超过 _autoReleaseTime 未被使用的 key 全部释放
     private void AutoReleaseObj()
     {
         try
@@ -138,38 +107,32 @@ public class ObjectPool<T> : IObjectPool where T : Object
             float currentTime = Time.time;
             List<string> keysToRemove = null;
 
-            foreach (var kv in _freePool)
+            foreach (var (key, stack) in _freePool)
             {
-                if (kv.Value.Count == 0) continue;
+                if (stack.Count == 0) continue;
+                if (currentTime - _lastPutTime.GetValueOrDefault(key) <= _autoReleaseTime) continue;
 
-                if (currentTime - _lastPutTime.GetValueOrDefault(kv.Key) > _autoReleaseTime)
+                while (stack.Count > 0)
                 {
-                    while (kv.Value.Count > 0)
-                    {
-                        ReleaseObj(kv.Key, kv.Value.Pop());
-#if STATS_ON && UNITY_EDITOR
-                        UpdateStats(kv.Key, 3);
-#endif
-                    }
-
-                    keysToRemove ??= new List<string>();
-                    keysToRemove.Add(kv.Key);
+                    ReleaseObj(key, stack.Pop());
+                    RecordStats(key, 3);
                 }
+
+                keysToRemove ??= new List<string>();
+                keysToRemove.Add(key);
             }
 
-            if (keysToRemove != null)
+            if (keysToRemove == null) return;
+
+            foreach (var key in keysToRemove)
             {
-                foreach (var key in keysToRemove)
-                {
-                    _freePool.Remove(key);
-                    _lastPutTime.Remove(key);
-                }
+                _freePool.Remove(key);
+                _lastPutTime.Remove(key);
             }
         }
         finally
         {
-            if (!_isReleased)
-                _cancel = CoreMgr.Timer.StartSecondDelay(_autoReleaseTime, AutoReleaseObj);
+            _cancel = CoreMgr.Timer.StartSecondDelay(_autoReleaseTime, AutoReleaseObj);
         }
     }
 
@@ -185,15 +148,13 @@ public class ObjectPool<T> : IObjectPool where T : Object
         CoreMgr.Res.Unload(key);
     }
 
-#if STATS_ON && UNITY_EDITOR
-    // flag: 1-新对象放入, 2-取出, 3-释放, 4-旧对象放回, 5-加载
-    private void UpdateStats(string key, int flag)
+    // flag: 1-新对象放入, 2-取出, 3-释放, 4-旧对象放回, 5-取不到，自行加载
+    [Conditional("STATS_ON")]
+    private void RecordStats(string key, int flag)
     {
+#if STATS_ON && UNITY_EDITOR
         if (!_stats.TryGetValue(key, out var stats))
-        {
-            stats = new ObjectPoolStats();
-            _stats[key] = stats;
-        }
+            _stats[key] = stats = new ObjectPoolStats();
 
         switch (flag)
         {
@@ -227,12 +188,11 @@ public class ObjectPool<T> : IObjectPool where T : Object
                 stats.externalObjects++;
                 break;
         }
+#endif
     }
 
-    public Dictionary<string, ObjectPoolStats> GetStats()
-    {
-        return new Dictionary<string, ObjectPoolStats>(_stats);
-    }
+#if STATS_ON && UNITY_EDITOR
+    public Dictionary<string, ObjectPoolStats> GetStats() => new(_stats);
 #endif
 }
 
