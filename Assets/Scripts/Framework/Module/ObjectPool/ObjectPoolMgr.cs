@@ -66,14 +66,19 @@ public class ObjectPoolMgr : ManagerBase
         }
         
         // 从对象池映射中移除
+        Type keyToRemove = null;
         foreach (var kv in _poolMap)
         {
             if (kv.Value == pool)
             {
-                pool.Release();
-                _poolMap.Remove(kv.Key);
-                return;
+                keyToRemove = kv.Key;
+                break;
             }
+        }
+        if (keyToRemove != null)
+        {
+            pool.Release();
+            _poolMap.Remove(keyToRemove);
         }
     }
     
@@ -104,8 +109,7 @@ public class ObjectPoolMgr : ManagerBase
         
         _poolMap.Clear();
     }
-    
-    
+
 #if STATS_ON && UNITY_EDITOR
     public List<string> DealPoolStats()
     {
