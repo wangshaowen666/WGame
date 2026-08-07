@@ -35,12 +35,4 @@ public abstract class ManagerBase
     {
 
     }
-
-    /// <summary>
-    /// 程序关闭，释放所有资源
-    /// </summary>
-    public virtual void OnShutdown()
-    {
-
-    }
 }

@@ -6,9 +6,7 @@
  *--------------------------------------------------------------
  */
 
-using System.Collections.Generic;
 using cfg;
-using Cysharp.Threading.Tasks;
 
 public class ProcedureChangeScene : ProcedureBase
 {
@@ -16,48 +14,32 @@ public class ProcedureChangeScene : ProcedureBase
     {
         base.OnEnter();
         
-        // todo 释放资源等
-        if (_fsm.GetData<bool>("isLoginFinish"))
-            GameMgr.UI.PanelOn(DPnlId.LoadingPanel);
-        
-        AsyncRun().Forget();
-    }
-
-    private async UniTaskVoid AsyncRun()
-    {
-        var nm = _fsm.GetData<string>("sceneNm");
-
-        _fsm.SetData("hah", 1);
+        var nm = _fsm.GetData<string>(ProcedureKey.SceneName);
         if (string.IsNullOrEmpty(nm))
         {
-            Log.Error("场景名未赋值");
+            Log.Error("不存在的场景：", nm);
             return;
         }
-        else
-        {
-            Log.Info("场景名：", nm);
-        }
-       
-        await UniTask.Delay(3000);
-        await CoreMgr.Scene.LoadScene(nm);
-
-        if (_fsm.GetData<bool>("isLoginFinish"))
-            GameMgr.UI.PanelOff(DPnlId.LoadingPanel);
         
+        GameMgr.UI.PanelOn(DPnlId.LoadingPanel);
+        GameMgr.OnSceneExit(GameConfig.MainScene.Equals(nm) ? SceneType.Main : SceneType.Battle);
+        CoreMgr.Res.LoadSceneAsync(nm, null, OnSceneComplete);
+    }
+    
+    private void OnSceneComplete()
+    {
+        var nm = _fsm.GetData<string>(ProcedureKey.SceneName);
+        GameMgr.UI.PanelOff(DPnlId.LoadingPanel);
         switch (nm)
         {
-            case "Main":
+            case GameConfig.MainScene:
                 ChangeTo<ProcedureMain>();
                 break;
             
-            case "Battle":
-            case "Network":
+            case GameConfig.BattleScene:
+            case GameConfig.NetworkScene:
                 ChangeTo<ProcedureBattle>();
                 break;
-            
-            default:
-                Log.Error("未实现的场景：", nm);
-                return;
         }
     }
 }

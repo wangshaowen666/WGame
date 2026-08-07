@@ -17,8 +17,6 @@ public static class CoreMgr
     public static readonly EventMgr Event = new();
     public static readonly ResMgr Res = new();
     public static readonly ObjectPoolMgr ObjectPool = new();
-    public static readonly SceneMgr Scene = new();
-    public static readonly LuaMgr Lua = new();
     
     private static readonly ManagerBase[] s_managers;
 
@@ -33,8 +31,6 @@ public static class CoreMgr
             Event,
             Res,
             ObjectPool,
-            Scene,
-            Lua,
         };
     }
 

@@ -30,6 +30,6 @@ public static class GameMgr
     }
 
     public static void Init() => ManagerContainerHelper.Init(s_managers);
-    public static void OnSceneExit(int sceneTp) => ManagerContainerHelper.OnSceneExit(s_managers, sceneTp);
+    public static void OnSceneExit(SceneType sceneTp) => ManagerContainerHelper.OnSceneExit(s_managers, (int)sceneTp);
     public static void OnGameRestart() => ManagerContainerHelper.OnGameRestart(s_managers);
 }

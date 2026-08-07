@@ -7,7 +7,7 @@
  */
 
 /// <summary>
-/// 管理器容器公共逻辑，供 CoreMgr/FrameworkMgr/GameMgr 复用
+/// 管理器容器公共逻辑，供 CoreMgr/GameMgr 复用
 /// </summary>
 public static class ManagerContainerHelper
 {

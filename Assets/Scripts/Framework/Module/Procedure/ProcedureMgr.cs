@@ -13,7 +13,13 @@
 /// </summary>
 public class ProcedureMgr : ManagerBase
 {
-    private Fsm _fsm= Fsm.Create();
+    private Fsm _fsm;
+
+    public override void OnInit()
+    {
+        base.OnInit();
+        _fsm = Fsm.Create();
+    }
 
     public void AddProcedure(ProcedureBase procedure)
     {

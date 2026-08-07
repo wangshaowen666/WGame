@@ -12,6 +12,8 @@ public class LaunchEntry : MonoBehaviour
 {
     void Start()
     {
+        CoreMgr.Init();
+        
         InitProcedure();
         DontDestroyOnLoad(gameObject);
     }

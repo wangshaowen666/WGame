@@ -22,7 +22,7 @@ public class ProcedureLaunch : ProcedureBase
         CreateUICanvas();
         
         var panel = LoadLoginPanel();
-        _fsm.SetData("loginPanel", panel);
+        _fsm.SetData(LaunchConfig.LoginPanel, panel);
         panel.SetTip("游戏启动中...", 0.1f);
 
         ChangeTo<ProcedureVersionCheck>();

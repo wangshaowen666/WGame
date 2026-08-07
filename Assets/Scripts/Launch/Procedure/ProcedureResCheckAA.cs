@@ -26,7 +26,7 @@ public class ProcedureResCheckAA : ProcedureBase
     {
         base.OnEnter();
         
-        _loginPanel = _fsm.GetData<LoginPanel>("loginPanel");
+        _loginPanel = _fsm.GetData<LoginPanel>(LaunchConfig.LoginPanel);
         AsyncRun().Forget();
     }
 

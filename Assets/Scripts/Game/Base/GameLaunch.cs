@@ -17,6 +17,8 @@ public class GameLaunch
 {
     public static void StartGame()
     {
+        GameMgr.Init();
+        
         //Application.targetFrameRate = 60;
         ReplenishMeta();
         InitGameProcedure();

@@ -6,37 +6,40 @@
  *--------------------------------------------------------------
  */
 
+using System;
+using Cysharp.Threading.Tasks;
+
 public interface IResLoader
 {
     /// <summary>
     /// 同步加载资源
     /// </summary>
-    /// <typeparam name="T">资源类型</typeparam>
-    /// <param name="key">资源键</param>
-    /// <returns>加载的资源</returns>
     T LoadSync<T>(string key);
-    
+
     /// <summary>
     /// 异步加载资源
     /// </summary>
-    /// <typeparam name="T">资源类型</typeparam>
-    /// <param name="key">资源键</param>
-    /// <param name="callback">加载完成回调</param>
-    /// <param name="userData">用户数据</param>
     void LoadAsync<T>(string key, LoadAssetCallback<T> callback, object userData = null);
-    
+
     /// <summary>
-    /// 卸载指定key的所有资源
+    /// 异步加载场景
     /// </summary>
-    /// <param name="key">资源键</param>
+    /// <param name="sceneName">场景名称</param>
+    /// <param name="onProgress">加载进度回调（0~1）</param>
+    /// <param name="onComplete">加载完成回调</param>
+    void LoadSceneAsync(string sceneName, Action<float> onProgress = null, Action onComplete = null);
+
+    /// <summary>
+    /// 卸载指定key的资源
+    /// </summary>
     void Unload(string key);
-    
+
     /// <summary>
     /// 卸载所有已加载的资源
     /// </summary>
     void UnloadAll();
-    
+
 #if STATS_ON && UNITY_EDITOR
-    public System.Collections.Generic.List<string> DealPoolStats();
+    System.Collections.Generic.List<string> DealPoolStats();
 #endif
 }

@@ -12,6 +12,8 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceProviders;
+using UnityEngine.SceneManagement;
 
 public class AddressableLoader : IResLoader
 {
@@ -57,47 +59,9 @@ public class AddressableLoader : IResLoader
         LoadRes(key, callback, userData).Forget();
     }
 
-    private async UniTaskVoid LoadRes<T>(string key, LoadAssetCallback<T> callback = null, object userData = null)
+    public void LoadSceneAsync(string sceneName, Action<float> onProgress = null, Action onComplete = null)
     {
-        try
-        {
-            if (_handleMap.TryGetValue(key, out AsyncOperationHandle tempHandle))
-            {
-                _refMap.TryGetValue(key, out int c);
-                _refMap[key] = c + 1;
-                if (!tempHandle.IsDone)
-                    await tempHandle.Task;
-                if (tempHandle.Status == AsyncOperationStatus.Succeeded)
-                    callback?.Invoke((T)tempHandle.Result, userData);
-                else
-                    callback?.Invoke(default, userData);
-                return;
-            }
-
-            AsyncOperationHandle<T> handle = Addressables.LoadAssetAsync<T>(key);
-            // 不等待完成，直接添加到map中。如果等完成后再添加，需要处理加载中又触发了相同key的加载。
-            // 后者TryGetValue失败，引用未被管理，但Addressable 的 ResourceManager 内部列表持有，gc不会将其回收，且该bundle计数始终+1了，导致bundle常驻内存，无法卸载
-            _handleMap[key] = handle;
-            _refMap.TryGetValue(key, out int count);
-            _refMap[key] = count + 1;
-
-            await handle.Task;
-
-            if (handle.Status != AsyncOperationStatus.Succeeded)
-            {
-                _handleMap.Remove(key);
-                _refMap.Remove(key);
-                Addressables.Release(handle);
-                throw new Exception($"资源加载失败:{key}  {handle.OperationException}");
-            }
-
-            callback?.Invoke(handle.Result, userData);
-        }
-        catch (Exception e)
-        {
-            Log.Error($"资源异步加载异常: {key}", e);
-            callback?.Invoke(default, userData);
-        }
+        LoadScene(sceneName, onProgress, onComplete).Forget();
     }
 
     public void Unload(string key)
@@ -150,12 +114,6 @@ public class AddressableLoader : IResLoader
         _refMap.Clear();
     }
 
-    public int GetLoadedCount(string key)
-    {
-        _refMap.TryGetValue(key, out int count);
-        return count;
-    }
-
     public async UniTaskVoid PreloadWithLabel<T>(string label, Action<T> callback = null, object userData = null)
     {
         try
@@ -184,6 +142,83 @@ public class AddressableLoader : IResLoader
         catch (Exception e)
         {
             Log.Error($"预加载异常: {label}", e);
+        }
+    }
+    
+    public int GetLoadedCount(string key)
+    {
+        _refMap.TryGetValue(key, out int count);
+        return count;
+    }
+    
+    private async UniTaskVoid LoadRes<T>(string key, LoadAssetCallback<T> callback = null, object userData = null)
+    {
+        try
+        {
+            if (_handleMap.TryGetValue(key, out AsyncOperationHandle tempHandle))
+            {
+                _refMap.TryGetValue(key, out int c);
+                _refMap[key] = c + 1;
+                if (!tempHandle.IsDone)
+                    await tempHandle.Task;
+                if (tempHandle.Status == AsyncOperationStatus.Succeeded)
+                    callback?.Invoke((T)tempHandle.Result, userData);
+                else
+                    callback?.Invoke(default, userData);
+                return;
+            }
+
+            AsyncOperationHandle<T> handle = Addressables.LoadAssetAsync<T>(key);
+            // 不等待完成，直接添加到map中。如果等完成后再添加，需要处理加载中又触发了相同key的加载。
+            // 后者TryGetValue失败，引用未被管理，但Addressable 的 ResourceManager 内部列表持有，gc不会将其回收，且该bundle计数始终+1了，导致bundle常驻内存，无法卸载
+            _handleMap[key] = handle;
+            _refMap.TryGetValue(key, out int count);
+            _refMap[key] = count + 1;
+
+            await handle.Task;
+
+            if (handle.Status != AsyncOperationStatus.Succeeded)
+            {
+                _handleMap.Remove(key);
+                _refMap.Remove(key);
+                Addressables.Release(handle);
+                throw new Exception($"资源加载失败:{key}  {handle.OperationException}");
+            }
+
+            callback?.Invoke(handle.Result, userData);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"资源异步加载异常: {key}", e);
+            callback?.Invoke(default, userData);
+        }
+    }
+    
+    private async UniTask LoadScene(string sceneName, Action<float> onProgress = null, Action onComplete = null)
+    {
+        try
+        {
+            var handle = Addressables.LoadSceneAsync(sceneName, LoadSceneMode.Single);
+
+            while (!handle.IsDone)
+            {
+                onProgress?.Invoke(handle.PercentComplete);
+                await UniTask.Yield();
+            }
+
+            if (handle.Status != AsyncOperationStatus.Succeeded)
+            {
+                Addressables.Release(handle);
+                Log.Error("场景加载失败:", sceneName);
+                return;
+            }
+
+            onProgress?.Invoke(1f);
+            onComplete?.Invoke();
+        }
+        catch (Exception e)
+        {
+            Log.Error("场景加载异常:", sceneName, e.Message);
         }
     }
     

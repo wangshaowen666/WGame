@@ -20,25 +20,30 @@ public class ProcedureLoadDll : ProcedureBase
         base.OnEnter();
 #if !UNITY_EDITOR
         // 这里单独实现的脚本加载没走资源管理系统，因为资源管理本身属于热更脚本
-        Assembly.Load(LoadDllBytes("Framework.JIT.dll"));
-        Assembly hotUpdateAss = Assembly.Load(LoadDllBytes("Game.dll"));
+        Assembly hotEntryAss = null;
+        foreach (var dll in LaunchConfig.HotfixDll)
+        {
+            var ass = Assembly.Load(LoadDllBytes(dll));
+            if (dll.StartsWith(LaunchConfig.HotEntryDll))
+                hotEntryAss = ass;
+        }
 #else
         // Editor下无需加载，直接查找获得HotUpdate程序集
-        Assembly hotUpdateAss = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == "Game");
+        Assembly hotEntryAss = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == LaunchConfig.HotEntryDll);
 #endif
-        if (hotUpdateAss == null)
+        if (hotEntryAss == null)
         {
-            Log.Error("热更程序集Game 找不到");
+            Log.Error($"热更程序集{LaunchConfig.HotEntryDll} 找不到");
             return;
         }
         
-        Type type = hotUpdateAss.GetType("GameLaunch");
+        Type type = hotEntryAss.GetType(LaunchConfig.HotEntryClass);
         if (type == null)
         {
-            Log.Error("未找到启动类 GameLaunch");
+            Log.Error("未找到启动类 ", LaunchConfig.HotEntryClass);
             return;
         }
-        type.GetMethod("StartGame")?.Invoke(null, null);
+        type.GetMethod(LaunchConfig.HotEntryMethod)?.Invoke(null, null);
     }
     
     private byte[] LoadDllBytes(string key)
