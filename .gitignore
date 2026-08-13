@@ -14,6 +14,11 @@ WGame_BurstDebugInformation_DoNotShip/
 mono_crash.0.0.json
 UserSettings/Layouts/default-2022.dwlt
 
+# Server 编译产物
+Server/**/bin/
+Server/**/obj/
+Server/**/*.db
+
 # Unity 项目文件
 *.csproj
 *.unityproj
