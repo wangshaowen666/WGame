@@ -12,6 +12,7 @@
 public static class GameMgr
 {
     public static readonly DataTableMgr DataTable = new();
+    public static readonly AccountMgr Account = new();
     public static readonly UIMgr UI = new();
     public static readonly BattleMgr Battle = new();
     public static readonly EntityMgr Entity = new();
@@ -23,6 +24,7 @@ public static class GameMgr
         s_managers = new ManagerBase[]
         {
             DataTable,
+            Account,
             UI,
             Battle,
             Entity,
