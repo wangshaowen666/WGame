@@ -18,6 +18,7 @@ public static class CoreMgr
     public static readonly ResMgr Res = new();
     public static readonly ObjectPoolMgr ObjectPool = new();
     public static readonly HttpMgr Http = new();
+    public static readonly NetMgr Net = new();
     
     private static readonly ManagerBase[] s_managers;
 
@@ -33,6 +34,7 @@ public static class CoreMgr
             Res,
             ObjectPool,
             Http,
+            Net,
         };
     }
 

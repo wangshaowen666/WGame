@@ -60,4 +60,37 @@ public class LoginTest : MonoBehaviour
         GameMgr.Account.Logout();
         Log.Info("已退出登录");
     }
+
+    [ContextMenu("测试加载养成数据")]
+    private async void TestLoadData()
+    {
+        if (!GameMgr.Account.IsLoggedIn)
+        {
+            Log.Error("未登录，请先测试登录");
+            return;
+        }
+
+        var result = await GameMgr.PlayerData.Load();
+        if (result.IsSuccess)
+            Log.Info("养成数据: 金币", GameMgr.PlayerData.Gold, "关卡", GameMgr.PlayerData.StageProgress);
+        else
+            Log.Error("加载失败:", result.RawData);
+    }
+
+    [ContextMenu("测试保存养成数据")]
+    private async void TestSaveData()
+    {
+        if (!GameMgr.Account.IsLoggedIn)
+        {
+            Log.Error("未登录，请先测试登录");
+            return;
+        }
+
+        GameMgr.PlayerData.AddGold(100);
+        var result = await GameMgr.PlayerData.Save();
+        if (result.IsSuccess)
+            Log.Info("保存成功");
+        else
+            Log.Error("保存失败:", result.RawData);
+    }
 }

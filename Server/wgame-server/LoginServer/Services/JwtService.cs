@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace LoginServer.Services;
 
-/// <summary>JWT 令牌生成与校验</summary>
+/// <summary>JWT 令牌生成（校验由认证中间件 JwtBearer 统一处理）</summary>
 public class JwtService
 {
     private readonly SymmetricSecurityKey _key;
@@ -37,39 +37,5 @@ public class JwtService
             signingCredentials: new SigningCredentials(_key, SecurityAlgorithms.HmacSha256));
 
         return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-    /// <summary>
-    /// 校验 token，成功返回 (playerId, username)，失败返回 null
-    /// </summary>
-    public (int PlayerId, string Username)? ValidateToken(string token)
-    {
-        try
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var validationParams = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = true,      // 校验过期时间
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = _key,
-                ClockSkew = TimeSpan.FromSeconds(30), // 允许 30 秒时钟偏差
-            };
-
-            var principal = handler.ValidateToken(token, validationParams, out _);
-
-            var idStr = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var username = principal.FindFirst(ClaimTypes.Name)?.Value;
-            if (idStr == null)
-                return null;
-
-            return (int.Parse(idStr), username ?? "");
-        }
-        catch
-        {
-            // token 无效、过期、签名错误都会走到这里
-            return null;
-        }
     }
 }

@@ -10,6 +10,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Google.Protobuf;
 using Unity.Profiling;
 using UnityEngine;
 
@@ -18,13 +19,22 @@ public class TTTT : MonoBehaviour
     [ContextMenu("执行")]
     void Test()
     {
-        //GCProfiler.RecordGC(A);
-        int a = 100;
-        CoreMgr.Timer.StartDelay(1000, () =>
-        {
-            Log.Info(a);
-        });
-        a = 50;
+        CoreMgr.Net.Connect("127.0.0.1", 7777);
+    }
+
+    [ContextMenu("发送问候")]
+    void SendHello()
+    {
+        CoreMgr.Net.SendHello("玩家");
+    }
+
+    [ContextMenu("proto序列化自测")]
+    void ProtoTest()
+    {
+        var hello = new Net.HelloMsg { Name = "Unity客户端", Times = 7 };
+        byte[] bytes = hello.ToByteArray();
+        var parsed = Net.HelloMsg.Parser.ParseFrom(bytes);
+        Log.Info("proto自测: 序列化", bytes.Length, "字节, 反序列化结果: name=", parsed.Name, "times=", parsed.Times);
     }
     
     // 测试我的自定义转换

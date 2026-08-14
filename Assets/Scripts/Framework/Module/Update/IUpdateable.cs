@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------
- * File: ModuleBase.cs
+ * File: IUpdateable.cs
  * Author: Wsw
  * Feedback: 614270423@qq.com
  * Time: 2025/11/11 18:52:59 
@@ -8,6 +8,9 @@
 
 public interface IUpdateable 
 {
+    /// <summary>
+    /// 优先级，值越大越先轮询
+    /// </summary>
     int Priority
     {
         get
