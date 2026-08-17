@@ -33,6 +33,20 @@ public partial class ToolBox
         EditorApplication.delayCall += AutoCompleteDataTableCtrProperties;
     }
     
+    [HorizontalGroup("导表工具/水平布局", Width = 80)] 
+    [Button("导Proto", ButtonSizes.Large)]
+    public void ImportProto()
+    {
+        var ret = ShellUtil.Run(editorPathConfig.protoShellPath);
+        if (!ret.Contains("[PROTO_OK]"))
+        {
+            AddLogInfo("导proto出错：" + ret);
+            return;
+        }
+        AddLogInfo("导proto完成");
+        AssetDatabase.Refresh();
+    }
+    
     /// <summary>
     /// 自动为DataTableCtr补全所有可获取的表的属性
     /// </summary>

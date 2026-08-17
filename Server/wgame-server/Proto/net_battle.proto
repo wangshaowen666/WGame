@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+// 帧同步相关：玩家操作/帧数据（UDP）
+package NetMsg;
+
+// 玩家操作（客户端 → 服务器）
+// op_type: 0=移动 1=放置塔 2=升级塔 ...
+message PlayerInput {
+  int32 op_type = 1;
+  int32 param1 = 2;   // 如目标位置 x
+  int32 param3 = 4;   // 如目标位置 y
+}
+
+// 帧数据（服务器 → 客户端）：一帧内所有玩家的操作
+message FrameData {
+  int32 frame_id = 1;                    // 帧号
+  repeated PlayerInput inputs = 2;       // 本帧操作列表
+}

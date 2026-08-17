@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Cysharp.Threading.Tasks;
+using Google.Protobuf;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -68,6 +69,61 @@ public class HttpMgr : ManagerBase
 
         await webRequest.SendWebRequest();
         return ParseResult(webRequest);
+    }
+
+    /// <summary>
+    /// POST 请求（proto 消息体，Content-Type: application/x-protobuf）
+    /// </summary>
+    /// <typeparam name="TReq">请求 proto 类型</typeparam>
+    /// <typeparam name="TResp">响应 proto 类型</typeparam>
+    public async UniTask<TResp> PostProto<TReq, TResp>(string url, TReq req, Dictionary<string, string> headers = null)
+        where TReq : class, IMessage<TReq>, new()
+        where TResp : class, IMessage<TResp>, new()
+    {
+        using var webRequest = new UnityWebRequest(url, "POST");
+
+        if (req != null)
+            webRequest.uploadHandler = new UploadHandlerRaw(req.ToByteArray());
+        webRequest.downloadHandler = new DownloadHandlerBuffer();
+        webRequest.SetRequestHeader("Content-Type", "application/x-protobuf");
+
+        ApplyHeaders(webRequest, headers);
+
+        await webRequest.SendWebRequest();
+        return ParseProtoResp<TResp>(webRequest);
+    }
+
+    /// <summary>
+    /// GET 请求（proto 响应体）
+    /// </summary>
+    public async UniTask<TResp> GetProto<TResp>(string url, Dictionary<string, string> headers = null)
+        where TResp : class, IMessage<TResp>, new()
+    {
+        using var webRequest = UnityWebRequest.Get(url);
+        webRequest.downloadHandler = new DownloadHandlerBuffer();
+
+        ApplyHeaders(webRequest, headers);
+
+        await webRequest.SendWebRequest();
+        return ParseProtoResp<TResp>(webRequest);
+    }
+
+    private static TResp ParseProtoResp<TResp>(UnityWebRequest webRequest) where TResp : class, IMessage<TResp>, new()
+    {
+        // 无论 HTTP 状态码，都尝试解析响应体（错误时 proto 里有 error 字段）
+        var bytes = webRequest.downloadHandler?.data;
+        if (bytes != null && bytes.Length > 0)
+        {
+            try
+            {
+                return new MessageParser<TResp>(() => new TResp()).ParseFrom(bytes);
+            }
+            catch (Exception e)
+            {
+                Log.Error("解析 proto 响应失败:", e.Message, "状态码:", webRequest.responseCode);
+            }
+        }
+        return new TResp();
     }
 
     private static void ApplyHeaders(UnityWebRequest request, Dictionary<string, string> headers)

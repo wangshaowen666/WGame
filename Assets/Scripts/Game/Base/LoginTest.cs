@@ -22,20 +22,20 @@ public class LoginTest : MonoBehaviour
     private async void TestRegister()
     {
         var result = await GameMgr.Account.Register(username, password);
-        if (result.IsSuccess)
+        if (result.ErrorCode == 0)
             Log.Info("注册成功");
         else
-            Log.Error("注册失败:", result.RawData);
+            Log.Error("注册失败:", result.ErrorCode);
     }
 
     [ContextMenu("测试登录")]
     private async void TestLogin()
     {
         var result = await GameMgr.Account.Login(username, password);
-        if (result.IsSuccess)
+        if (result.ErrorCode == 0)
             Log.Info("登录成功, token 已保存");
         else
-            Log.Error("登录失败:", result.RawData);
+            Log.Error("登录失败:", result.ErrorCode);
     }
 
     [ContextMenu("测试 /me 校验 token")]
@@ -48,10 +48,10 @@ public class LoginTest : MonoBehaviour
         }
 
         var result = await GameMgr.Account.GetMe();
-        if (result.IsSuccess)
-            Log.Info("/me 校验通过:", result.RawData);
+        if (result.ErrorCode == 0)
+            Log.Info("/me 校验通过:", result.Username);
         else
-            Log.Error("/me 校验失败:", result.RawData);
+            Log.Error("/me 校验失败:", result.ErrorCode);
     }
 
     [ContextMenu("测试退出登录")]
@@ -71,10 +71,10 @@ public class LoginTest : MonoBehaviour
         }
 
         var result = await GameMgr.PlayerData.Load();
-        if (result.IsSuccess)
+        if (result.ErrorCode == 0)
             Log.Info("养成数据: 金币", GameMgr.PlayerData.Gold, "关卡", GameMgr.PlayerData.StageProgress);
         else
-            Log.Error("加载失败:", result.RawData);
+            Log.Error("加载失败:", result.ErrorCode);
     }
 
     [ContextMenu("测试保存养成数据")]
@@ -88,9 +88,9 @@ public class LoginTest : MonoBehaviour
 
         GameMgr.PlayerData.AddGold(100);
         var result = await GameMgr.PlayerData.Save();
-        if (result.IsSuccess)
+        if (result.ErrorCode == 0)
             Log.Info("保存成功");
         else
-            Log.Error("保存失败:", result.RawData);
+            Log.Error("保存失败:", result.ErrorCode);
     }
 }

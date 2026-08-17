@@ -25,52 +25,53 @@ public class AccountMgr : ManagerBase
     public bool IsLoggedIn => !string.IsNullOrEmpty(Token);
 
     /// <summary>
-    /// 注册。成功返回 true，失败返回 false（可看 result.Data 里的 error）
+    /// 注册。成功返回 true，失败返回 false（看 resp.ErrorCode 里的原因）
     /// </summary>
-    public async UniTask<HttpResult> Register(string username, string password)
+    public async UniTask<NetMsg.RegisterResp> Register(string username, string password)
     {
-        // 注意：ParseUtil.ToJson 用的是 MiniJSON，只序列化字段不序列化属性，
-        // 匿名类型会变成空对象 {}，所以用 Dictionary 传参
-        var body = new Dictionary<string, object>
-        {
-            { "username", username },
-            { "password", password },
-        };
-        return await CoreMgr.Http.Post(GameConfig.LoginServerUrl + "/register", body);
+        var req = new NetMsg.RegisterReq { Username = username, Password = password };
+        var resp = await CoreMgr.Http.PostProto<NetMsg.RegisterReq, NetMsg.RegisterResp>(
+            GameConfig.LoginServerUrl + "/register", req);
+        if (resp.ErrorCode != NetMsg.ErrorCode.ErrorNone)
+            Log.Error("注册失败, 错误码:", resp.ErrorCode);
+        else
+            Log.Info("注册成功");
+        return resp;
     }
 
     /// <summary>
     /// 登录。成功后自动保存 token/playerId/username 到本地
     /// </summary>
-    public async UniTask<HttpResult> Login(string username, string password)
+    public async UniTask<NetMsg.LoginResp> Login(string username, string password)
     {
-        var body = new Dictionary<string, object>
-        {
-            { "username", username },
-            { "password", password },
-        };
-        var result = await CoreMgr.Http.Post(GameConfig.LoginServerUrl + "/login", body);
+        var req = new NetMsg.LoginReq { Username = username, Password = password };
+        var resp = await CoreMgr.Http.PostProto<NetMsg.LoginReq, NetMsg.LoginResp>(
+            GameConfig.LoginServerUrl + "/login", req);
 
-        if (result.IsSuccess && result.Data != null)
+        if (resp.ErrorCode == NetMsg.ErrorCode.ErrorNone && !string.IsNullOrEmpty(resp.Token))
         {
-            PlayerPrefsUtil.SetString(TokenKey, result.Data["token"]?.ToString());
-            PlayerPrefsUtil.SetInt(PlayerIdKey, Convert.ToInt32(result.Data["playerId"]));
-            PlayerPrefsUtil.SetString(UsernameKey, result.Data["username"]?.ToString());
-            Log.Info("登录成功:", Username);
+            PlayerPrefsUtil.SetString(TokenKey, resp.Token);
+            PlayerPrefsUtil.SetInt(PlayerIdKey, resp.PlayerId);
+            PlayerPrefsUtil.SetString(UsernameKey, resp.Username);
+            Log.Info("登录成功:", resp.Username);
         }
-        return result;
+        else
+        {
+            Log.Error("登录失败, 错误码:", resp.ErrorCode);
+        }
+        return resp;
     }
 
     /// <summary>
     /// 用本地保存的 token 请求 /me，验证 token 是否仍有效
     /// </summary>
-    public async UniTask<HttpResult> GetMe()
+    public async UniTask<NetMsg.GetMeResp> GetMe()
     {
         var headers = new Dictionary<string, string>
         {
             { "Authorization", "Bearer " + Token }
         };
-        return await CoreMgr.Http.Get(GameConfig.LoginServerUrl + "/me", headers);
+        return await CoreMgr.Http.GetProto<NetMsg.GetMeResp>(GameConfig.LoginServerUrl + "/me", headers);
     }
 
     /// <summary>

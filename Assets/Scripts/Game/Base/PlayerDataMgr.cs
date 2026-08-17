@@ -23,47 +23,48 @@ public class PlayerDataMgr : ManagerBase
     public bool IsLoaded { get; private set; }
 
     /// <summary>
-    /// 获取养成数据（GET /data），成功后更新本地缓存
+    /// 获取养成数据（GET /data，proto），成功后更新本地缓存
     /// </summary>
-    public async UniTask<HttpResult> Load()
+    public async UniTask<NetMsg.GetDataResp> Load()
     {
         var headers = AuthHeaders();
-        var result = await CoreMgr.Http.Get(GameConfig.LoginServerUrl + "/data", headers);
+        var resp = await CoreMgr.Http.GetProto<NetMsg.GetDataResp>(GameConfig.LoginServerUrl + "/data", headers);
 
-        if (result.IsSuccess && result.Data != null)
+        if (resp.ErrorCode == NetMsg.ErrorCode.ErrorNone)
         {
-            Gold = ParseInt(result.Data, "gold");
-            StageProgress = ParseInt(result.Data, "stageProgress");
-            TowerLevels = result.Data["towerLevels"] as Dictionary<string, object> ?? new Dictionary<string, object>();
+            Gold = resp.Gold;
+            StageProgress = resp.StageProgress;
+            TowerLevels = ParseUtil.DeJson(resp.TowerLevels) as Dictionary<string, object> ?? new Dictionary<string, object>();
             IsLoaded = true;
             Log.Info("养成数据加载成功: 金币", Gold, "关卡", StageProgress);
         }
         else
         {
-            Log.Error("养成数据加载失败:", result.RawData);
+            Log.Error("养成数据加载失败, 错误码:", resp.ErrorCode);
         }
-        return result;
+        return resp;
     }
 
     /// <summary>
-    /// 保存养成数据（POST /data）
+    /// 保存养成数据（POST /data，proto）
     /// </summary>
-    public async UniTask<HttpResult> Save()
+    public async UniTask<NetMsg.SaveDataResp> Save()
     {
-        var body = new Dictionary<string, object>
+        var req = new NetMsg.SaveDataReq
         {
-            { "gold", Gold },
-            { "stageProgress", StageProgress },
-            { "towerLevels", ParseUtil.ToJson(TowerLevels) },
+            Gold = Gold,
+            StageProgress = StageProgress,
+            TowerLevels = ParseUtil.ToJson(TowerLevels),
         };
         var headers = AuthHeaders();
-        var result = await CoreMgr.Http.Post(GameConfig.LoginServerUrl + "/data", body, headers);
+        var resp = await CoreMgr.Http.PostProto<NetMsg.SaveDataReq, NetMsg.SaveDataResp>(
+            GameConfig.LoginServerUrl + "/data", req, headers);
 
-        if (result.IsSuccess)
+        if (resp.ErrorCode == NetMsg.ErrorCode.ErrorNone)
             Log.Info("养成数据保存成功");
         else
-            Log.Error("养成数据保存失败:", result.RawData);
-        return result;
+            Log.Error("养成数据保存失败, 错误码:", resp.ErrorCode);
+        return resp;
     }
 
     public void AddGold(int amount) => Gold += amount;
@@ -75,10 +76,5 @@ public class PlayerDataMgr : ManagerBase
         {
             { "Authorization", "Bearer " + GameMgr.Account.Token }
         };
-    }
-
-    private static int ParseInt(Dictionary<string, object> data, string key)
-    {
-        return data.TryGetValue(key, out var v) && int.TryParse(v?.ToString(), out var r) ? r : 0;
     }
 }

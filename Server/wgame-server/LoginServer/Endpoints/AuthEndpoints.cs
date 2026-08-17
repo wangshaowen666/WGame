@@ -1,67 +1,80 @@
 using System.Security.Claims;
 using LoginServer.Data;
-using LoginServer.Models;
 using LoginServer.Services;
 
 namespace LoginServer.Endpoints;
 
-/// <summary>认证相关路由</summary>
+/// <summary>认证相关路由（proto 收发）</summary>
 public static class AuthEndpoints
 {
     public static void MapAuthEndpoints(this WebApplication app)
     {
         // 注册（无需登录）
-        app.MapPost("/register", async (RegisterReq req, PlayerRepository repo,
+        app.MapPost("/register", async (HttpContext ctx, PlayerRepository repo,
             PlayerProfileRepository profileRepo, PasswordService pwd) =>
         {
+            var req = await ProtoHttp.ReadReq<NetMsg.RegisterReq>(ctx);
+
             var existing = await repo.GetByUsername(req.Username);
             if (existing != null)
-                return Results.BadRequest("用户名已存在");
+            {
+                await ProtoHttp.WriteResp(ctx, new NetMsg.RegisterResp { ErrorCode = NetMsg.ErrorCode.ErrorUserExists }, 400);
+                return;
+            }
 
             var playerId = await repo.CreatePlayer(req.Username, pwd.Hash(req.Password));
             // 注册时自动创建默认养成数据
             await profileRepo.CreateDefault(playerId);
 
             Console.WriteLine($"新用户注册: {req.Username}");
-            return Results.Ok("注册成功");
+            await ProtoHttp.WriteResp(ctx, new NetMsg.RegisterResp { ErrorCode = NetMsg.ErrorCode.ErrorNone });
         });
 
         // 登录（无需登录）
-        app.MapPost("/login", async (RegisterReq req, PlayerRepository repo, PasswordService pwd, JwtService jwt) =>
+        app.MapPost("/login", async (HttpContext ctx, PlayerRepository repo, PasswordService pwd, JwtService jwt) =>
         {
+            var req = await ProtoHttp.ReadReq<NetMsg.LoginReq>(ctx);
+
             var player = await repo.GetByUsername(req.Username);
             if (player == null || string.IsNullOrEmpty(player.PasswordHash) ||
                 !pwd.Verify(req.Password, player.PasswordHash))
-                return Results.Json(new { error = "用户名或密码错误" }, statusCode: 401);
+            {
+                await ProtoHttp.WriteResp(ctx, new NetMsg.LoginResp { ErrorCode = NetMsg.ErrorCode.ErrorWrongCredentials }, 401);
+                return;
+            }
 
             var token = jwt.GenerateToken(player.Id, player.Username ?? "");
             Console.WriteLine($"用户登录: {req.Username}");
-            return Results.Ok(new
+            await ProtoHttp.WriteResp(ctx, new NetMsg.LoginResp
             {
-                token,
-                playerId = player.Id,
-                username = player.Username,
+                Token = token,
+                PlayerId = player.Id,
+                Username = player.Username ?? "",
             });
         });
 
         // 验证 token（需要登录，由认证中间件统一校验）
-        // RequireAuthorization()：无有效 token 的请求会直接被中间件拦截返回 401
         app.MapGet("/me", async (HttpContext context, PlayerRepository repo) =>
         {
-            // 能走到这里说明 token 已通过中间件校验，直接从 User 中取玩家信息
             var idStr = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (idStr == null)
-                return Results.Json(new { error = "token 无效" }, statusCode: 401);
+            {
+                await ProtoHttp.WriteResp(context, new NetMsg.GetMeResp { ErrorCode = NetMsg.ErrorCode.ErrorUnauthorized }, 401);
+                return;
+            }
 
             var player = await repo.GetById(int.Parse(idStr));
             if (player == null)
-                return Results.Json(new { error = "玩家不存在" }, statusCode: 404);
-
-            return Results.Ok(new
             {
-                playerId = player.Id,
-                username = player.Username,
-                createdAt = player.CreatedAt,
+                await ProtoHttp.WriteResp(context, new NetMsg.GetMeResp { ErrorCode = NetMsg.ErrorCode.ErrorPlayerNotFound }, 404);
+                return;
+            }
+
+            await ProtoHttp.WriteResp(context, new NetMsg.GetMeResp
+            {
+                PlayerId = player.Id,
+                Username = player.Username ?? "",
+                CreatedAt = player.CreatedAt ?? "",
             });
         }).RequireAuthorization();
     }

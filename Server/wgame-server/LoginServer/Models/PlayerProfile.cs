@@ -1,6 +1,6 @@
 namespace LoginServer.Models;
 
-/// <summary>玩家养成数据（对应 PlayerData 表）</summary>
+/// <summary>玩家养成数据（对应 PlayerProfile 表）</summary>
 public class PlayerProfile
 {
     public int PlayerId { get; set; }
@@ -10,6 +10,3 @@ public class PlayerProfile
     public string? TowerLevels { get; set; }
     public string? UpdatedAt { get; set; }
 }
-
-/// <summary>保存养成数据请求</summary>
-public record SaveProfileReq(int Gold, int StageProgress, string TowerLevels);

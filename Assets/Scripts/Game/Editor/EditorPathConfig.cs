@@ -28,4 +28,8 @@ public class EditorPathConfig : ScriptableObject
     [Title("excel导表工具路径")]
     [FilePath(AbsolutePath = true)]
     public string excelShellPath = "";
+    
+    [Title("proto导入工具路径")]
+    [FilePath(AbsolutePath = true)]
+    public string protoShellPath = "";
 }

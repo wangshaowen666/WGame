@@ -14,6 +14,7 @@ public static class GameMgr
     public static readonly DataTableMgr DataTable = new();
     public static readonly AccountMgr Account = new();
     public static readonly PlayerDataMgr PlayerData = new();
+    public static readonly NetMsgHandler NetMsg = new();
     public static readonly UIMgr UI = new();
     public static readonly BattleMgr Battle = new();
     public static readonly EntityMgr Entity = new();
@@ -27,6 +28,7 @@ public static class GameMgr
             DataTable,
             Account,
             PlayerData,
+            NetMsg,
             UI,
             Battle,
             Entity,

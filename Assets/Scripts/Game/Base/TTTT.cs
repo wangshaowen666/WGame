@@ -25,16 +25,17 @@ public class TTTT : MonoBehaviour
     [ContextMenu("发送问候")]
     void SendHello()
     {
-        CoreMgr.Net.SendHello("玩家");
+        var input = new NetMsg.PlayerInput { OpType = 1, Param1 = 100, Param3 = 200 };
+        GameMgr.NetMsg.Send(NetMsg.MsgType.MsgPlayerInput, input);
     }
 
     [ContextMenu("proto序列化自测")]
     void ProtoTest()
     {
-        var hello = new Net.HelloMsg { Name = "Unity客户端", Times = 7 };
-        byte[] bytes = hello.ToByteArray();
-        var parsed = Net.HelloMsg.Parser.ParseFrom(bytes);
-        Log.Info("proto自测: 序列化", bytes.Length, "字节, 反序列化结果: name=", parsed.Name, "times=", parsed.Times);
+        var input = new NetMsg.PlayerInput { OpType = 1, Param1 = 100, Param3 = 200 };
+        byte[] bytes = input.ToByteArray();
+        var parsed = NetMsg.PlayerInput.Parser.ParseFrom(bytes);
+        Log.Info("proto自测: 序列化", bytes.Length, "字节, 反序列化结果: op_type=", parsed.OpType, "param1=", parsed.Param1, "param2=", parsed.Param3);
     }
     
     // 测试我的自定义转换

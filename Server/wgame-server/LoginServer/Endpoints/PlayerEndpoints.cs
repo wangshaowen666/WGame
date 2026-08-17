@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using LoginServer.Data;
-using LoginServer.Models;
+using LoginServer.Services;
 
 namespace LoginServer.Endpoints;
 
-/// <summary>养成数据相关路由</summary>
+/// <summary>养成数据相关路由（proto 收发）</summary>
 public static class PlayerEndpoints
 {
     public static void MapPlayerEndpoints(this WebApplication app)
@@ -14,29 +14,39 @@ public static class PlayerEndpoints
         {
             var playerId = GetPlayerId(context);
             if (playerId == null)
-                return Results.Unauthorized();
+            {
+                await ProtoHttp.WriteResp(context, new NetMsg.GetDataResp { ErrorCode = NetMsg.ErrorCode.ErrorUnauthorized }, 401);
+                return;
+            }
 
             var profile = await repo.GetByPlayerId(playerId.Value);
             if (profile == null)
-                return Results.Json(new { error = "养成数据不存在" }, statusCode: 404);
-
-            return Results.Ok(new
             {
-                gold = profile.Gold,
-                stageProgress = profile.StageProgress,
-                towerLevels = profile.TowerLevels ?? "{}",
+                await ProtoHttp.WriteResp(context, new NetMsg.GetDataResp { ErrorCode = NetMsg.ErrorCode.ErrorProfileNotFound }, 404);
+                return;
+            }
+
+            await ProtoHttp.WriteResp(context, new NetMsg.GetDataResp
+            {
+                Gold = profile.Gold,
+                StageProgress = profile.StageProgress,
+                TowerLevels = profile.TowerLevels ?? "{}",
             });
         }).RequireAuthorization();
 
         // 保存养成数据（需要登录）
-        app.MapPost("/data", async (HttpContext context, SaveProfileReq req, PlayerProfileRepository repo) =>
+        app.MapPost("/data", async (HttpContext context, PlayerProfileRepository repo) =>
         {
             var playerId = GetPlayerId(context);
             if (playerId == null)
-                return Results.Unauthorized();
+            {
+                await ProtoHttp.WriteResp(context, new NetMsg.SaveDataResp { ErrorCode = NetMsg.ErrorCode.ErrorUnauthorized }, 401);
+                return;
+            }
 
+            var req = await ProtoHttp.ReadReq<NetMsg.SaveDataReq>(context);
             await repo.Update(playerId.Value, req.Gold, req.StageProgress, req.TowerLevels);
-            return Results.Ok("保存成功");
+            await ProtoHttp.WriteResp(context, new NetMsg.SaveDataResp { ErrorCode = NetMsg.ErrorCode.ErrorNone });
         }).RequireAuthorization();
     }
 

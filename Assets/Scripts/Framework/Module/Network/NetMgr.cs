@@ -8,11 +8,11 @@
 
 using System;
 using LiteNetLib;
-using LiteNetLib.Utils;
 
 /// <summary>
-/// 实时网络管理：连接服务器、心跳保活、断线检测。
-/// 任务2：仅实现连接/断开/断线检测，消息协议在任务3实现
+/// 实时网络传输层（Framework，AOT）：
+/// 只负责连接管理、心跳、断线检测、原始字节收发。
+/// 具体协议（NetMsg 等）在热更层解析，这里不依赖任何协议。
 /// </summary>
 public class NetMgr : ManagerBase, IUpdateable
 {
@@ -25,6 +25,12 @@ public class NetMgr : ManagerBase, IUpdateable
 
     public event Action OnConnected;
     public event Action OnDisconnected;
+
+    /// <summary>
+    /// 收到原始字节数据（由热更层订阅并解析协议）
+    /// 参数：byte[] 原始数据
+    /// </summary>
+    public event Action<byte[]> OnRawData;
 
     /// <summary>
     /// 连接服务器
@@ -49,25 +55,12 @@ public class NetMgr : ManagerBase, IUpdateable
             OnDisconnected?.Invoke();
         };
 
-        // 收到数据：解析协议并处理
+        // 收到数据：转发原始字节给订阅者（协议解析在热更层）
         listener.NetworkReceiveEvent += (peer, reader, channel, deliveryMethod) =>
         {
-            // 首字节是消息类型
-            var msgType = (MsgType)reader.GetByte();
-            Log.Info("收到服务器消息:", msgType);
-
-            switch (msgType)
-            {
-                case MsgType.S2C_HelloAck:
-                    var text = reader.GetString();
-                    Log.Info("服务器回复:", text);
-                    break;
-
-                default:
-                    Log.Warning("未知消息类型:", msgType);
-                    break;
-            }
-
+            var raw = reader.GetRemainingBytes();
+            if (raw != null && raw.Length > 0)
+                OnRawData?.Invoke(raw);
             reader.Recycle();
         };
 
@@ -79,7 +72,7 @@ public class NetMgr : ManagerBase, IUpdateable
         };
 
         _netManager.Start();
-        // connectKey：连接令牌（任务1服务器未校验，任务5匹配时再校验身份）
+        // connectKey：连接令牌（任务1服务器未校验，任务6匹配时再校验身份）
         _netManager.Connect(ip, port, "wgame");
         Log.Info("正在连接服务器:", ip, port);
 
@@ -99,21 +92,16 @@ public class NetMgr : ManagerBase, IUpdateable
     }
 
     /// <summary>
-    /// 发送问候消息（测试收发链路用）
+    /// 发送原始字节（由热更层把协议序列化好后传进来）
     /// </summary>
-    public void SendHello(string name)
+    public void SendRaw(byte[] data)
     {
         if (!IsConnected)
         {
             Log.Error("未连接服务器，无法发送消息");
             return;
         }
-
-        var writer = new NetDataWriter();
-        writer.Put((byte)MsgType.C2S_Hello);
-        writer.Put(name);
-        _serverPeer.Send(writer, DeliveryMethod.ReliableOrdered);
-        Log.Info("已发送问候:", name);
+        _serverPeer.Send(data, DeliveryMethod.ReliableOrdered);
     }
 
     /// <summary>
