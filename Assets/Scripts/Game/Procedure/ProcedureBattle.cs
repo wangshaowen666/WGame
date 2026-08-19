@@ -18,6 +18,6 @@ public class ProcedureBattle : ProcedureBase
         
         GameCamera.SetMainCamera(GameCamera.BattleCameraName);
         GameMgr.UI.PanelOn(DPnlId.BattlePanel);
-        GameMgr.Battle.EnterBattle();
+        //GameMgr.Battle.EnterBattle();
     }
 }

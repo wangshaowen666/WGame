@@ -10,7 +10,7 @@ public static class PlayerEndpoints
     public static void MapPlayerEndpoints(this WebApplication app)
     {
         // 获取养成数据（需要登录）
-        app.MapGet("/data", async (HttpContext context, PlayerProfileRepository repo) =>
+        app.MapGet(NetApi.GetData, async (HttpContext context, PlayerProfileRepository repo) =>
         {
             var playerId = GetPlayerId(context);
             if (playerId == null)
@@ -35,7 +35,7 @@ public static class PlayerEndpoints
         }).RequireAuthorization();
 
         // 保存养成数据（需要登录）
-        app.MapPost("/data", async (HttpContext context, PlayerProfileRepository repo) =>
+        app.MapPost(NetApi.SaveData, async (HttpContext context, PlayerProfileRepository repo) =>
         {
             var playerId = GetPlayerId(context);
             if (playerId == null)

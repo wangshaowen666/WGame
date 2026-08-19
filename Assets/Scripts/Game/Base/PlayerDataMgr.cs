@@ -6,11 +6,12 @@
  *--------------------------------------------------------------
  */
 
+using System;
 using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
 
 /// <summary>
-/// 养成数据服务：获取/保存玩家养成数据（需登录，token 来自 AccountMgr）
+/// 养成数据服务：获取/保存玩家养成数据（需登录，token 来自 AccountMgr）。
+/// 对外全部为回调 API（内部由 HttpMsgHandler 用 UniTask 异步执行）
 /// </summary>
 public class PlayerDataMgr : ManagerBase
 {
@@ -23,32 +24,32 @@ public class PlayerDataMgr : ManagerBase
     public bool IsLoaded { get; private set; }
 
     /// <summary>
-    /// 获取养成数据（GET /data，proto），成功后更新本地缓存
+    /// 获取养成数据（GET /data，proto），成功后更新本地缓存，完成后回调
     /// </summary>
-    public async UniTask<NetMsg.GetDataResp> Load()
+    public void Load(Action<NetMsg.GetDataResp> onDone)
     {
-        var headers = AuthHeaders();
-        var resp = await CoreMgr.Http.GetProto<NetMsg.GetDataResp>(GameConfig.LoginServerUrl + "/data", headers);
-
-        if (resp.ErrorCode == NetMsg.ErrorCode.ErrorNone)
+        GameMgr.HttpMsg.Get<NetMsg.GetDataResp>(resp =>
         {
-            Gold = resp.Gold;
-            StageProgress = resp.StageProgress;
-            TowerLevels = ParseUtil.DeJson(resp.TowerLevels) as Dictionary<string, object> ?? new Dictionary<string, object>();
-            IsLoaded = true;
-            Log.Info("养成数据加载成功: 金币", Gold, "关卡", StageProgress);
-        }
-        else
-        {
-            Log.Error("养成数据加载失败, 错误码:", resp.ErrorCode);
-        }
-        return resp;
+            if (resp.ErrorCode == NetMsg.ErrorCode.ErrorNone)
+            {
+                Gold = resp.Gold;
+                StageProgress = resp.StageProgress;
+                TowerLevels = ParseUtil.DeJson(resp.TowerLevels) as Dictionary<string, object> ?? new Dictionary<string, object>();
+                IsLoaded = true;
+                Log.Info("养成数据加载成功: 金币", Gold, "关卡", StageProgress);
+            }
+            else
+            {
+                Log.Error("养成数据加载失败, 错误码:", resp.ErrorCode);
+            }
+            onDone?.Invoke(resp);
+        });
     }
 
     /// <summary>
-    /// 保存养成数据（POST /data，proto）
+    /// 保存养成数据（POST /data，proto），完成后回调
     /// </summary>
-    public async UniTask<NetMsg.SaveDataResp> Save()
+    public void Save(Action<NetMsg.SaveDataResp> onDone)
     {
         var req = new NetMsg.SaveDataReq
         {
@@ -56,25 +57,15 @@ public class PlayerDataMgr : ManagerBase
             StageProgress = StageProgress,
             TowerLevels = ParseUtil.ToJson(TowerLevels),
         };
-        var headers = AuthHeaders();
-        var resp = await CoreMgr.Http.PostProto<NetMsg.SaveDataReq, NetMsg.SaveDataResp>(
-            GameConfig.LoginServerUrl + "/data", req, headers);
-
-        if (resp.ErrorCode == NetMsg.ErrorCode.ErrorNone)
-            Log.Info("养成数据保存成功");
-        else
-            Log.Error("养成数据保存失败, 错误码:", resp.ErrorCode);
-        return resp;
+        GameMgr.HttpMsg.Post<NetMsg.SaveDataResp>(req, resp =>
+            {
+                if (resp.ErrorCode == NetMsg.ErrorCode.ErrorNone)
+                    Log.Info("养成数据保存成功");
+                else
+                    Log.Error("养成数据保存失败, 错误码:", resp.ErrorCode);
+                onDone?.Invoke(resp);
+            });
     }
 
     public void AddGold(int amount) => Gold += amount;
-
-    /// <summary>构建带 token 的请求头</summary>
-    private static Dictionary<string, string> AuthHeaders()
-    {
-        return new Dictionary<string, string>
-        {
-            { "Authorization", "Bearer " + GameMgr.Account.Token }
-        };
-    }
 }

@@ -26,13 +26,15 @@ namespace NetMsg {
           string.Concat(
             "ChBuZXRfY29tbW9uLnByb3RvEgZOZXRNc2ciRAoOTmV0TXNnRW52ZWxvcGUS",
             "IQoIbXNnX3R5cGUYASABKA4yDy5OZXRNc2cuTXNnVHlwZRIPCgdwYXlsb2Fk",
-            "GAIgASgMKqUBCglFcnJvckNvZGUSDgoKRVJST1JfTk9ORRAAEhYKEUVSUk9S",
-            "X1VTRVJfRVhJU1RTEOkHEhwKF0VSUk9SX1dST05HX0NSRURFTlRJQUxTEOoH",
-            "EhcKEkVSUk9SX1VOQVVUSE9SSVpFRBDrBxIbChZFUlJPUl9QTEFZRVJfTk9U",
-            "X0ZPVU5EEOwHEhwKF0VSUk9SX1BST0ZJTEVfTk9UX0ZPVU5EEO0HKnIKB01z",
-            "Z1R5cGUSDAoITVNHX05PTkUQABIUChBNU0dfUExBWUVSX0lOUFVUEAESEgoO",
-            "TVNHX0ZSQU1FX0RBVEEQAhIRCg1NU0dfTUFJTF9QVVNIEAMSHAoYTVNHX0FD",
-            "VElWSVRZX1JFV0FSRF9QVVNIEARiBnByb3RvMw=="));
+            "GAIgASgMKroBCglFcnJvckNvZGUSDgoKRVJST1JfTk9ORRAAEhMKDkVSUk9S",
+            "X0lOVEVSTkFMEOgHEhYKEUVSUk9SX1VTRVJfRVhJU1RTEOkHEhwKF0VSUk9S",
+            "X1dST05HX0NSRURFTlRJQUxTEOoHEhcKEkVSUk9SX1VOQVVUSE9SSVpFRBDr",
+            "BxIbChZFUlJPUl9QTEFZRVJfTk9UX0ZPVU5EEOwHEhwKF0VSUk9SX1BST0ZJ",
+            "TEVfTk9UX0ZPVU5EEO0HKqABCgdNc2dUeXBlEgwKCE1TR19OT05FEAASFAoQ",
+            "TVNHX1BMQVlFUl9JTlBVVBABEhIKDk1TR19GUkFNRV9EQVRBEAISEQoNTVNH",
+            "X01BSUxfUFVTSBADEhwKGE1TR19BQ1RJVklUWV9SRVdBUkRfUFVTSBAEEhUK",
+            "EU1TR19VRFBfTE9HSU5fUkVREAUSFQoRTVNHX1VEUF9MT0dJTl9BQ0sQBmIG",
+            "cHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::NetMsg.ErrorCode), typeof(global::NetMsg.MsgType), }, null, new pbr::GeneratedClrTypeInfo[] {
@@ -53,6 +55,10 @@ namespace NetMsg {
     /// 成功
     /// </summary>
     [pbr::OriginalName("ERROR_NONE")] ErrorNone = 0,
+    /// <summary>
+    /// 服务器内部错误（含响应非 proto 等异常情况）
+    /// </summary>
+    [pbr::OriginalName("ERROR_INTERNAL")] ErrorInternal = 1000,
     /// <summary>
     /// 用户名已存在
     /// </summary>
@@ -85,11 +91,11 @@ namespace NetMsg {
     /// </summary>
     [pbr::OriginalName("MSG_NONE")] MsgNone = 0,
     /// <summary>
-    /// 玩家操作（客户端→服务器）
+    /// 玩家操作（客户端->服务器）
     /// </summary>
     [pbr::OriginalName("MSG_PLAYER_INPUT")] MsgPlayerInput = 1,
     /// <summary>
-    /// 帧数据（服务器→客户端）
+    /// 帧数据（服务器->客户端）
     /// </summary>
     [pbr::OriginalName("MSG_FRAME_DATA")] MsgFrameData = 2,
     /// <summary>
@@ -100,6 +106,14 @@ namespace NetMsg {
     /// 活动结算推送
     /// </summary>
     [pbr::OriginalName("MSG_ACTIVITY_REWARD_PUSH")] MsgActivityRewardPush = 4,
+    /// <summary>
+    /// UDP 连接认证请求（客户端->GameServer，带 JWT token）
+    /// </summary>
+    [pbr::OriginalName("MSG_UDP_LOGIN_REQ")] MsgUdpLoginReq = 5,
+    /// <summary>
+    /// UDP 连接认证回复（GameServer->客户端）
+    /// </summary>
+    [pbr::OriginalName("MSG_UDP_LOGIN_ACK")] MsgUdpLoginAck = 6,
   }
 
   #endregion

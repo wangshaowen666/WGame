@@ -60,6 +60,12 @@ done
 
 "$PROTOC_BIN" -I "$PROTO_DIR" --csharp_out="$CLIENT_OUT" "${PROTOS[@]}"
 
+# ---- 同步共享常量（手写文件，非 protoc 生成）----
+if [ -f "$PROTO_DIR/NetApi.cs" ]; then
+    cp "$PROTO_DIR/NetApi.cs" "$CLIENT_OUT/NetApi.cs"
+    echo "已同步共享常量: NetApi.cs"
+fi
+
 echo "完成！客户端代码已生成到 $CLIENT_OUT"
 echo "注意：服务器端代码由 GameServer build 时自动生成，无需手动处理"
 

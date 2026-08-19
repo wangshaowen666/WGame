@@ -10,7 +10,7 @@ using UnityEngine;
 
 public class LaunchEntry : MonoBehaviour
 {
-    void Start()
+    void Awake()
     {
         CoreMgr.Init();
         
@@ -30,6 +30,6 @@ public class LaunchEntry : MonoBehaviour
         CoreMgr.Procedure.AddProcedure(new ProcedureResCheckAA());
         CoreMgr.Procedure.AddProcedure(new ProcedureLoadDll());
         
-        //CoreMgr.Procedure.ChangeProcedure<ProcedureLaunch>();
+        CoreMgr.Procedure.ChangeProcedure<ProcedureLaunch>();
     }
 }

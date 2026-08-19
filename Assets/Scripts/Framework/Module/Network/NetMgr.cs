@@ -119,6 +119,6 @@ public class NetMgr : ManagerBase, IUpdateable
     /// </summary>
     public override void OnSceneExit(int sceneTp)
     {
-        Disconnect();
+        //Disconnect();
     }
 }

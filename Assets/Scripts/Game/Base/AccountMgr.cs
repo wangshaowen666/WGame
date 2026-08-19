@@ -7,11 +7,10 @@
  */
 
 using System;
-using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
 
 /// <summary>
-/// 账号服务：注册、登录、token 校验。登录态存 PlayerPrefs 持久化
+/// 账号服务：注册、登录、token 校验。登录态存 PlayerPrefs 持久化。
+/// 对外全部为回调 API（内部由 HttpMsgHandler 用 UniTask 异步执行）
 /// </summary>
 public class AccountMgr : ManagerBase
 {
@@ -24,54 +23,48 @@ public class AccountMgr : ManagerBase
     public string Username => PlayerPrefsUtil.GetString(UsernameKey);
     public bool IsLoggedIn => !string.IsNullOrEmpty(Token);
 
+    /// <summary>登录态变化（登录成功/登出）时触发，用于让依赖 token 的缓存失效重建</summary>
+    public event Action OnLoginStateChanged;
+
     /// <summary>
-    /// 注册。成功返回 true，失败返回 false（看 resp.ErrorCode 里的原因）
+    /// 注册，完成后回调（看 resp.ErrorCode 判断是否成功）
     /// </summary>
-    public async UniTask<NetMsg.RegisterResp> Register(string username, string password)
+    public void Register(string username, string password, Action<NetMsg.RegisterResp> onDone)
     {
         var req = new NetMsg.RegisterReq { Username = username, Password = password };
-        var resp = await CoreMgr.Http.PostProto<NetMsg.RegisterReq, NetMsg.RegisterResp>(
-            GameConfig.LoginServerUrl + "/register", req);
-        if (resp.ErrorCode != NetMsg.ErrorCode.ErrorNone)
-            Log.Error("注册失败, 错误码:", resp.ErrorCode);
-        else
-            Log.Info("注册成功");
-        return resp;
+        GameMgr.HttpMsg.Post(req, onDone);
     }
 
     /// <summary>
-    /// 登录。成功后自动保存 token/playerId/username 到本地
+    /// 登录，成功后自动保存 token/playerId/username 到本地，完成后回调
     /// </summary>
-    public async UniTask<NetMsg.LoginResp> Login(string username, string password)
+    public void Login(string username, string password, Action<NetMsg.LoginResp> onDone)
     {
         var req = new NetMsg.LoginReq { Username = username, Password = password };
-        var resp = await CoreMgr.Http.PostProto<NetMsg.LoginReq, NetMsg.LoginResp>(
-            GameConfig.LoginServerUrl + "/login", req);
-
-        if (resp.ErrorCode == NetMsg.ErrorCode.ErrorNone && !string.IsNullOrEmpty(resp.Token))
-        {
-            PlayerPrefsUtil.SetString(TokenKey, resp.Token);
-            PlayerPrefsUtil.SetInt(PlayerIdKey, resp.PlayerId);
-            PlayerPrefsUtil.SetString(UsernameKey, resp.Username);
-            Log.Info("登录成功:", resp.Username);
-        }
-        else
-        {
-            Log.Error("登录失败, 错误码:", resp.ErrorCode);
-        }
-        return resp;
+        GameMgr.HttpMsg.Post<NetMsg.LoginResp>(req, resp =>
+            {
+                if (resp.ErrorCode == NetMsg.ErrorCode.ErrorNone && !string.IsNullOrEmpty(resp.Token))
+                {
+                    PlayerPrefsUtil.SetString(TokenKey, resp.Token);
+                    PlayerPrefsUtil.SetInt(PlayerIdKey, resp.PlayerId);
+                    PlayerPrefsUtil.SetString(UsernameKey, resp.Username);
+                    Log.Info("登录成功:", resp.Username);
+                    OnLoginStateChanged?.Invoke();
+                }
+                else
+                {
+                    Log.Error("登录失败, 错误码:", resp.ErrorCode);
+                }
+                onDone?.Invoke(resp);
+            });
     }
 
     /// <summary>
-    /// 用本地保存的 token 请求 /me，验证 token 是否仍有效
+    /// 用本地保存的 token 请求 /me，验证 token 是否仍有效，完成后回调
     /// </summary>
-    public async UniTask<NetMsg.GetMeResp> GetMe()
+    public void GetMe(Action<NetMsg.GetMeResp> onDone)
     {
-        var headers = new Dictionary<string, string>
-        {
-            { "Authorization", "Bearer " + Token }
-        };
-        return await CoreMgr.Http.GetProto<NetMsg.GetMeResp>(GameConfig.LoginServerUrl + "/me", headers);
+        GameMgr.HttpMsg.Get(onDone);
     }
 
     /// <summary>
@@ -82,5 +75,6 @@ public class AccountMgr : ManagerBase
         PlayerPrefsUtil.DeleteKey(TokenKey);
         PlayerPrefsUtil.DeleteKey(PlayerIdKey);
         PlayerPrefsUtil.DeleteKey(UsernameKey);
+        OnLoginStateChanged?.Invoke();
     }
 }

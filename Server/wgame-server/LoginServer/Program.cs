@@ -7,6 +7,9 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 监听所有网卡（真机/局域网客户端可访问；本地调试可用 ASPNETCORE_URLS 覆盖）
+builder.WebHost.UseUrls("http://0.0.0.0:5049");
+
 // 从配置读取 JWT 密钥
 var jwtSecret = builder.Configuration["Jwt:Secret"]
     ?? throw new InvalidOperationException("缺少配置 Jwt:Secret");

@@ -6,11 +6,11 @@
  *--------------------------------------------------------------
  */
 
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
-/// 登录流程测试脚本，挂到场景任意物体上，右键 Inspector 调用
+/// 登录流程测试脚本，挂到场景任意物体上，右键 Inspector 调用。
+/// 业务层采用回调形式（底层由 UniTask 异步执行），无需 async/await
 /// </summary>
 public class LoginTest : MonoBehaviour
 {
@@ -19,27 +19,31 @@ public class LoginTest : MonoBehaviour
     public string password = "123456";
 
     [ContextMenu("测试注册")]
-    private async void TestRegister()
+    private void TestRegister()
     {
-        var result = await GameMgr.Account.Register(username, password);
-        if (result.ErrorCode == 0)
-            Log.Info("注册成功");
-        else
-            Log.Error("注册失败:", result.ErrorCode);
+        GameMgr.Account.Register(username, password, result =>
+        {
+            if (result.ErrorCode == NetMsg.ErrorCode.ErrorNone)
+                Log.Info("注册成功");
+            else
+                Log.Error("注册失败:", result.ErrorCode);
+        });
     }
 
     [ContextMenu("测试登录")]
-    private async void TestLogin()
+    private void TestLogin()
     {
-        var result = await GameMgr.Account.Login(username, password);
-        if (result.ErrorCode == 0)
-            Log.Info("登录成功, token 已保存");
-        else
-            Log.Error("登录失败:", result.ErrorCode);
+        GameMgr.Account.Login(username, password, result =>
+        {
+            if (result.ErrorCode == NetMsg.ErrorCode.ErrorNone)
+                Log.Info("登录成功, token 已保存");
+            else
+                Log.Error("登录失败:", result.ErrorCode);
+        });
     }
 
     [ContextMenu("测试 /me 校验 token")]
-    private async void TestGetMe()
+    private void TestGetMe()
     {
         if (!GameMgr.Account.IsLoggedIn)
         {
@@ -47,11 +51,13 @@ public class LoginTest : MonoBehaviour
             return;
         }
 
-        var result = await GameMgr.Account.GetMe();
-        if (result.ErrorCode == 0)
-            Log.Info("/me 校验通过:", result.Username);
-        else
-            Log.Error("/me 校验失败:", result.ErrorCode);
+        GameMgr.Account.GetMe(result =>
+        {
+            if (result.ErrorCode == NetMsg.ErrorCode.ErrorNone)
+                Log.Info("/me 校验通过:", result.Username);
+            else
+                Log.Error("/me 校验失败:", result.ErrorCode);
+        });
     }
 
     [ContextMenu("测试退出登录")]
@@ -62,7 +68,7 @@ public class LoginTest : MonoBehaviour
     }
 
     [ContextMenu("测试加载养成数据")]
-    private async void TestLoadData()
+    private void TestLoadData()
     {
         if (!GameMgr.Account.IsLoggedIn)
         {
@@ -70,15 +76,17 @@ public class LoginTest : MonoBehaviour
             return;
         }
 
-        var result = await GameMgr.PlayerData.Load();
-        if (result.ErrorCode == 0)
-            Log.Info("养成数据: 金币", GameMgr.PlayerData.Gold, "关卡", GameMgr.PlayerData.StageProgress);
-        else
-            Log.Error("加载失败:", result.ErrorCode);
+        GameMgr.PlayerData.Load(result =>
+        {
+            if (result.ErrorCode == NetMsg.ErrorCode.ErrorNone)
+                Log.Info("养成数据: 金币", GameMgr.PlayerData.Gold, "关卡", GameMgr.PlayerData.StageProgress);
+            else
+                Log.Error("加载失败:", result.ErrorCode);
+        });
     }
 
     [ContextMenu("测试保存养成数据")]
-    private async void TestSaveData()
+    private void TestSaveData()
     {
         if (!GameMgr.Account.IsLoggedIn)
         {
@@ -87,10 +95,12 @@ public class LoginTest : MonoBehaviour
         }
 
         GameMgr.PlayerData.AddGold(100);
-        var result = await GameMgr.PlayerData.Save();
-        if (result.ErrorCode == 0)
-            Log.Info("保存成功");
-        else
-            Log.Error("保存失败:", result.ErrorCode);
+        GameMgr.PlayerData.Save(result =>
+        {
+            if (result.ErrorCode == NetMsg.ErrorCode.ErrorNone)
+                Log.Info("保存成功");
+            else
+                Log.Error("保存失败:", result.ErrorCode);
+        });
     }
 }

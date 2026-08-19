@@ -1,5 +1,5 @@
 %YAML 1.1
-%TAG !u! tag:unity3d.com,2011:
+%TAG !u! tag:yousandi.cn,2023:
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12,12 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce6db80e3bba14ae5aedee8d31765f90, type: 3}
   m_Name: EditorPathConfig
   m_EditorClassIdentifier: 
-  dlls:
-  - Game.dll
-  - Framework.JIT.dll
   remotePath: /Library/WebServer/Documents/MyServer
   dllSourcePath: /Users/wangshaowen/wgame/HybridCLRData/HotUpdateDlls
   dllTargetPath: /Users/wangshaowen/wgame/Assets/Res/Dll
   excelShellPath: /Users/wangshaowen/wgame/DataTables/gen.sh
-  tablesFilePath: /Users/wangshaowen/wgame/Assets/Scripts/FrameworkJIT/DataTable/Tables.cs
-  dataTableCtrFilePath: /Users/wangshaowen/wgame/Assets/Scripts/FrameworkJIT/Module/Ctr/DataTableCtr.cs
+  protoShellPath: /Users/wangshaowen/wgame/DataTables/gen_proto.sh

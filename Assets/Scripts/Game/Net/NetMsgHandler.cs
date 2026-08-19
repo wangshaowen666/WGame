@@ -2,7 +2,7 @@
  * File: NetMsgHandler.cs
  * Author: Wsw
  * Feedback: 614270423@qq.com
- * Time: 2026/08/15 10:00:00 
+ * Time: 2026/08/15 10:00:00
  *--------------------------------------------------------------
  */
 
@@ -12,14 +12,84 @@ using Google.Protobuf;
 /// <summary>
 /// 网络协议处理层（热更）：
 /// 订阅 Framework 的 NetMgr 传输层，负责协议消息的封装/解析/分发。
+/// 连接建立后自动用本地登录态做 UDP 认证（UdpLoginReq/Ack，GameServer 校验 JWT 绑定 playerId）。
 /// 新增协议类型：在对应 .proto 加 message + MsgType 枚举值，这里加 case 分支即可
 /// </summary>
 public class NetMsgHandler : ManagerBase
 {
+    /// <summary>UDP 认证是否通过（未认证连接在服务器侧的操作会被丢弃）</summary>
+    public bool IsUdpAuthed { get; private set; }
+
+    /// <summary>服务器认证返回的 playerId（与 HTTP 登录账号一致）</summary>
+    public int UdpPlayerId { get; private set; }
+
+    /// <summary>UDP 认证结果（成功/失败都触发，看 resp.ErrorCode 区分）</summary>
+    public event Action<NetMsg.UdpLoginAck> OnUdpLoginAck;
+
+    /// <summary>
+    /// 收到服务器帧数据（FrameSyncMgr 订阅消费）
+    /// </summary>
+    public event Action<NetMsg.FrameData> OnFrameData;
+
     public override void OnInit()
     {
         // 订阅传输层的原始数据事件
         CoreMgr.Net.OnRawData += OnRawDataReceived;
+
+        // 连接建立后自动做 UDP 认证（用 HTTP 登录保存的 token）
+        CoreMgr.Net.OnConnected += OnNetConnected;
+        CoreMgr.Net.OnDisconnected += OnNetDisconnected;
+    }
+
+    /// <summary>
+    /// 连接建立：发送本地 token 认证
+    /// </summary>
+    private void OnNetConnected()
+    {
+        IsUdpAuthed = false;
+        UdpPlayerId = 0;
+
+        if (!GameMgr.Account.IsLoggedIn)
+        {
+            Log.Warning("未登录（无本地 token），UDP 认证跳过，请先完成 HTTP 登录");
+            return;
+        }
+
+        SendUdpLogin(GameMgr.Account.Token);
+        Log.Info("已发送 UDP 认证请求");
+    }
+
+    /// <summary>
+    /// 断开：清认证状态
+    /// </summary>
+    private void OnNetDisconnected()
+    {
+        IsUdpAuthed = false;
+        UdpPlayerId = 0;
+    }
+
+    /// <summary>
+    /// 发送 UDP 认证（token 来自 HTTP 登录，AccountMgr 本地保存）
+    /// </summary>
+    public void SendUdpLogin(string token)
+    {
+        Send(NetMsg.MsgType.MsgUdpLoginReq, new NetMsg.UdpLoginReq { Token = token });
+    }
+
+    /// <summary>
+    /// 收到认证回复
+    /// </summary>
+    private void HandleUdpLoginAck(NetMsg.UdpLoginAck resp)
+    {
+        IsUdpAuthed = resp.ErrorCode == NetMsg.ErrorCode.ErrorNone;
+        UdpPlayerId = resp.PlayerId;
+
+        if (IsUdpAuthed)
+            Log.Info("UDP 认证成功, playerId:", resp.PlayerId);
+        else
+            Log.Error("UDP 认证失败, 错误码:", resp.ErrorCode, "（token 无效或已过期，请重新 HTTP 登录）");
+
+        OnUdpLoginAck?.Invoke(resp);
     }
 
     /// <summary>
@@ -55,17 +125,22 @@ public class NetMsgHandler : ManagerBase
     }
 
     /// <summary>
-    /// 按 msg_type 分发处理（示例处理 PlayerInput）
+    /// 按 msg_type 分发处理
     /// </summary>
     private void HandleEnvelope(NetMsg.NetMsgEnvelope envelope)
     {
-        Log.Info("收到服务器消息, 类型:", envelope.MsgType);
+        // FrameData 频率高（20 帧/秒），不打印日志避免刷屏
+        if (envelope.MsgType != NetMsg.MsgType.MsgFrameData)
+            Log.Info("收到服务器消息, 类型:", envelope.MsgType);
 
         switch (envelope.MsgType)
         {
-            case NetMsg.MsgType.MsgPlayerInput:
-                var input = NetMsg.PlayerInput.Parser.ParseFrom(envelope.Payload);
-                Log.Info("收到玩家操作: op_type=", input.OpType, "param1=", input.Param1, "param3=", input.Param3);
+            case NetMsg.MsgType.MsgFrameData:
+                OnFrameData?.Invoke(NetMsg.FrameData.Parser.ParseFrom(envelope.Payload));
+                break;
+
+            case NetMsg.MsgType.MsgUdpLoginAck:
+                HandleUdpLoginAck(NetMsg.UdpLoginAck.Parser.ParseFrom(envelope.Payload));
                 break;
 
             default:
@@ -77,6 +152,6 @@ public class NetMsgHandler : ManagerBase
     public override void OnSceneExit(int sceneTp)
     {
         // 取消订阅，避免泄漏
-        CoreMgr.Net.OnRawData -= OnRawDataReceived;
+        //CoreMgr.Net.OnRawData -= OnRawDataReceived;
     }
 }

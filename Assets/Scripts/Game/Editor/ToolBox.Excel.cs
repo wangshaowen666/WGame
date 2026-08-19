@@ -45,6 +45,7 @@ public partial class ToolBox
         }
         AddLogInfo("导proto完成");
         AssetDatabase.Refresh();
+        EditorApplication.delayCall += AutoCompleteApiRegistry;
     }
     
     /// <summary>
@@ -164,6 +165,103 @@ public partial class ToolBox
         }
     }
     
+    /// <summary>
+    /// 自动为 ApiRegistry 补全 RegisterAll 方法（由 NetApi.cs 驱动）
+    /// 解析 NetApi.cs 每个字段：字段名 X + 注释 // POST → RegisterPost<NetMsg.XReq>
+    ///                                  字段名 X + 注释 // GET  → RegisterGet<NetMsg.XResp>
+    /// </summary>
+    private void AutoCompleteApiRegistry()
+    {
+        try
+        {
+            AddLogInfo("开始自动补全 ApiRegistry.RegisterAll...");
+            var netApiPath = GetScriptPathByType(typeof(NetApi));
+            if (!File.Exists(netApiPath))
+            {
+                AddLogInfo("错误：NetApi.cs 文件不存在");
+                return;
+            }
+
+            var apiRegistryPath = GetScriptPathByType(typeof(ApiRegistry));
+            if (!File.Exists(apiRegistryPath))
+            {
+                AddLogInfo("错误：ApiRegistry.cs 文件不存在");
+                return;
+            }
+
+            string netApiContent = File.ReadAllText(netApiPath);
+
+            // 解析 NetApi.cs 的字段与分组注释（按行顺序扫描）：
+            //   // ===== 分组名 =====  → 当前分组标题（输出一次）
+            //   public const string X = "url";   // POST：说明 / // GET：说明
+            // 注释里的方法标识不区分大小写（post/get/POST/GET 均可）
+            Regex apiRegex = new Regex(
+                @"public\s+const\s+string\s+(\w+)\s*=\s*""[^""]*"";\s*//\s*(POST|GET)",
+                RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            Regex groupRegex = new Regex(@"//\s*=====\s*(.+?)\s*=====", RegexOptions.Multiline);
+
+            var apiMatches = apiRegex.Matches(netApiContent);
+            if (apiMatches.Count == 0)
+            {
+                AddLogInfo("错误：NetApi.cs 中没有找到带 POST/GET 注释的字段");
+                return;
+            }
+
+            // 按行顺序扫描，遇到分组记录当前分组，遇到接口时输出所属分组（仅一次）
+            StringBuilder newBody = new StringBuilder();
+            string currentGroup = null;
+            foreach (string line in netApiContent.Split('\n'))
+            {
+                var groupMatch = groupRegex.Match(line);
+                if (groupMatch.Success)
+                {
+                    currentGroup = groupMatch.Groups[1].Value;
+                    continue;
+                }
+
+                var apiMatch = apiRegex.Match(line);
+                if (!apiMatch.Success) continue;
+
+                if (currentGroup != null)
+                {
+                    newBody.AppendLine($"        // ===== {currentGroup} =====");
+                    currentGroup = null; // 已输出，避免重复
+                }
+
+                string fieldName = apiMatch.Groups[1].Value;
+                string method = apiMatch.Groups[2].Value;
+                if (string.Equals(method, "POST", StringComparison.OrdinalIgnoreCase))
+                    newBody.AppendLine($"        RegisterPost<NetMsg.{fieldName}Req>(NetApi.{fieldName});");
+                else
+                    newBody.AppendLine($"        RegisterGet<NetMsg.{fieldName}Resp>(NetApi.{fieldName});");
+            }
+
+            // 替换 ApiRegistry.cs 中的 RegisterAll 方法体
+            string apiRegistryContent = File.ReadAllText(apiRegistryPath);
+            Regex registerAllRegex = new Regex(
+                @"public\s+static\s+void\s+RegisterAll\(\)\s*\{[\s\S]*?\n\s*\}", RegexOptions.Multiline);
+
+            if (!registerAllRegex.IsMatch(apiRegistryContent))
+            {
+                AddLogInfo("错误：ApiRegistry.cs 中未找到 RegisterAll 方法");
+                return;
+            }
+
+            string newRegisterAll = $"    public static void RegisterAll()\n    {{\n{newBody}    }}";
+            apiRegistryContent = registerAllRegex.Replace(apiRegistryContent, newRegisterAll);
+
+            File.WriteAllText(apiRegistryPath, apiRegistryContent);
+            AssetDatabase.Refresh();
+
+            AddLogInfo($"已自动补全 ApiRegistry.RegisterAll（共 {apiMatches.Count} 个接口）");
+        }
+        catch (Exception ex)
+        {
+            AddLogInfo($"自动补全 ApiRegistry.RegisterAll 失败：{ex.Message}");
+            Debug.LogError($"自动补全 ApiRegistry.RegisterAll 失败：{ex}");
+        }
+    }
+
     private string GetScriptPathByType(Type type)
     {
         string[] guids = AssetDatabase.FindAssets($"t:Script {type.Name}");

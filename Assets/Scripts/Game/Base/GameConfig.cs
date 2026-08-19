@@ -16,6 +16,6 @@ public static class GameConfig
     public const string BattleScene = "Battle";
     public const string NetworkScene = "Network";
 
-    // 登录服务器地址（本机调试用，真机需改为局域网/公网 IP）
-    public const string LoginServerUrl = "http://localhost:5049";
+    // 登录服务器地址（本机调试用 localhost，真机/双端测试用局域网 IP：本机 WiFi en1 的 192.168.14.x 网段）
+    public const string LoginServerUrl = "http://192.168.14.200:5049";
 }

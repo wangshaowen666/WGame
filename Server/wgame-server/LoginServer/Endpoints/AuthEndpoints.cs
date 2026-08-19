@@ -10,7 +10,7 @@ public static class AuthEndpoints
     public static void MapAuthEndpoints(this WebApplication app)
     {
         // 注册（无需登录）
-        app.MapPost("/register", async (HttpContext ctx, PlayerRepository repo,
+        app.MapPost(NetApi.Register, async (HttpContext ctx, PlayerRepository repo,
             PlayerProfileRepository profileRepo, PasswordService pwd) =>
         {
             var req = await ProtoHttp.ReadReq<NetMsg.RegisterReq>(ctx);
@@ -31,7 +31,7 @@ public static class AuthEndpoints
         });
 
         // 登录（无需登录）
-        app.MapPost("/login", async (HttpContext ctx, PlayerRepository repo, PasswordService pwd, JwtService jwt) =>
+        app.MapPost(NetApi.Login, async (HttpContext ctx, PlayerRepository repo, PasswordService pwd, JwtService jwt) =>
         {
             var req = await ProtoHttp.ReadReq<NetMsg.LoginReq>(ctx);
 
@@ -54,7 +54,7 @@ public static class AuthEndpoints
         });
 
         // 验证 token（需要登录，由认证中间件统一校验）
-        app.MapGet("/me", async (HttpContext context, PlayerRepository repo) =>
+        app.MapGet(NetApi.GetMe, async (HttpContext context, PlayerRepository repo) =>
         {
             var idStr = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (idStr == null)

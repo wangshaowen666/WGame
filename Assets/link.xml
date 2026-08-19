@@ -1,0 +1,7 @@
+<linker>
+  <!-- 手动保留（独立于 HybridCLRGenerate/link.xml，重新生成不会被覆盖）：
+       CreatePrimitive 在 native 内部按类名添加 BoxCollider/CapsuleCollider/SphereCollider，
+       C# 代码无显式引用，IL2CPP 裁剪扫描不到 -> 真机报
+       "Can't add component because class 'BoxCollider' doesn't exist!" -->
+  <assembly fullname="UnityEngine.PhysicsModule" preserve="all" />
+</linker>
