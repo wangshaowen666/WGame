@@ -25,17 +25,17 @@ namespace NetMsg {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "ChBuZXRfYmF0dGxlLnByb3RvEgZOZXRNc2caEG5ldF9jb21tb24ucHJvdG8i",
-            "HAoLVWRwTG9naW5SZXESDQoFdG9rZW4YASABKAkiRwoLVWRwTG9naW5BY2sS",
-            "JQoKZXJyb3JfY29kZRgBIAEoDjIRLk5ldE1zZy5FcnJvckNvZGUSEQoJcGxh",
-            "eWVyX2lkGAIgASgFIlEKC1BsYXllcklucHV0Eg8KB29wX3R5cGUYASABKAUS",
-            "DgoGcGFyYW0xGAIgASgFEg4KBnBhcmFtMhgDIAEoBRIRCglwbGF5ZXJfaWQY",
-            "BCABKAUiQgoJRnJhbWVEYXRhEhAKCGZyYW1lX2lkGAEgASgFEiMKBmlucHV0",
-            "cxgCIAMoCzITLk5ldE1zZy5QbGF5ZXJJbnB1dGIGcHJvdG8z"));
+            "HAoLVWRwTG9naW5SZXESDQoFdG9rZW4YASABKAkiSAoMVWRwTG9naW5SZXNw",
+            "EiUKCmVycm9yX2NvZGUYASABKA4yES5OZXRNc2cuRXJyb3JDb2RlEhEKCXBs",
+            "YXllcl9pZBgCIAEoBSJRCgtQbGF5ZXJJbnB1dBIPCgdvcF90eXBlGAEgASgF",
+            "Eg4KBnBhcmFtMRgCIAEoBRIOCgZwYXJhbTIYAyABKAUSEQoJcGxheWVyX2lk",
+            "GAQgASgFIkIKCUZyYW1lRGF0YRIQCghmcmFtZV9pZBgBIAEoBRIjCgZpbnB1",
+            "dHMYAiADKAsyEy5OZXRNc2cuUGxheWVySW5wdXRiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::NetMsg.NetCommonReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::NetMsg.UdpLoginReq), global::NetMsg.UdpLoginReq.Parser, new[]{ "Token" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::NetMsg.UdpLoginAck), global::NetMsg.UdpLoginAck.Parser, new[]{ "ErrorCode", "PlayerId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::NetMsg.UdpLoginResp), global::NetMsg.UdpLoginResp.Parser, new[]{ "ErrorCode", "PlayerId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::NetMsg.PlayerInput), global::NetMsg.PlayerInput.Parser, new[]{ "OpType", "Param1", "Param2", "PlayerId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::NetMsg.FrameData), global::NetMsg.FrameData.Parser, new[]{ "FrameId", "Inputs" }, null, null, null, null)
           }));
@@ -247,18 +247,19 @@ namespace NetMsg {
 
   /// <summary>
   /// UDP 连接认证回复（player_id 为 token 解析出的真实玩家 id，后续帧数据用它标识身份）
+  /// 命名规范：请求/响应成对 XxxReq/XxxResp（见开发文档阶段 4）
   /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
-  public sealed partial class UdpLoginAck : pb::IMessage<UdpLoginAck>
+  public sealed partial class UdpLoginResp : pb::IMessage<UdpLoginResp>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<UdpLoginAck> _parser = new pb::MessageParser<UdpLoginAck>(() => new UdpLoginAck());
+    private static readonly pb::MessageParser<UdpLoginResp> _parser = new pb::MessageParser<UdpLoginResp>(() => new UdpLoginResp());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<UdpLoginAck> Parser { get { return _parser; } }
+    public static pb::MessageParser<UdpLoginResp> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -274,7 +275,7 @@ namespace NetMsg {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public UdpLoginAck() {
+    public UdpLoginResp() {
       OnConstruction();
     }
 
@@ -282,7 +283,7 @@ namespace NetMsg {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public UdpLoginAck(UdpLoginAck other) : this() {
+    public UdpLoginResp(UdpLoginResp other) : this() {
       errorCode_ = other.errorCode_;
       playerId_ = other.playerId_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
@@ -290,8 +291,8 @@ namespace NetMsg {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public UdpLoginAck Clone() {
-      return new UdpLoginAck(this);
+    public UdpLoginResp Clone() {
+      return new UdpLoginResp(this);
     }
 
     /// <summary>Field number for the "error_code" field.</summary>
@@ -324,12 +325,12 @@ namespace NetMsg {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
-      return Equals(other as UdpLoginAck);
+      return Equals(other as UdpLoginResp);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(UdpLoginAck other) {
+    public bool Equals(UdpLoginResp other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -415,7 +416,7 @@ namespace NetMsg {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(UdpLoginAck other) {
+    public void MergeFrom(UdpLoginResp other) {
       if (other == null) {
         return;
       }

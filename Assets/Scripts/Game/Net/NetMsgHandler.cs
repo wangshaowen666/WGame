@@ -24,7 +24,7 @@ public class NetMsgHandler : ManagerBase
     public int UdpPlayerId { get; private set; }
 
     /// <summary>UDP 认证结果（成功/失败都触发，看 resp.ErrorCode 区分）</summary>
-    public event Action<NetMsg.UdpLoginAck> OnUdpLoginAck;
+    public event Action<NetMsg.UdpLoginResp> OnUdpLoginResp;
 
     /// <summary>
     /// 收到服务器帧数据（FrameSyncMgr 订阅消费）
@@ -79,7 +79,7 @@ public class NetMsgHandler : ManagerBase
     /// <summary>
     /// 收到认证回复
     /// </summary>
-    private void HandleUdpLoginAck(NetMsg.UdpLoginAck resp)
+    private void HandleUdpLoginResp(NetMsg.UdpLoginResp resp)
     {
         IsUdpAuthed = resp.ErrorCode == NetMsg.ErrorCode.ErrorNone;
         UdpPlayerId = resp.PlayerId;
@@ -89,7 +89,7 @@ public class NetMsgHandler : ManagerBase
         else
             Log.Error("UDP 认证失败, 错误码:", resp.ErrorCode, "（token 无效或已过期，请重新 HTTP 登录）");
 
-        OnUdpLoginAck?.Invoke(resp);
+        OnUdpLoginResp?.Invoke(resp);
     }
 
     /// <summary>
@@ -139,8 +139,32 @@ public class NetMsgHandler : ManagerBase
                 OnFrameData?.Invoke(NetMsg.FrameData.Parser.ParseFrom(envelope.Payload));
                 break;
 
-            case NetMsg.MsgType.MsgUdpLoginAck:
-                HandleUdpLoginAck(NetMsg.UdpLoginAck.Parser.ParseFrom(envelope.Payload));
+            case NetMsg.MsgType.MsgUdpLoginResp:
+                HandleUdpLoginResp(NetMsg.UdpLoginResp.Parser.ParseFrom(envelope.Payload));
+                break;
+
+            case NetMsg.MsgType.MsgRoomResp:
+                OnRoomResp?.Invoke(NetMsg.RoomResp.Parser.ParseFrom(envelope.Payload));
+                break;
+
+            case NetMsg.MsgType.MsgRoomStatePush:
+                OnRoomStatePush?.Invoke(NetMsg.RoomStatePush.Parser.ParseFrom(envelope.Payload));
+                break;
+
+            case NetMsg.MsgType.MsgLeaveRoomResp:
+                OnLeaveRoomResp?.Invoke(NetMsg.LeaveRoomResp.Parser.ParseFrom(envelope.Payload));
+                break;
+
+            case NetMsg.MsgType.MsgMatchResp:
+                OnMatchResp?.Invoke(NetMsg.MatchResp.Parser.ParseFrom(envelope.Payload));
+                break;
+
+            case NetMsg.MsgType.MsgReadyResp:
+                OnReadyResp?.Invoke(NetMsg.ReadyResp.Parser.ParseFrom(envelope.Payload));
+                break;
+
+            case NetMsg.MsgType.MsgStartGamePush:
+                OnStartGamePush?.Invoke(NetMsg.StartGamePush.Parser.ParseFrom(envelope.Payload));
                 break;
 
             default:
@@ -148,6 +172,24 @@ public class NetMsgHandler : ManagerBase
                 break;
         }
     }
+
+    /// <summary>房间请求回复（建房/加房结果，RoomMgr 订阅）</summary>
+    public event Action<NetMsg.RoomResp> OnRoomResp;
+
+    /// <summary>房间状态推送（成员列表变化，RoomMgr 订阅）</summary>
+    public event Action<NetMsg.RoomStatePush> OnRoomStatePush;
+
+    /// <summary>退出房间回复（RoomMgr 订阅）</summary>
+    public event Action<NetMsg.LeaveRoomResp> OnLeaveRoomResp;
+
+    /// <summary>匹配回复（受理回执/撮合成功，RoomMgr 订阅）</summary>
+    public event Action<NetMsg.MatchResp> OnMatchResp;
+
+    /// <summary>就绪回复（RoomMgr 订阅）</summary>
+    public event Action<NetMsg.ReadyResp> OnReadyResp;
+
+    /// <summary>开战推送（全员就绪：起始帧+随机种子，RoomMgr 订阅）</summary>
+    public event Action<NetMsg.StartGamePush> OnStartGamePush;
 
     public override void OnSceneExit(int sceneTp)
     {

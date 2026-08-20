@@ -237,6 +237,8 @@ public partial class ToolBox
             }
 
             // 替换 ApiRegistry.cs 中的 RegisterAll 方法体
+            // 注意：模板缩进必须幂等（方法名/大括号固定 4 空格、方法体固定 8 空格），
+            //      否则每次执行缩进逐层加深（原模板曾因缩进被正则 \s* 吸收而累积）
             string apiRegistryContent = File.ReadAllText(apiRegistryPath);
             Regex registerAllRegex = new Regex(
                 @"public\s+static\s+void\s+RegisterAll\(\)\s*\{[\s\S]*?\n\s*\}", RegexOptions.Multiline);
@@ -247,7 +249,10 @@ public partial class ToolBox
                 return;
             }
 
-            string newRegisterAll = $"    public static void RegisterAll()\n    {{\n{newBody}    }}";
+            // 固定模板：方法名与 { } 各 4 空格缩进，方法体行由 newBody 自带 8 空格缩进
+            string newRegisterAll = "    public static void RegisterAll()\n    {\n"
+                                    + newBody
+                                    + "    }";
             apiRegistryContent = registerAllRegex.Replace(apiRegistryContent, newRegisterAll);
 
             File.WriteAllText(apiRegistryPath, apiRegistryContent);

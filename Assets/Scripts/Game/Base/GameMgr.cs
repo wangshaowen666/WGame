@@ -17,6 +17,7 @@ public static class GameMgr
     public static readonly NetMsgHandler NetMsg = new();
     public static readonly HttpMsgHandler HttpMsg = new();
     public static readonly FrameSyncMgr FrameSync = new();
+    public static readonly RoomMgr Room = new();
     public static readonly UIMgr UI = new();
     public static readonly BattleMgr Battle = new();
     public static readonly EntityMgr Entity = new();
@@ -33,6 +34,7 @@ public static class GameMgr
             NetMsg,
             HttpMsg,
             FrameSync,
+            Room,
             UI,
             Battle,
             Entity,

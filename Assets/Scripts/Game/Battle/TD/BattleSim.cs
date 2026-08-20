@@ -11,7 +11,7 @@ using System.Collections.Generic;
 /// <summary>
 /// 确定性塔防模拟层（纯 C#，无 UnityEngine）：
 /// - 以服务器绝对帧号锚定：Tick(absFrame, inputs)，同一帧号 + 同一操作序列 => 任意客户端状态完全一致
-/// - 后进场客户端用空帧快进到当前帧即可对齐（前提：进场前无人操作，阶段 6 用 StartGame 消息根治）
+/// - 构造传入随机种子（由 StartGamePush 统一下发，双端一致）
 /// - 禁止：float/double、UnityEngine.Random、Time.*、Dictionary 遍历（本类只用 List/按索引访问）
 /// - 操作类型：1=放塔(param1=格子x, param2=格子y) 2=升级塔(同参数，需塔主人)
 /// </summary>
@@ -56,15 +56,16 @@ public class BattleSim
         public int Cooldown; // 距下次可攻击的剩余帧数
     }
 
-    /// <summary>玩家（按首次操作进场顺序排列，遍历顺序确定）</summary>
+    /// <summary>玩家（按初始化顺序排列，遍历顺序确定）</summary>
     public class SimPlayer
     {
         public int PlayerId;
         public long Gold = StartGold;
     }
 
-    private static readonly Fix s_enemySpeed = Fix.FromRaw(4587);   // ≈0.07 格/帧 = 1.4 格/秒
-    private static readonly Fix s_towerRange = Fix.FromRaw(196608); // 3.0 格（原 2.5 太小，路径旁塔覆盖不够）
+    // ---- 业务数值（定点常量直接写业务值，FromDouble 内部转 raw，见 FixMath） ----
+    private static readonly Fix s_enemySpeed = Fix.FromDouble(0.07);   // 0.07 格/帧 = 1.4 格/秒
+    private static readonly Fix s_towerRange = Fix.FromDouble(3.0);    // 塔射程 3 格
 
     // 路径点（格子中心坐标），敌人从 Wp[0] 走到 Wp[last]，竖向蛇形布局
     private static readonly (int X, int Y)[] s_waypoints =
@@ -83,7 +84,21 @@ public class BattleSim
     /// <summary>最近一次被拒绝的操作原因（成功/无操作时为空，仅诊断用，不影响确定性）</summary>
     public string LastReject { get; private set; } = "";
 
-    private readonly XRng _rng = new(12345); // 阶段 6 改为 StartGame 下发种子
+    private readonly XRng _rng;
+
+    /// <summary>
+    /// 构造。seed/初始玩家列表来自 StartGamePush（双端一致）；
+    /// playerIds 为空时（旧测试入口）不预登记，保持"首次操作进场"的旧行为
+    /// </summary>
+    public BattleSim(long seed = 12345, int[]? playerIds = null)
+    {
+        _rng = new XRng((ulong)seed);
+
+        // 开局登记参战玩家（金币=StartGold；阶段 7 可改为从养成数据带初始金币）
+        if (playerIds != null)
+            foreach (var pid in playerIds)
+                Players.Add(new SimPlayer { PlayerId = pid });
+    }
     private int _nextId = 1;
 
     /// <summary>
@@ -234,7 +249,7 @@ public class BattleSim
             Id = _nextId++,
             Hp = hp,
             X = Fix.FromInt(wx) + Fix.Half,
-            Y = Fix.FromInt(wy) + Fix.Half + Fix.FromRaw(_rng.NextInt(-1966, 1967)), // ±0.03 格散布
+            Y = Fix.FromInt(wy) + Fix.Half + _rng.NextFix(-0.03, 0.03), // 出生散布 ±1966 raw ≈ ±0.03 格
             WpIndex = 1,
         });
     }

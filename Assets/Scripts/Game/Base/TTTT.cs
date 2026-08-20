@@ -21,6 +21,13 @@ public class TTTT : MonoBehaviour
     private int _lastTowerX = 1; // 记录最后一次放塔位置，供"升级塔"菜单使用
     private int _lastTowerY = 2;
 
+    private int _knownRoomId;      // 已知房间号（本端建房成功自动记录，也可 UI 手动输入）
+    private string _roomInput = ""; // UI 房间号输入框内容
+
+    /// <summary>登录测试账号（Inspector 可改：Editor 双端分别填不同账号；真机打包前填好）</summary>
+    public string TestUsername = "wsw";
+    public string TestPassword = "123456";
+
     // 路径旁预置塔位（覆盖蛇形路径，射程 3 格内），放塔菜单按此轮询放置
     private static readonly int[,] s_towerSlots = { { 1, 2 }, { 2, 7 }, { 4, 9 }, { 5, 13 }, { 2, 11 } };
     private int _slotIndex;
@@ -29,15 +36,25 @@ public class TTTT : MonoBehaviour
     {
         // 失焦不暂停（切去看服务器终端时客户端继续收帧，否则会积压延迟）
         Application.runInBackground = true;
-        
+
         //GameMgr.Init();
+
+        // 建房/加房成功自动记录房间号（供 ContextMenu 快捷加入）
+        GameMgr.Room.OnRoomResp += OnRoomResp;
+
+        // 全员就绪收到开战推送 -> 自动进入战斗
+        GameMgr.Room.OnStartGamePush += _ =>
+        {
+            GameMgr.Battle.EnterBattle();
+            UiLog("全员就绪，开战!");
+        };
     }
 
     [ContextMenu("0.登录测试账号(HTTP)")]
     void LoginTestAccount()
     {
-        const string user = "test";
-        const string pass = "test";
+        var user = TestUsername;
+        var pass = TestPassword;
 
         GameMgr.Account.Login(user, pass, resp =>
         {
@@ -73,11 +90,50 @@ public class TTTT : MonoBehaviour
         UiLog($"连接 {ServerIp}:{ServerPort} ...");
     }
 
-    [ContextMenu("2.进入战斗")]
-    void EnterBattle()
+    [ContextMenu("2.就绪(全员就绪自动开战)")]
+    void ReadyForBattle()
     {
-        GameMgr.Battle.EnterBattle();
-        UiLog("进入战斗");
+        if (!GameMgr.Room.IsInRoom)
+        {
+            UiLog("未在房间内，请先建房/匹配/加入");
+            Log.Warning("未在房间内");
+            return;
+        }
+        GameMgr.Room.Ready();
+        UiLog("就绪请求已发送，等待全员就绪...");
+    }
+
+    [ContextMenu("1.5创建房间")]
+    void CreateRoom()
+    {
+        GameMgr.Room.CreateRoom();
+        UiLog("创建房间请求已发送");
+    }
+
+    /// <summary>建房/加房成功回调入口（UI 按钮用）：记录房间号</summary>
+    private void OnRoomResp(NetMsg.RoomResp resp)
+    {
+        if (resp.ErrorCode == NetMsg.ErrorCode.ErrorNone)
+            _knownRoomId = resp.RoomId;
+    }
+
+    [ContextMenu("1.6加入上次房间号")]
+    void JoinRoom()
+    {
+        if (_knownRoomId == 0)
+        {
+            UiLog("没有已知房间号（先在本端或另一端建房后记下房间号，或用 UI 输入框输入）");
+            return;
+        }
+        GameMgr.Room.JoinRoom(_knownRoomId);
+        UiLog($"加入房间 {_knownRoomId} 请求已发送");
+    }
+
+    [ContextMenu("1.7退出房间")]
+    void LeaveRoom()
+    {
+        GameMgr.Room.LeaveRoom();
+        UiLog("退出房间请求已发送");
     }
 
     [ContextMenu("3.放塔(路径旁预置位)")]
@@ -152,13 +208,52 @@ public class TTTT : MonoBehaviour
 
         if (GUILayout.Button("0. 登录测试账号", GetBtnStyle())) LoginTestAccount();
         if (GUILayout.Button("1. 连接服务器", GetBtnStyle())) ConnectServer();
-        if (GUILayout.Button("2. 进入战斗", GetBtnStyle())) EnterBattle();
+
+        // 房间操作：建房 / 输入房间号加入 / 退房
+        if (GUILayout.Button("1.5 创建房间", GetBtnStyle())) CreateRoom();
+        GUILayout.BeginHorizontal();
+        _roomInput = GUILayout.TextField(_roomInput, 4, GetBtnStyle());
+        if (GUILayout.Button("加入", GetBtnStyle(), GUILayout.Width(100)))
+        {
+            if (int.TryParse(_roomInput, out var rid))
+            {
+                _knownRoomId = rid;
+                GameMgr.Room.JoinRoom(rid);
+                UiLog($"加入房间 {rid} 请求已发送");
+            }
+            else
+                UiLog("请输入数字房间号");
+        }
+        GUILayout.EndHorizontal();
+
+        // 匹配：开始（已在房/匹配中则显示取消）
+        if (GameMgr.Room.IsMatching)
+        {
+            if (GUILayout.Button("取消匹配(匹配中...)", GetBtnStyle()))
+            {
+                GameMgr.Room.CancelMatch();
+                UiLog("取消匹配请求已发送");
+            }
+        }
+        else
+        {
+            if (GUILayout.Button("1.6 开始匹配", GetBtnStyle()))
+            {
+                GameMgr.Room.StartMatch();
+                UiLog("匹配请求已发送");
+            }
+        }
+
+        if (GUILayout.Button("1.7 退出房间", GetBtnStyle())) LeaveRoom();
+
+        if (GUILayout.Button("2. 就绪(自动开战)", GetBtnStyle())) ReadyForBattle();
         if (GUILayout.Button("3. 放塔", GetBtnStyle())) PlaceTower();
         if (GUILayout.Button("4. 升级塔", GetBtnStyle())) UpgradeTower();
         if (GUILayout.Button("5. 退出战斗", GetBtnStyle())) ExitBattle();
 
         GUILayout.Space(10);
         GUILayout.Label(NetStateText(), GetLabelStyle());
+        GUILayout.Label(RoomStateText(), GetLabelStyle());
         GUILayout.Label(BattleStateText(), GetLabelStyle());
 
         GUILayout.Space(10);
@@ -178,6 +273,14 @@ public class TTTT : MonoBehaviour
             ? $"已认证(P{GameMgr.NetMsg.UdpPlayerId})"
             : (CoreMgr.Net.IsConnected ? "未认证" : "-");
         return $"网络:{(CoreMgr.Net.IsConnected ? "已连接" : "未连接")} {auth} 帧:{GameMgr.FrameSync.CurFrameId} 缓冲:{GameMgr.FrameSync.BufferCount}";
+    }
+
+    private string RoomStateText()
+    {
+        if (GameMgr.Room.IsMatching) return "房间: 无 (匹配中...)";
+        if (!GameMgr.Room.IsInRoom) return "房间: 无";
+        var ready = GameMgr.Room.IsReady ? " 已就绪" : "";
+        return $"房间: {GameMgr.Room.CurRoomId} 成员: {string.Join(",", GameMgr.Room.MemberIds)}{ready}";
     }
 
     private string BattleStateText()

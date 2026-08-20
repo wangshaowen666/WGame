@@ -26,15 +26,22 @@ namespace NetMsg {
           string.Concat(
             "ChBuZXRfY29tbW9uLnByb3RvEgZOZXRNc2ciRAoOTmV0TXNnRW52ZWxvcGUS",
             "IQoIbXNnX3R5cGUYASABKA4yDy5OZXRNc2cuTXNnVHlwZRIPCgdwYXlsb2Fk",
-            "GAIgASgMKroBCglFcnJvckNvZGUSDgoKRVJST1JfTk9ORRAAEhMKDkVSUk9S",
+            "GAIgASgMKp8CCglFcnJvckNvZGUSDgoKRVJST1JfTk9ORRAAEhMKDkVSUk9S",
             "X0lOVEVSTkFMEOgHEhYKEUVSUk9SX1VTRVJfRVhJU1RTEOkHEhwKF0VSUk9S",
             "X1dST05HX0NSRURFTlRJQUxTEOoHEhcKEkVSUk9SX1VOQVVUSE9SSVpFRBDr",
             "BxIbChZFUlJPUl9QTEFZRVJfTk9UX0ZPVU5EEOwHEhwKF0VSUk9SX1BST0ZJ",
-            "TEVfTk9UX0ZPVU5EEO0HKqABCgdNc2dUeXBlEgwKCE1TR19OT05FEAASFAoQ",
-            "TVNHX1BMQVlFUl9JTlBVVBABEhIKDk1TR19GUkFNRV9EQVRBEAISEQoNTVNH",
-            "X01BSUxfUFVTSBADEhwKGE1TR19BQ1RJVklUWV9SRVdBUkRfUFVTSBAEEhUK",
-            "EU1TR19VRFBfTE9HSU5fUkVREAUSFQoRTVNHX1VEUF9MT0dJTl9BQ0sQBmIG",
-            "cHJvdG8z"));
+            "TEVfTk9UX0ZPVU5EEO0HEhYKEUVSUk9SX05PVF9JTl9ST09NEO4HEhkKFEVS",
+            "Uk9SX1JPT01fTk9UX0ZPVU5EEO8HEhQKD0VSUk9SX1JPT01fRlVMTBDwBxIa",
+            "ChVFUlJPUl9BTFJFQURZX0lOX1JPT00Q8Qcq9wIKB01zZ1R5cGUSDAoITVNH",
+            "X05PTkUQABIUChBNU0dfUExBWUVSX0lOUFVUEAESEgoOTVNHX0ZSQU1FX0RB",
+            "VEEQAhIRCg1NU0dfTUFJTF9QVVNIEAMSHAoYTVNHX0FDVElWSVRZX1JFV0FS",
+            "RF9QVVNIEAQSFQoRTVNHX1VEUF9MT0dJTl9SRVEQBRIWChJNU0dfVURQX0xP",
+            "R0lOX1JFU1AQBhIQCgxNU0dfUk9PTV9SRVEQBxIRCg1NU0dfUk9PTV9SRVNQ",
+            "EAgSFwoTTVNHX1JPT01fU1RBVEVfUFVTSBAJEhYKEk1TR19MRUFWRV9ST09N",
+            "X1JFURAKEhcKE01TR19MRUFWRV9ST09NX1JFU1AQCxIRCg1NU0dfTUFUQ0hf",
+            "UkVREAwSEgoOTVNHX01BVENIX1JFU1AQDRIRCg1NU0dfUkVBRFlfUkVREA4S",
+            "EgoOTVNHX1JFQURZX1JFU1AQDxIXChNNU0dfU1RBUlRfR0FNRV9QVVNIEBBi",
+            "BnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::NetMsg.ErrorCode), typeof(global::NetMsg.MsgType), }, null, new pbr::GeneratedClrTypeInfo[] {
@@ -79,6 +86,22 @@ namespace NetMsg {
     /// 养成数据不存在
     /// </summary>
     [pbr::OriginalName("ERROR_PROFILE_NOT_FOUND")] ErrorProfileNotFound = 1005,
+    /// <summary>
+    /// 不在房间内（建房/加入前须先通过 UDP 认证）
+    /// </summary>
+    [pbr::OriginalName("ERROR_NOT_IN_ROOM")] ErrorNotInRoom = 1006,
+    /// <summary>
+    /// 加入的房间不存在
+    /// </summary>
+    [pbr::OriginalName("ERROR_ROOM_NOT_FOUND")] ErrorRoomNotFound = 1007,
+    /// <summary>
+    /// 房间已满
+    /// </summary>
+    [pbr::OriginalName("ERROR_ROOM_FULL")] ErrorRoomFull = 1008,
+    /// <summary>
+    /// 已在房间中（需先退出）
+    /// </summary>
+    [pbr::OriginalName("ERROR_ALREADY_IN_ROOM")] ErrorAlreadyInRoom = 1009,
   }
 
   /// <summary>
@@ -113,7 +136,47 @@ namespace NetMsg {
     /// <summary>
     /// UDP 连接认证回复（GameServer->客户端）
     /// </summary>
-    [pbr::OriginalName("MSG_UDP_LOGIN_ACK")] MsgUdpLoginAck = 6,
+    [pbr::OriginalName("MSG_UDP_LOGIN_RESP")] MsgUdpLoginResp = 6,
+    /// <summary>
+    /// 房间请求（客户端->服务器：无 room_id=创建，有=加入）
+    /// </summary>
+    [pbr::OriginalName("MSG_ROOM_REQ")] MsgRoomReq = 7,
+    /// <summary>
+    /// 房间请求回复（服务器->客户端）
+    /// </summary>
+    [pbr::OriginalName("MSG_ROOM_RESP")] MsgRoomResp = 8,
+    /// <summary>
+    /// 房间状态推送（服务器->房间内所有成员：成员列表变化）
+    /// </summary>
+    [pbr::OriginalName("MSG_ROOM_STATE_PUSH")] MsgRoomStatePush = 9,
+    /// <summary>
+    /// 退出房间请求（客户端->服务器）
+    /// </summary>
+    [pbr::OriginalName("MSG_LEAVE_ROOM_REQ")] MsgLeaveRoomReq = 10,
+    /// <summary>
+    /// 退出房间回复（服务器->客户端）
+    /// </summary>
+    [pbr::OriginalName("MSG_LEAVE_ROOM_RESP")] MsgLeaveRoomResp = 11,
+    /// <summary>
+    /// 匹配请求（客户端->服务器：开始/取消）
+    /// </summary>
+    [pbr::OriginalName("MSG_MATCH_REQ")] MsgMatchReq = 12,
+    /// <summary>
+    /// 匹配回复（服务器->客户端：受理回执/撮合成功）
+    /// </summary>
+    [pbr::OriginalName("MSG_MATCH_RESP")] MsgMatchResp = 13,
+    /// <summary>
+    /// 就绪请求（客户端->服务器，房间内成员）
+    /// </summary>
+    [pbr::OriginalName("MSG_READY_REQ")] MsgReadyReq = 14,
+    /// <summary>
+    /// 就绪回复（服务器->客户端）
+    /// </summary>
+    [pbr::OriginalName("MSG_READY_RESP")] MsgReadyResp = 15,
+    /// <summary>
+    /// 开战推送（服务器->房间全员：起始帧+随机种子）
+    /// </summary>
+    [pbr::OriginalName("MSG_START_GAME_PUSH")] MsgStartGamePush = 16,
   }
 
   #endregion

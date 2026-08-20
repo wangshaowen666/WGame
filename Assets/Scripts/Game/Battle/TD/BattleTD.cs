@@ -28,15 +28,16 @@ public class BattleTD : BattleBase
     private readonly Dictionary<int, Transform> _towerViews = new();
     private bool _overLogged;
     private string _lastReject = ""; // 上一次的拒绝原因（用于变化检测）
+    private int _startFrame;         // 战斗起始帧（StartGamePush 下发，之前的帧丢弃）
 
     public override void Init()
     {
-        _sim = new BattleSim();
-
-        // 空帧快进：把进场前的历史帧以"无操作"方式补算，保证后进场客户端与先进场一致
-        var empty = new NetMsg.PlayerInput[0];
-        for (int n = 1; n <= GameMgr.FrameSync.CurFrameId; n++)
-            _sim.Tick(n, empty);
+        // 起始帧/种子/参战玩家来自 StartGamePush（RoomMgr 开战推送时填充）
+        var startFrame = GameMgr.Room.StartFrame;
+        var seed = GameMgr.Room.Seed;
+        var playerIds = GameMgr.Room.BattlePlayerIds;
+        _startFrame = startFrame;
+        _sim = new BattleSim(seed, playerIds.ToArray());
 
         var cam = InitCamera();
         InitViews();
@@ -46,7 +47,8 @@ public class BattleTD : BattleBase
             AdaptWorldToCamera(cam);
 
         GameMgr.FrameSync.OnFrame += OnFrame;
-        Log.Info("[战斗] 进入战斗, 已快进至帧", GameMgr.FrameSync.CurFrameId);
+        Log.Info("[战斗] 进入战斗, 起始帧:", startFrame, "种子:", seed,
+            "参战:", string.Join(",", playerIds));
     }
 
     public override void Dispose()
@@ -78,10 +80,13 @@ public class BattleTD : BattleBase
     }
 
     /// <summary>
-    /// 收到逻辑帧：喂给模拟层并同步表现
+    /// 收到逻辑帧：起始帧之前的帧丢弃（房间存在期间的等待帧），
+    /// 从起始帧起喂给模拟层（双端同帧同操作 => 状态一致，根治后进场漏操作）
     /// </summary>
     private void OnFrame(NetMsg.FrameData frame)
     {
+        if (frame.FrameId < _startFrame) return;
+
         _sim.Tick(frame.FrameId, frame.Inputs);
 
         // 操作被拒原因（变化时输出，方便测试时看出"为什么放塔/升级没生效"）

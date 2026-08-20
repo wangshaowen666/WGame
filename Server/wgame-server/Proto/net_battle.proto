@@ -11,7 +11,8 @@ message UdpLoginReq {
 }
 
 // UDP 连接认证回复（player_id 为 token 解析出的真实玩家 id，后续帧数据用它标识身份）
-message UdpLoginAck {
+// 命名规范：请求/响应成对 XxxReq/XxxResp（见开发文档阶段 4）
+message UdpLoginResp {
   ErrorCode error_code = 1;   // ERROR_NONE = 认证成功
   int32 player_id = 2;
 }

@@ -22,18 +22,21 @@ public static class ApiRegistry
     // GET：响应类型 → URL（GET 无请求体，用响应类型标识接口）
     private static readonly Dictionary<Type, string> s_getUrl = new();
 
-    /// <summary>注册 POST 接口：请求类型 → URL</summary>
-    private static void RegisterPost<TReq>(string url) => s_postUrl[typeof(TReq)] = url;
+    /// <summary>注册 POST 接口：请求类型 → 完整 URL（自动拼接 LoginServerUrl）</summary>
+    private static void RegisterPost<TReq>(string apiPath) => s_postUrl[typeof(TReq)] = Combine(apiPath);
 
-    /// <summary>注册 GET 接口：响应类型 → URL</summary>
-    private static void RegisterGet<TResp>(string url) => s_getUrl[typeof(TResp)] = url;
+    /// <summary>注册 GET 接口：响应类型 → 完整 URL（自动拼接 LoginServerUrl）</summary>
+    private static void RegisterGet<TResp>(string apiPath) => s_getUrl[typeof(TResp)] = Combine(apiPath);
+
+    /// <summary>相对路径（如 /register）拼上登录服务器地址，导 proto 注册时统一处理</summary>
+    private static string Combine(string apiPath) => GameConfig.LoginServerUrl + apiPath;
 
     /// <summary>注册所有接口（与 NetApi.cs 的 URL 约定一一对应）</summary>
-            public static void RegisterAll()
+    public static void RegisterAll()
     {
         // ===== 认证 =====
         RegisterPost<NetMsg.RegisterReq>(NetApi.Register);
-        RegisterGet<NetMsg.LoginResp>(NetApi.Login);
+        RegisterPost<NetMsg.LoginReq>(NetApi.Login);
         RegisterGet<NetMsg.GetMeResp>(NetApi.GetMe);
         // ===== 养成数据 =====
         RegisterGet<NetMsg.GetDataResp>(NetApi.GetData);

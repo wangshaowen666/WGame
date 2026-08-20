@@ -26,8 +26,6 @@ public static class Program
 
     private static NetManager _netManager = null!;
     private static string _jwtSecret = null!;
-    private static readonly List<NetMsg.PlayerInput> _pendingInputs = new();
-    private static int _frameId;
 
     /// <summary>连接 -> 认证后的 playerId（未认证的连接不在表内）</summary>
     private static readonly Dictionary<NetPeer, int> _peerPlayers = new();
@@ -62,6 +60,11 @@ public static class Program
         {
             var hadAuth = _peerPlayers.TryGetValue(peer, out var pid);
             _peerPlayers.Remove(peer);
+
+            // 断线：出匹配队列 + 自动退房（剩余成员会收到 RoomStatePush）
+            MatchMaker.Dequeue(peer);
+            RoomMgr.RemoveFromRoom(peer);
+
             Console.WriteLine($"[已断开] playerId={(hadAuth ? pid : -1)}, 原因: {disconnectInfo.Reason}");
         };
 
@@ -145,10 +148,199 @@ public static class Program
                 OnPlayerInput(peer, NetMsg.PlayerInput.Parser.ParseFrom(envelope.Payload));
                 break;
 
+            case NetMsg.MsgType.MsgRoomReq:
+                OnRoomReq(peer, NetMsg.RoomReq.Parser.ParseFrom(envelope.Payload));
+                break;
+
+            case NetMsg.MsgType.MsgLeaveRoomReq:
+                OnLeaveRoom(peer);
+                break;
+
+            case NetMsg.MsgType.MsgMatchReq:
+                OnMatchReq(peer, NetMsg.MatchReq.Parser.ParseFrom(envelope.Payload));
+                break;
+
+            case NetMsg.MsgType.MsgReadyReq:
+                OnReadyReq(peer);
+                break;
+
             default:
                 Console.WriteLine($"[警告] 未知消息类型: {envelope.MsgType}");
                 break;
         }
+    }
+
+    /// <summary>
+    /// 就绪请求：在房间内且未开局则标记就绪；全员就绪由 Room.SetReady 触发开战推送
+    /// </summary>
+    private static void OnReadyReq(NetPeer peer)
+    {
+        if (!RoomMgr.PeerRooms.TryGetValue(peer, out var room))
+        {
+            SendTo(peer, NetMsg.MsgType.MsgReadyResp, new NetMsg.ReadyResp
+            {
+                ErrorCode = NetMsg.ErrorCode.ErrorNotInRoom,
+            });
+            return;
+        }
+
+        if (room.IsStarted)
+        {
+            SendTo(peer, NetMsg.MsgType.MsgReadyResp, new NetMsg.ReadyResp
+            {
+                ErrorCode = NetMsg.ErrorCode.ErrorAlreadyInRoom,
+            });
+            return;
+        }
+
+        var playerId = _peerPlayers.TryGetValue(peer, out var pid) ? pid : 0;
+        Console.WriteLine($"[房间{room.Id}] playerId={playerId} 就绪");
+        room.SetReady(peer);
+
+        SendTo(peer, NetMsg.MsgType.MsgReadyResp, new NetMsg.ReadyResp
+        {
+            ErrorCode = NetMsg.ErrorCode.ErrorNone,
+        });
+    }
+
+    /// <summary>
+    /// 匹配请求：开始匹配（入队，队列满 2 人时撮合）/ 取消匹配（出队）
+    /// </summary>
+    private static void OnMatchReq(NetPeer peer, NetMsg.MatchReq req)
+    {
+        // 前置校验：已认证
+        if (!_peerPlayers.TryGetValue(peer, out var playerId))
+        {
+            SendTo(peer, NetMsg.MsgType.MsgMatchResp, new NetMsg.MatchResp
+            {
+                ErrorCode = NetMsg.ErrorCode.ErrorUnauthorized,
+            });
+            return;
+        }
+
+        if (req.Cancel)
+        {
+            // 取消匹配
+            MatchMaker.Dequeue(peer);
+            Console.WriteLine($"[匹配] playerId={playerId} 取消匹配");
+            SendTo(peer, NetMsg.MsgType.MsgMatchResp, new NetMsg.MatchResp
+            {
+                ErrorCode = NetMsg.ErrorCode.ErrorNone,
+                MatchState = NetMsg.MatchState.Cancelled,
+            });
+            return;
+        }
+
+        // 前置校验：不在房间（匹配的目的就是进房，已进房则拒绝）
+        if (RoomMgr.IsInRoom(peer))
+        {
+            SendTo(peer, NetMsg.MsgType.MsgMatchResp, new NetMsg.MatchResp
+            {
+                ErrorCode = NetMsg.ErrorCode.ErrorAlreadyInRoom,
+            });
+            return;
+        }
+
+        // 入队并尝试撮合（撮合成功时 MatchMaker 会直接回 MATCHED 的 MatchResp）
+        MatchMaker.Enqueue(peer, playerId);
+        // 受理回执（若已撮合，客户端会先收到 MATCHED，此回执只是补充）
+        SendTo(peer, NetMsg.MsgType.MsgMatchResp, new NetMsg.MatchResp
+            {
+                ErrorCode = NetMsg.ErrorCode.ErrorNone,
+                MatchState = NetMsg.MatchState.Matching,
+            });
+    }
+
+    /// <summary>
+    /// 房间请求：room_id=0 创建新房间；room_id>0 加入指定房间。
+    /// 前置条件：已通过 UDP 认证且当前不在房间中
+    /// </summary>
+    private static void OnRoomReq(NetPeer peer, NetMsg.RoomReq req)
+    {
+        // 前置校验：已认证
+        if (!_peerPlayers.TryGetValue(peer, out var playerId))
+        {
+            SendTo(peer, NetMsg.MsgType.MsgRoomResp, new NetMsg.RoomResp
+            {
+                ErrorCode = NetMsg.ErrorCode.ErrorUnauthorized,
+            });
+            return;
+        }
+
+        // 前置校验：未在其他房间
+        if (RoomMgr.IsInRoom(peer))
+        {
+            Console.WriteLine($"[校验失败] playerId={playerId} 已在房间，拒绝建房/加房");
+            SendTo(peer, NetMsg.MsgType.MsgRoomResp, new NetMsg.RoomResp
+            {
+                ErrorCode = NetMsg.ErrorCode.ErrorAlreadyInRoom,
+            });
+            return;
+        }
+
+        if (req.RoomId == 0)
+        {
+            // 创建新房间
+            var room = RoomMgr.CreateRoom();
+            RoomMgr.JoinRoom(room, peer, playerId);
+            Console.WriteLine($"[房间{room.Id}] 创建并加入: playerId={playerId}");
+            SendTo(peer, NetMsg.MsgType.MsgRoomResp, new NetMsg.RoomResp
+            {
+                ErrorCode = NetMsg.ErrorCode.ErrorNone,
+                RoomId = room.Id,
+            });
+            room.PushState();
+        }
+        else
+        {
+            // 加入指定房间
+            if (!RoomMgr.Rooms.TryGetValue(req.RoomId, out var room))
+            {
+                SendTo(peer, NetMsg.MsgType.MsgRoomResp, new NetMsg.RoomResp
+                {
+                    ErrorCode = NetMsg.ErrorCode.ErrorRoomNotFound,
+                });
+                return;
+            }
+
+            if (room.IsFull)
+            {
+                SendTo(peer, NetMsg.MsgType.MsgRoomResp, new NetMsg.RoomResp
+                {
+                    ErrorCode = NetMsg.ErrorCode.ErrorRoomFull,
+                });
+                return;
+            }
+
+            RoomMgr.JoinRoom(room, peer, playerId);
+            Console.WriteLine($"[房间{room.Id}] 加入: playerId={playerId}, 当前 {room.MemberCount} 人");
+            SendTo(peer, NetMsg.MsgType.MsgRoomResp, new NetMsg.RoomResp
+            {
+                ErrorCode = NetMsg.ErrorCode.ErrorNone,
+                RoomId = room.Id,
+            });
+            room.PushState();
+        }
+    }
+
+    /// <summary>
+    /// 退出房间：成员变化推送剩余成员；房间清空则销毁
+    /// </summary>
+    private static void OnLeaveRoom(NetPeer peer)
+    {
+        if (RoomMgr.RemoveFromRoom(peer) == null)
+        {
+            SendTo(peer, NetMsg.MsgType.MsgLeaveRoomResp, new NetMsg.LeaveRoomResp
+            {
+                ErrorCode = NetMsg.ErrorCode.ErrorNotInRoom,
+            });
+            return;
+        }
+
+        SendTo(peer, NetMsg.MsgType.MsgLeaveRoomResp, new NetMsg.LeaveRoomResp
+        {
+            ErrorCode = NetMsg.ErrorCode.ErrorNone,
+        });
     }
 
     /// <summary>
@@ -160,7 +352,7 @@ public static class Program
         {
             _peerPlayers[peer] = playerId;
             Console.WriteLine($"[认证成功] playerId={playerId} ({peer.Address}:{peer.Port})");
-            SendTo(peer, NetMsg.MsgType.MsgUdpLoginAck, new NetMsg.UdpLoginAck
+            SendTo(peer, NetMsg.MsgType.MsgUdpLoginResp, new NetMsg.UdpLoginResp
             {
                 ErrorCode = NetMsg.ErrorCode.ErrorNone,
                 PlayerId = playerId,
@@ -169,7 +361,7 @@ public static class Program
         else
         {
             Console.WriteLine($"[认证失败] token 无效或已过期 ({peer.Address}:{peer.Port})");
-            SendTo(peer, NetMsg.MsgType.MsgUdpLoginAck, new NetMsg.UdpLoginAck
+            SendTo(peer, NetMsg.MsgType.MsgUdpLoginResp, new NetMsg.UdpLoginResp
             {
                 ErrorCode = NetMsg.ErrorCode.ErrorUnauthorized,
             });
@@ -208,9 +400,9 @@ public static class Program
     }
 
     /// <summary>
-    /// 发送 proto 消息到指定连接（自动包信封）
+    /// 发送 proto 消息到指定连接（自动包信封）。MatchMaker 复用，须 internal
     /// </summary>
-    private static void SendTo(NetPeer peer, NetMsg.MsgType msgType, IMessage msg)
+    internal static void SendTo(NetPeer peer, NetMsg.MsgType msgType, IMessage msg)
     {
         var envelope = new NetMsg.NetMsgEnvelope
         {
@@ -220,8 +412,12 @@ public static class Program
         peer.Send(envelope.ToByteArray(), DeliveryMethod.ReliableOrdered);
     }
 
+    /// <summary>取连接绑定的 playerId（未认证返回 0，MatchMaker 撮合时复用）</summary>
+    internal static int GetPlayerId(NetPeer peer)
+        => _peerPlayers.TryGetValue(peer, out var id) ? id : 0;
+
     /// <summary>
-    /// 收到玩家操作：校验（已认证 + 操作合法）后加入本帧待广播列表
+    /// 收到玩家操作：校验（已认证 + 在房间内 + 操作合法）后攒进所在房间
     /// </summary>
     private static void OnPlayerInput(NetPeer peer, NetMsg.PlayerInput input)
     {
@@ -232,54 +428,59 @@ public static class Program
             return;
         }
 
-        // 校验 1：操作类型合法（非法 op_type 直接丢弃，防协议滥用）
+        // 校验 1：必须先进入房间（未进房的操作无广播对象，丢弃）
+        if (!RoomMgr.PeerRooms.TryGetValue(peer, out var room))
+        {
+            Console.WriteLine($"[校验失败] playerId={playerId} 不在房间内，操作丢弃");
+            return;
+        }
+
+        // 校验 2：操作类型合法（非法 op_type 直接丢弃，防协议滥用）
         if (input.OpType < 0 || input.OpType > MaxOpType)
         {
             Console.WriteLine($"[校验失败] playerId={playerId} 非法 op_type={input.OpType}，丢弃");
             return;
         }
 
-        // 校验 2：单帧操作数防刷（正常操作远达不到该频率，超限视为刷包）
-        var count = 0;
-        foreach (var i in _pendingInputs)
-            if (i.PlayerId == playerId) count++;
-        if (count >= MaxInputsPerFrame)
+        // 校验 3：单帧操作数防刷（正常操作远达不到该频率，超限视为刷包）
+        if (room.CountInputsOf(playerId) >= MaxInputsPerFrame)
         {
             Console.WriteLine($"[校验失败] playerId={playerId} 单帧操作数超过 {MaxInputsPerFrame}，丢弃");
             return;
         }
 
         // player_id 由服务器填充（token 解析的真实 playerId），客户端无法伪造身份
-        _pendingInputs.Add(new NetMsg.PlayerInput
+        room.AddInput(new NetMsg.PlayerInput
         {
             OpType = input.OpType,
             Param1 = input.Param1,
             Param2 = input.Param2,
             PlayerId = playerId,
         });
-        Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}][玩家操作] playerId={playerId}, op_type={input.OpType}, param1={input.Param1}, param2={input.Param2}");
+        Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}][玩家操作] 房间{room.Id} playerId={playerId}, op_type={input.OpType}, param1={input.Param1}, param2={input.Param2}");
     }
 
     /// <summary>
-    /// 广播一帧：把攒批的操作发给所有在线客户端（空帧也发，保证帧号连续驱动客户端）
+    /// 广播一帧：遍历所有房间，各房间独立帧号打包自己的攒批操作发成员
+    /// （空帧也发，保证帧号连续；房间空了就地销毁）
     /// </summary>
     private static void BroadcastFrame()
     {
-        _frameId++;
-
-        var frame = new NetMsg.FrameData { FrameId = _frameId };
-        frame.Inputs.Add(_pendingInputs);
-        _pendingInputs.Clear();
-
-        var envelope = new NetMsg.NetMsgEnvelope
+        // 遍历中销毁：先收集要移除的房间号
+        List<int>? emptyRooms = null;
+        foreach (var kv in RoomMgr.Rooms)
         {
-            MsgType = NetMsg.MsgType.MsgFrameData,
-            Payload = frame.ToByteString(),
-        };
-        _netManager.SendToAll(envelope.ToByteArray(), DeliveryMethod.ReliableOrdered);
+            if (kv.Value.BroadcastFrame())
+            {
+                emptyRooms ??= new List<int>();
+                emptyRooms.Add(kv.Key);
+            }
+        }
 
-        // 空帧不打印日志，避免刷屏
-        if (frame.Inputs.Count > 0)
-            Console.WriteLine($"[广播] frame={_frameId}, 操作数={frame.Inputs.Count}, 在线={_netManager.ConnectedPeersCount}, 已认证={_peerPlayers.Count}");
+        if (emptyRooms != null)
+        {
+            foreach (var id in emptyRooms)
+                RoomMgr.Rooms.Remove(id);
+        }
     }
 }
