@@ -21,6 +21,7 @@ public static class GameMgr
     public static readonly UIMgr UI = new();
     public static readonly BattleMgr Battle = new();
     public static readonly EntityMgr Entity = new();
+    public static readonly FrameAnimMgr FrameAnim = new();
 
     private static readonly ManagerBase[] s_managers;
 
@@ -38,6 +39,7 @@ public static class GameMgr
             UI,
             Battle,
             Entity,
+            FrameAnim,
         };
     }
 

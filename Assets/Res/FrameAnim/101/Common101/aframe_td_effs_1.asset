@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2823414cb17c4125a77565884c4e24d, type: 3}
+  m_Name: aframe_td_effs_1
+  m_EditorClassIdentifier: 
+  items:
+  - anim: effs1
+    sprites:
+    - {fileID: 880159865, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: -1133536985, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: 1321468396, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: 1741535666, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: -1569061406, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: 382715008, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: 852145174, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: 574143143, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: 1250669432, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: 98853772, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    time: 1
+    loop: 1
+  - anim: effs1_null
+    sprites:
+    - {fileID: 697356769, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    time: 1
+    loop: 1
+  - anim: effs2
+    sprites:
+    - {fileID: 1562881483, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: -531624989, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: 2018857888, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: -1779951567, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: 192062648, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: 697356769, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    time: 0.4
+    loop: 0
+  - anim: effs2_null
+    sprites:
+    - {fileID: 697356769, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    time: 1
+    loop: 1
+  textureArrayType: 0
+  singleArraySize: 512
+  configName: aframe_td_effs_1.asset
+  sprConfig: {fileID: 0}

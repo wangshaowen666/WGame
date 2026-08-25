@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2823414cb17c4125a77565884c4e24d, type: 3}
+  m_Name: aframe_2012007_1
+  m_EditorClassIdentifier: 
+  items:
+  - anim: run
+    sprites:
+    - {fileID: 1357181150, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: -238022634, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: -1458417711, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 325576989, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: -99864572, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 808223035, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 1163060033, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: -2103600367, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 645873327, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 1473496428, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 291152418, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: -2060736771, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 1890492269, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: -2126755993, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 895842536, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    time: 1
+    loop: 1
+  - anim: die
+    sprites:
+    - {fileID: -1352361216, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 592116462, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 1907878450, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: -504090426, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 979646536, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: -2108497095, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: -95752525, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: -907777670, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: -1343068865, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 431712649, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 2035346937, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 1373152586, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: -1880739121, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 211107162, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: -703962131, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    - {fileID: 1607664011, guid: 1fdd0e3150a26c049ba6f0b1288239aa, type: 3}
+    time: 1
+    loop: 0
+  textureArrayType: 0
+  singleArraySize: 512
+  configName: aframe_2012007_1.asset
+  sprConfig: {fileID: 0}

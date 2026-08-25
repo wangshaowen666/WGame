@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2823414cb17c4125a77565884c4e24d, type: 3}
+  m_Name: aframe_2012006_1
+  m_EditorClassIdentifier: 
+  items:
+  - anim: run
+    sprites:
+    - {fileID: 648551373, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: -1435459500, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: -1923802550, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 924816928, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: -963665872, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 1437205871, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: -820089156, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 1181709838, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: -1863992506, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 744265936, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 1870280135, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: -309229737, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 596961630, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: -1181643256, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 1993604557, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    time: 1
+    loop: 1
+  - anim: die
+    sprites:
+    - {fileID: 1715155247, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 1805578538, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: -1663271788, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: -867978958, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: -1320586820, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 880014614, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 560289495, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 1935599388, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 1864511562, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 1774188660, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 593627068, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 269678995, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 187340068, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 1650432528, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: 279187599, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    - {fileID: -1756566074, guid: bb52925163c7a4848845700329317dd7, type: 3}
+    time: 1
+    loop: 0
+  textureArrayType: 0
+  singleArraySize: 512
+  configName: aframe_2012006_1.asset
+  sprConfig: {fileID: 0}

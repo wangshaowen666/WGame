@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2823414cb17c4125a77565884c4e24d, type: 3}
+  m_Name: aframe_2011010_1
+  m_EditorClassIdentifier: 
+  items:
+  - anim: run
+    sprites:
+    - {fileID: -295115349, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: -1923309220, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: 1702440277, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: -715493154, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: -1480020877, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: 334490379, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: 1819060853, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: 1605705786, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: 1502760821, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: -2127240214, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    time: 0.67
+    loop: 1
+  - anim: die
+    sprites:
+    - {fileID: -731996581, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: 394847697, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: 1982661454, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: -1514660246, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: -12119174, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: 1026846556, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: 266338652, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: -348941902, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: 1060682972, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    - {fileID: 1131914711, guid: 983ba96c276a64ecdaac9abb627679ca, type: 3}
+    time: 0.73
+    loop: 0
+  textureArrayType: 0
+  singleArraySize: 512
+  configName: aframe_2011010_1.asset
+  sprConfig: {fileID: 0}
