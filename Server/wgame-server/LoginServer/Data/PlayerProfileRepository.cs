@@ -45,15 +45,7 @@ public class PlayerProfileRepository
             "INSERT INTO PlayerProfile (PlayerId) VALUES (@id)", new { id = playerId });
     }
 
-    /// <summary>更新养成数据（整段覆盖保存）</summary>
-    public async Task Update(int playerId, int gold, int stageProgress, string towerLevels)
-    {
-        using var conn = new SqliteConnection(_connStr);
-        await conn.ExecuteAsync(@"
-            UPDATE PlayerProfile
-            SET Gold = @gold, StageProgress = @stage, TowerLevels = @towers,
-                UpdatedAt = CURRENT_TIMESTAMP
-            WHERE PlayerId = @id",
-            new { id = playerId, gold, stage = stageProgress, towers = towerLevels });
-    }
+    // 注：全量 Update 已随玩家侧 SaveData 接口移除（阶段 7-3 防作弊）。
+    // 养成数据写入一律由服务器主导：GameServer 结算入账（ProfileStore）、
+    // 未来的商店/升级等业务接口各自提供窄口径写入，不再开放客户端全量覆盖
 }

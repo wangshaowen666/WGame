@@ -40,6 +40,9 @@ public class RoomMgr : ManagerBase
     /// <summary>参战玩家列表（开战推送下发，playerId 升序；BattleSim 按此初始化）</summary>
     public List<int> BattlePlayerIds { get; } = new();
 
+    /// <summary>是否处于战斗结束态（收到 GameEndPush 置 true，重新开局/退房/断线清 false）</summary>
+    public bool IsBattleOver { get; private set; }
+
     /// <summary>建房/加房结果（成功失败都触发，看 resp.ErrorCode）</summary>
     public event Action<NetMsg.RoomResp> OnRoomResp;
 
@@ -57,6 +60,7 @@ public class RoomMgr : ManagerBase
         GameMgr.NetMsg.OnMatchResp += HandleMatchResp;
         GameMgr.NetMsg.OnReadyResp += HandleReadyResp;
         GameMgr.NetMsg.OnStartGamePush += HandleStartGamePush;
+        GameMgr.NetMsg.OnGameEndPush += HandleGameEndPush;
         CoreMgr.Net.OnDisconnected += OnDisconnected;
     }
 
@@ -69,6 +73,13 @@ public class RoomMgr : ManagerBase
             return;
         }
         GameMgr.NetMsg.Send(NetMsg.MsgType.MsgReadyReq, new NetMsg.ReadyReq());
+    }
+
+    /// <summary>上报游戏结束（BattleTD 本地模拟判定 GameOver 后调用；
+    /// 双端同帧判定都会上报，服务器以第一份为准广播 GameEndPush）</summary>
+    public void ReportGameEnd(int endFrame)
+    {
+        GameMgr.NetMsg.Send(NetMsg.MsgType.MsgGameEndReq, new NetMsg.GameEndReq { EndFrame = endFrame });
     }
 
     /// <summary>开始匹配（进队列，两人凑齐自动开房）</summary>
@@ -141,6 +152,7 @@ public class RoomMgr : ManagerBase
             CurRoomId = 0;
             MemberIds.Clear();
             IsReady = false;
+            IsBattleOver = false;
             StartFrame = 0;
             Seed = 0;
             BattlePlayerIds.Clear();
@@ -199,6 +211,9 @@ public class RoomMgr : ManagerBase
     /// <summary>开战推送（全员就绪：起始帧+随机种子；此时客户端应进入战斗）</summary>
     public event Action<NetMsg.StartGamePush> OnStartGamePush;
 
+    /// <summary>游戏结束推送（结束帧+结果；房间已回等待中，可再就绪重开）</summary>
+    public event Action<NetMsg.GameEndPush> OnGameEndPush;
+
     /// <summary>就绪回执</summary>
     private void HandleReadyResp(NetMsg.ReadyResp resp)
     {
@@ -218,12 +233,27 @@ public class RoomMgr : ManagerBase
     private void HandleStartGamePush(NetMsg.StartGamePush push)
     {
         IsReady = false;
+        IsBattleOver = false;
         StartFrame = push.StartFrame;
         Seed = push.Seed;
         BattlePlayerIds.Clear();
         BattlePlayerIds.AddRange(push.PlayerIds);
         Log.Info("开战! 起始帧:", push.StartFrame, "种子:", push.Seed, "参战:", string.Join(",", push.PlayerIds));
         OnStartGamePush?.Invoke(push);
+    }
+
+    /// <summary>游戏结束推送：房间已回等待中。
+    /// 先触发事件再清锚点（订阅者回调内可读 StartFrame 计算对局时长/波次）</summary>
+    private void HandleGameEndPush(NetMsg.GameEndPush push)
+    {
+        IsBattleOver = true;
+        IsReady = false;
+        Log.Info("游戏结束! 结束帧:", push.EndFrame, "结果:", push.Result);
+        OnGameEndPush?.Invoke(push);
+
+        StartFrame = 0;
+        Seed = 0;
+        BattlePlayerIds.Clear();
     }
 
     /// <summary>断线：清房间与匹配状态（重连后需重新匹配/建房/加入）</summary>
@@ -233,6 +263,7 @@ public class RoomMgr : ManagerBase
         MemberIds.Clear();
         IsMatching = false;
         IsReady = false;
+        IsBattleOver = false;
         StartFrame = 0;
         Seed = 0;
         BattlePlayerIds.Clear();

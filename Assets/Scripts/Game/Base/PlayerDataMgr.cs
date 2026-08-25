@@ -24,7 +24,8 @@ public class PlayerDataMgr : ManagerBase
     public bool IsLoaded { get; private set; }
 
     /// <summary>
-    /// 获取养成数据（GET /data，proto），成功后更新本地缓存，完成后回调
+    /// 获取养成数据（GET /data，proto），成功后更新本地缓存，完成后回调。
+    /// 注：客户端只有读权限，写入由服务器主导（结算入账/未来业务接口），阶段 7-3 已移除 Save
     /// </summary>
     public void Load(Action<NetMsg.GetDataResp> onDone)
     {
@@ -45,27 +46,4 @@ public class PlayerDataMgr : ManagerBase
             onDone?.Invoke(resp);
         });
     }
-
-    /// <summary>
-    /// 保存养成数据（POST /data，proto），完成后回调
-    /// </summary>
-    public void Save(Action<NetMsg.SaveDataResp> onDone)
-    {
-        var req = new NetMsg.SaveDataReq
-        {
-            Gold = Gold,
-            StageProgress = StageProgress,
-            TowerLevels = ParseUtil.ToJson(TowerLevels),
-        };
-        GameMgr.HttpMsg.Post<NetMsg.SaveDataResp>(req, resp =>
-            {
-                if (resp.ErrorCode == NetMsg.ErrorCode.ErrorNone)
-                    Log.Info("养成数据保存成功");
-                else
-                    Log.Error("养成数据保存失败, 错误码:", resp.ErrorCode);
-                onDone?.Invoke(resp);
-            });
-    }
-
-    public void AddGold(int amount) => Gold += amount;
 }

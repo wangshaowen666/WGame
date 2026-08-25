@@ -84,23 +84,4 @@ public class LoginTest : MonoBehaviour
                 Log.Error("加载失败:", result.ErrorCode);
         });
     }
-
-    [ContextMenu("测试保存养成数据")]
-    private void TestSaveData()
-    {
-        if (!GameMgr.Account.IsLoggedIn)
-        {
-            Log.Error("未登录，请先测试登录");
-            return;
-        }
-
-        GameMgr.PlayerData.AddGold(100);
-        GameMgr.PlayerData.Save(result =>
-        {
-            if (result.ErrorCode == NetMsg.ErrorCode.ErrorNone)
-                Log.Info("保存成功");
-            else
-                Log.Error("保存失败:", result.ErrorCode);
-        });
-    }
 }

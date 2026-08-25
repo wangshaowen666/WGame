@@ -107,6 +107,10 @@ public class BattleTD : BattleBase
         {
             _overLogged = true;
             Log.Error("[战斗] 基地被攻破, 游戏失败 @帧", frame.FrameId);
+
+            // 上报服务器：广播 GameEndPush 给全员（含自己），房间回到等待中
+            // 双端同帧判定都会上报，服务器以第一份为准（幂等）
+            GameMgr.Room.ReportGameEnd(frame.FrameId);
         }
     }
 

@@ -167,6 +167,14 @@ public class NetMsgHandler : ManagerBase
                 OnStartGamePush?.Invoke(NetMsg.StartGamePush.Parser.ParseFrom(envelope.Payload));
                 break;
 
+            case NetMsg.MsgType.MsgGameEndResp:
+                OnGameEndResp?.Invoke(NetMsg.GameEndResp.Parser.ParseFrom(envelope.Payload));
+                break;
+
+            case NetMsg.MsgType.MsgGameEndPush:
+                OnGameEndPush?.Invoke(NetMsg.GameEndPush.Parser.ParseFrom(envelope.Payload));
+                break;
+
             default:
                 Log.Warning("未知消息类型:", envelope.MsgType);
                 break;
@@ -190,6 +198,12 @@ public class NetMsgHandler : ManagerBase
 
     /// <summary>开战推送（全员就绪：起始帧+随机种子，RoomMgr 订阅）</summary>
     public event Action<NetMsg.StartGamePush> OnStartGamePush;
+
+    /// <summary>游戏结束回执（RoomMgr 订阅）</summary>
+    public event Action<NetMsg.GameEndResp> OnGameEndResp;
+
+    /// <summary>游戏结束推送（结束帧+结果，RoomMgr 订阅）</summary>
+    public event Action<NetMsg.GameEndPush> OnGameEndPush;
 
     public override void OnSceneExit(int sceneTp)
     {

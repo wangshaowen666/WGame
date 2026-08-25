@@ -40,7 +40,6 @@ public static class ApiRegistry
         RegisterGet<NetMsg.GetMeResp>(NetApi.GetMe);
         // ===== 养成数据 =====
         RegisterGet<NetMsg.GetDataResp>(NetApi.GetData);
-        RegisterPost<NetMsg.SaveDataReq>(NetApi.SaveData);
     }
 
     /// <summary>按请求类型查 POST URL</summary>

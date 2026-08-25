@@ -32,7 +32,7 @@ namespace NetMsg {
             "BxIbChZFUlJPUl9QTEFZRVJfTk9UX0ZPVU5EEOwHEhwKF0VSUk9SX1BST0ZJ",
             "TEVfTk9UX0ZPVU5EEO0HEhYKEUVSUk9SX05PVF9JTl9ST09NEO4HEhkKFEVS",
             "Uk9SX1JPT01fTk9UX0ZPVU5EEO8HEhQKD0VSUk9SX1JPT01fRlVMTBDwBxIa",
-            "ChVFUlJPUl9BTFJFQURZX0lOX1JPT00Q8Qcq9wIKB01zZ1R5cGUSDAoITVNH",
+            "ChVFUlJPUl9BTFJFQURZX0lOX1JPT00Q8QcquwMKB01zZ1R5cGUSDAoITVNH",
             "X05PTkUQABIUChBNU0dfUExBWUVSX0lOUFVUEAESEgoOTVNHX0ZSQU1FX0RB",
             "VEEQAhIRCg1NU0dfTUFJTF9QVVNIEAMSHAoYTVNHX0FDVElWSVRZX1JFV0FS",
             "RF9QVVNIEAQSFQoRTVNHX1VEUF9MT0dJTl9SRVEQBRIWChJNU0dfVURQX0xP",
@@ -40,8 +40,9 @@ namespace NetMsg {
             "EAgSFwoTTVNHX1JPT01fU1RBVEVfUFVTSBAJEhYKEk1TR19MRUFWRV9ST09N",
             "X1JFURAKEhcKE01TR19MRUFWRV9ST09NX1JFU1AQCxIRCg1NU0dfTUFUQ0hf",
             "UkVREAwSEgoOTVNHX01BVENIX1JFU1AQDRIRCg1NU0dfUkVBRFlfUkVREA4S",
-            "EgoOTVNHX1JFQURZX1JFU1AQDxIXChNNU0dfU1RBUlRfR0FNRV9QVVNIEBBi",
-            "BnByb3RvMw=="));
+            "EgoOTVNHX1JFQURZX1JFU1AQDxIXChNNU0dfU1RBUlRfR0FNRV9QVVNIEBAS",
+            "FAoQTVNHX0dBTUVfRU5EX1JFURAREhUKEU1TR19HQU1FX0VORF9SRVNQEBIS",
+            "FQoRTVNHX0dBTUVfRU5EX1BVU0gQE2IGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::NetMsg.ErrorCode), typeof(global::NetMsg.MsgType), }, null, new pbr::GeneratedClrTypeInfo[] {
@@ -177,6 +178,18 @@ namespace NetMsg {
     /// 开战推送（服务器->房间全员：起始帧+随机种子）
     /// </summary>
     [pbr::OriginalName("MSG_START_GAME_PUSH")] MsgStartGamePush = 16,
+    /// <summary>
+    /// 游戏结束上报（客户端->服务器：本地模拟判定结束后）
+    /// </summary>
+    [pbr::OriginalName("MSG_GAME_END_REQ")] MsgGameEndReq = 17,
+    /// <summary>
+    /// 游戏结束回执（服务器->客户端）
+    /// </summary>
+    [pbr::OriginalName("MSG_GAME_END_RESP")] MsgGameEndResp = 18,
+    /// <summary>
+    /// 游戏结束推送（服务器->房间全员：结束帧+结果）
+    /// </summary>
+    [pbr::OriginalName("MSG_GAME_END_PUSH")] MsgGameEndPush = 19,
   }
 
   #endregion

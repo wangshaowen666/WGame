@@ -15,6 +15,5 @@ public static class NetApi
     public const string GetMe = "/me";            // GET：验证 token 取玩家信息
 
     // ===== 养成数据 =====
-    public const string GetData = "/data";        // GET：获取养成数据
-    public const string SaveData = "/data";       // POST：保存养成数据
+    public const string GetData = "/data";        // GET：获取养成数据（写入由服务器业务接口主导，客户端无写权限）
 }

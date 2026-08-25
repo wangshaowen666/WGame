@@ -33,21 +33,6 @@ public static class PlayerEndpoints
                 TowerLevels = profile.TowerLevels ?? "{}",
             });
         }).RequireAuthorization();
-
-        // 保存养成数据（需要登录）
-        app.MapPost(NetApi.SaveData, async (HttpContext context, PlayerProfileRepository repo) =>
-        {
-            var playerId = GetPlayerId(context);
-            if (playerId == null)
-            {
-                await ProtoHttp.WriteResp(context, new NetMsg.SaveDataResp { ErrorCode = NetMsg.ErrorCode.ErrorUnauthorized }, 401);
-                return;
-            }
-
-            var req = await ProtoHttp.ReadReq<NetMsg.SaveDataReq>(context);
-            await repo.Update(playerId.Value, req.Gold, req.StageProgress, req.TowerLevels);
-            await ProtoHttp.WriteResp(context, new NetMsg.SaveDataResp { ErrorCode = NetMsg.ErrorCode.ErrorNone });
-        }).RequireAuthorization();
     }
 
     /// <summary>从已认证的 token 中提取玩家 Id</summary>

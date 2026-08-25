@@ -74,3 +74,29 @@ message StartGamePush {
   int64 seed = 2;             // 战斗随机种子（双端 BattleSim 用同一种子）
   repeated int32 player_ids = 3;  // 参战玩家列表（playerId 升序，双端一致初始化模拟层）
 }
+
+// 游戏结果
+enum GameResult {
+  GAME_RESULT_NONE = 0;
+  GAME_RESULT_DEFEAT = 1;     // 失败（基地被攻破）
+  GAME_RESULT_VICTORY = 2;    // 胜利（胜利条件实现时启用，当前预留）
+}
+
+// 游戏结束上报（客户端 -> 服务器）
+// 客户端本地模拟层判定结束后上报（双端同帧判定、都会上报，服务器以第一份为准，其余幂等忽略）
+message GameEndReq {
+  int32 end_frame = 1;        // 结束帧号（本地模拟判定的帧，阶段 7 校验用）
+}
+
+// 游戏结束回执（服务器 -> 客户端，仅回执本人）
+message GameEndResp {
+  ErrorCode error_code = 1;   // ERROR_NONE = 受理
+}
+
+// 游戏结束推送（服务器 -> 房间内所有成员，首个 GameEndReq 触发一次）
+// 客户端收到后结束战斗表现；房间回到等待中，可再次就绪重开
+message GameEndPush {
+  int32 end_frame = 1;        // 结束帧号
+  GameResult result = 2;      // 结果（当前仅失败）
+  int32 gold_reward = 3;      // 奖励金币（服务器按结束帧计算，客户端上报无效力）
+}

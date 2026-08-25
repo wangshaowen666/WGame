@@ -15,7 +15,8 @@ using System.Collections.Generic;
 /// - 接收：收到 FrameData 入缓冲队列
 /// - 驱动：墙钟累积时间，每满 50ms 消费一帧缓冲；
 ///   缓冲堆积时自动快进连续消费追平（积压帧数与停顿时长产生的预算恰好相等，债务自清），
-///   缓冲不足 2 帧时暂停消费（防网络抖动）
+///   缓冲不足 2 帧时暂停消费（防网络抖动）；
+///   网络突发到达的积压（本机无停顿、墙钟无预算欠账）由显式追赶压回（见 MaxBufferFrames）
 /// 业务逻辑（战斗等）订阅 OnFrame，在回调中确定性执行，禁止使用本地未同步状态驱动
 /// </summary>
 public class FrameSyncMgr : ManagerBase, IUpdateable
@@ -25,6 +26,12 @@ public class FrameSyncMgr : ManagerBase, IUpdateable
 
     /// <summary>缓冲帧数：缓冲不足此值时暂停消费，网络抖动时逻辑帧不空转</summary>
     public const int BufferFrames = 2;
+
+    /// <summary>追赶阈值：缓冲深度超过此值视为网络突发积压（墙钟机制无法自愈），启动显式追赶</summary>
+    public const int MaxBufferFrames = 6;
+
+    /// <summary>追赶速度：追赶状态下每个逻辑周期（50ms）额外消费的帧数（净追赶速度 = 2 帧/50ms）</summary>
+    public const int CatchupFrames = 2;
 
     private readonly Queue<NetMsg.FrameData> _frameBuffer = new();
     private float _frameTimer;
@@ -84,7 +91,8 @@ public class FrameSyncMgr : ManagerBase, IUpdateable
 
     /// <summary>
     /// 逻辑帧驱动：墙钟累积时间，每满 50ms 消费一帧缓冲；
-    /// 缓冲堆积时自动快进连续消费追平，缓冲不足 2 帧时暂停消费（防抖动）
+    /// 缓冲堆积时自动快进连续消费追平，缓冲不足 2 帧时暂停消费（防抖动）；
+    /// 缓冲深度超阈值时每个周期额外消费几帧显式追赶（压回目标深度）
     /// </summary>
     public void MyUpdate(float deltaTime, float realDeltaTime)
     {
@@ -107,16 +115,34 @@ public class FrameSyncMgr : ManagerBase, IUpdateable
             }
 
             _frameTimer -= LogicFrameMs;
-            var frame = _frameBuffer.Dequeue();
+            ConsumeOneFrame();
 
-            // 帧号连续性检测：ReliableOrdered 下不应发生，发生说明实现有异常
-            if (_nextFrameId != 0 && frame.FrameId != _nextFrameId)
-                Log.Warning("帧号不连续, 期望:", _nextFrameId, "实际:", frame.FrameId);
-            _nextFrameId = frame.FrameId + 1;
-
-            CurFrameId = frame.FrameId;
-            OnFrame?.Invoke(frame);
+            // 网络突发积压的显式追赶：
+            // 墙钟快进只能自愈"本机停顿"造成的积压（停顿期间预算与积压同步产生，债务自清）；
+            // 帧在网络中延迟后突发到达时本机无停顿，饥饿期的预算已被上面钳制丢弃，
+            // 墙钟永远只按 1 帧/50ms 产生预算，积压会永久挂账（恒定延迟）。
+            // 故缓冲深度超阈值时每个周期额外多消费几帧，渐进压回目标深度。
+            var extra = 0;
+            while (_frameBuffer.Count > MaxBufferFrames && extra < CatchupFrames)
+            {
+                ConsumeOneFrame();
+                extra++;
+            }
         }
+    }
+
+    /// <summary>消费一帧缓冲：帧号连续性校验 + 推进 CurFrameId + 广播 OnFrame</summary>
+    private void ConsumeOneFrame()
+    {
+        var frame = _frameBuffer.Dequeue();
+
+        // 帧号连续性检测：ReliableOrdered 下不应发生，发生说明实现有异常
+        if (_nextFrameId != 0 && frame.FrameId != _nextFrameId)
+            Log.Warning("帧号不连续, 期望:", _nextFrameId, "实际:", frame.FrameId);
+        _nextFrameId = frame.FrameId + 1;
+
+        CurFrameId = frame.FrameId;
+        OnFrame?.Invoke(frame);
     }
 
     /// <summary>在 NetMgr(100) 之后轮询：先收完网络数据，再消费帧</summary>

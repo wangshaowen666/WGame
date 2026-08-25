@@ -48,6 +48,15 @@ public class TTTT : MonoBehaviour
             GameMgr.Battle.EnterBattle();
             UiLog("全员就绪，开战!");
         };
+
+        // 游戏结束推送 -> 战报提示（回调内 StartFrame 尚未清零，可算时长/波次）
+        GameMgr.Room.OnGameEndPush += push =>
+        {
+            var frames = push.EndFrame - GameMgr.Room.StartFrame;
+            var secs = frames * FrameSyncMgr.LogicFrameMs / 1000;
+            var waves = frames / BattleSim.SpawnEveryFrames;
+            UiLog($"游戏结束({push.Result})! 坚持{secs}秒/{waves}波, 奖励{push.GoldReward}金币(服务器结算), 可再就绪重开");
+        };
     }
 
     [ContextMenu("0.登录测试账号(HTTP)")]
@@ -161,6 +170,19 @@ public class TTTT : MonoBehaviour
         GameMgr.Battle.ExitBattle();
     }
 
+    [ContextMenu("6.查询金币(HTTP)")]
+    void QueryGold()
+    {
+        GameMgr.PlayerData.Load(resp =>
+        {
+            if (resp.ErrorCode == NetMsg.ErrorCode.ErrorNone)
+                UiLog($"当前金币: {GameMgr.PlayerData.Gold} (通关进度 {GameMgr.PlayerData.StageProgress})");
+            else
+                UiLog($"查询养成数据失败: {resp.ErrorCode}（需先登录）");
+        });
+        UiLog("查询养成数据请求已发送");
+    }
+
     [ContextMenu("帧同步状态")]
     void FrameStatus()
     {
@@ -250,6 +272,7 @@ public class TTTT : MonoBehaviour
         if (GUILayout.Button("3. 放塔", GetBtnStyle())) PlaceTower();
         if (GUILayout.Button("4. 升级塔", GetBtnStyle())) UpgradeTower();
         if (GUILayout.Button("5. 退出战斗", GetBtnStyle())) ExitBattle();
+        if (GUILayout.Button("6. 查询金币", GetBtnStyle())) QueryGold();
 
         GUILayout.Space(10);
         GUILayout.Label(NetStateText(), GetLabelStyle());
@@ -280,7 +303,8 @@ public class TTTT : MonoBehaviour
         if (GameMgr.Room.IsMatching) return "房间: 无 (匹配中...)";
         if (!GameMgr.Room.IsInRoom) return "房间: 无";
         var ready = GameMgr.Room.IsReady ? " 已就绪" : "";
-        return $"房间: {GameMgr.Room.CurRoomId} 成员: {string.Join(",", GameMgr.Room.MemberIds)}{ready}";
+        var over = GameMgr.Room.IsBattleOver ? " [战斗结束,可再就绪]" : "";
+        return $"房间: {GameMgr.Room.CurRoomId} 成员: {string.Join(",", GameMgr.Room.MemberIds)}{ready}{over}";
     }
 
     private string BattleStateText()

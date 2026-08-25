@@ -41,6 +41,9 @@ enum MsgType {
   MSG_READY_REQ = 14;              // 就绪请求（客户端->服务器，房间内成员）
   MSG_READY_RESP = 15;             // 就绪回复（服务器->客户端）
   MSG_START_GAME_PUSH = 16;        // 开战推送（服务器->房间全员：起始帧+随机种子）
+  MSG_GAME_END_REQ = 17;           // 游戏结束上报（客户端->服务器：本地模拟判定结束后）
+  MSG_GAME_END_RESP = 18;          // 游戏结束回执（服务器->客户端）
+  MSG_GAME_END_PUSH = 19;          // 游戏结束推送（服务器->房间全员：结束帧+结果）
 }
 
 // 消息信封：所有 UDP 消息统一包在这一层，首字段标识消息类型，payload 承载具体消息

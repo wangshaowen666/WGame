@@ -760,6 +760,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8224b5dbf653e4ab4b4808c30e230571, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  TestUsername: wsw
+  TestPassword: 123456
 --- !u!4 &1554580536
 Transform:
   m_ObjectHideFlags: 0
