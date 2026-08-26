@@ -38,10 +38,10 @@ public class BattleMgr : ManagerBase
         _battle = null;
     }
 
-    public override void OnSceneExit(int sceneTp)
+    public override void OnSceneExit(string sceneNm)
     {
-        base.OnSceneExit(sceneTp);
-        if (sceneTp == 2)
+        // 离开战斗类场景（战斗/联机战斗）时清理战斗
+        if (sceneNm == GameConfig.BattleScene)
         {
             _battle?.Dispose();
             _battle = null;

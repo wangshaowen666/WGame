@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02ea2bed296b144cb8766c3714e3c814, type: 3}
+  m_Name: FrameAnimAsset
+  m_EditorClassIdentifier: 
+  clips:
+  - clipName: run
+    sprites:
+    - {fileID: 441929649, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: 1355162434, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: 1684589513, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: 476898978, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -204909642, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -2103946024, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -1687088791, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -332221895, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: 1744549703, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -1144584186, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    duration: 0.6
+    loop: 1
+  - clipName: attack
+    sprites:
+    - {fileID: -1177020819, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -1507004911, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -977667659, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -1210988166, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -954539823, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -1208894459, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -1695845886, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -340637658, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    duration: 0.5
+    loop: 1

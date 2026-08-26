@@ -205,7 +205,7 @@ public class NetMsgHandler : ManagerBase
     /// <summary>游戏结束推送（结束帧+结果，RoomMgr 订阅）</summary>
     public event Action<NetMsg.GameEndPush> OnGameEndPush;
 
-    public override void OnSceneExit(int sceneTp)
+    public override void OnSceneExit()
     {
         // 取消订阅，避免泄漏
         //CoreMgr.Net.OnRawData -= OnRawDataReceived;

@@ -11,13 +11,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 序列帧播放器（纯 C#，非 MonoBehaviour）：
+/// 序列帧播放器（纯 C#，非 MonoBehaviour，走项目统一对象池 ClassPool）：
 /// - 核心原理：动画 = 按时间查表换 Sprite 引用，每帧成本仅一次加法与比较，
 ///   只有跨帧边界那一拍才触碰 SpriteRenderer
 /// - 由 FrameAnimMgr 统一驱动与池化管理，禁止直接 new，走 GameMgr.FrameAnim.CreatePlayer
 /// - 表现层组件：允许 float / UnityEngine API，不受模拟层确定性纪律约束
 /// </summary>
-public class FrameAnimPlayer
+public class FrameAnimPlayer : IResetable
 {
     private SpriteRenderer _target;
     private FrameAnimAsset _asset;
@@ -173,9 +173,20 @@ public class FrameAnimPlayer
     }
 
     /// <summary>
-    /// 回收清理（仅 FrameAnimMgr 调用）
+    /// 回收标记（仅 FrameAnimMgr 调用）：
+    /// 只做逻辑释放，延迟到下一帧由 Mgr flush 统一归还对象池，届时触发 Reset 完整清理
     /// </summary>
     internal void Release()
+    {
+        _isReleased = true;
+        _isPlaying = false;
+        _onFinish = null;
+    }
+
+    /// <summary>
+    /// 完整清理（IResetable，对象池回收时调用）
+    /// </summary>
+    public void Reset()
     {
         _isReleased = true;
         _isPlaying = false;

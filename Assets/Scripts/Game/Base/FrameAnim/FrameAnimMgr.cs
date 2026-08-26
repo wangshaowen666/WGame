@@ -11,20 +11,16 @@ using UnityEngine;
 
 /// <summary>
 /// 序列帧动画管理器：
-/// - 播放器池化创建/回收（CreatePlayer / ReleasePlayer），战斗视图大量增删零 GC
+/// - 播放器走项目统一对象池（CoreMgr.ClassPool）创建/回收，战斗视图大量增删零 GC
 /// - 统一驱动（IUpdateable）：所有激活播放器在单次循环内集中推进，
 ///   避免每实例一个 MonoBehaviour Update 的调用开销
 /// - 全局暂停（Pause / Resume）：升级选牌、战斗暂停等场景使用
-/// 回收采用延迟移除：ReleasePlayer 只打标记，下一帧 flush 统一出列，
+/// 回收采用延迟移除：ReleasePlayer 只打标记，下一帧 flush 统一出列并归还对象池，
 /// 因此在 onFinish 回调内回收播放器是安全的
 /// </summary>
 public class FrameAnimMgr : ManagerBase, IUpdateable
 {
     private readonly List<FrameAnimPlayer> _activePlayers = new();
-    private readonly List<FrameAnimPlayer> _freePlayers = new();
-
-    /// <summary>当前激活播放器数量（调试用）</summary>
-    public int ActiveCount => _activePlayers.Count;
 
     /// <summary>是否全局暂停</summary>
     public bool IsPaused { get; private set; }
@@ -41,20 +37,15 @@ public class FrameAnimMgr : ManagerBase, IUpdateable
     /// <param name="asset">动画配置</param>
     public FrameAnimPlayer CreatePlayer(SpriteRenderer target, FrameAnimAsset asset)
     {
-        if (target == null || asset == null)
-        {
-            Log.Error("FrameAnimMgr.CreatePlayer 参数为空");
-            return null;
-        }
-
-        var player = _freePlayers.Count > 0 ? PopFree() : new FrameAnimPlayer();
+        var player = CoreMgr.ClassPool.Get<FrameAnimPlayer>();
         player.Init(target, asset);
         _activePlayers.Add(player);
         return player;
     }
 
     /// <summary>
-    /// 回收播放器（幂等；可在 onFinish 回调内安全调用）
+    /// 回收播放器（幂等；可在 onFinish 回调内安全调用）。
+    /// 只打回收标记，下一帧 FlushReleased 统一出列并归还对象池
     /// </summary>
     public void ReleasePlayer(FrameAnimPlayer player)
     {
@@ -101,9 +92,9 @@ public class FrameAnimMgr : ManagerBase, IUpdateable
         }
     }
 
-    public override void OnSceneExit(int sceneTp)
+    public override void OnSceneExit()
     {
-        // 场景退出时视图随之销毁，统一回收兜底（视图自身的 ReleasePlayer 幂等）
+        // 场景无关的通用清理：切场景时视图随之销毁，统一回收兜底（视图自身的 ReleasePlayer 幂等）
         ReleaseAll();
     }
 
@@ -113,8 +104,9 @@ public class FrameAnimMgr : ManagerBase, IUpdateable
     }
 
     /// <summary>
-    /// 倒序交换移除已回收播放器并归还池：
-    /// 被换到当前下标的元素来自已遍历的尾部，不会漏删也不会重复处理
+    /// 倒序交换移除已回收播放器并归还对象池：
+    /// 被换到当前下标的元素来自已遍历的尾部，不会漏删也不会重复处理；
+    /// ClassPool.Recycle 内部会调用 Reset 完整清理
     /// </summary>
     private void FlushReleased()
     {
@@ -125,7 +117,7 @@ public class FrameAnimMgr : ManagerBase, IUpdateable
             {
                 _activePlayers[i] = _activePlayers[_activePlayers.Count - 1];
                 _activePlayers.RemoveAt(_activePlayers.Count - 1);
-                _freePlayers.Add(player);
+                CoreMgr.ClassPool.Recycle(player);
             }
         }
     }
@@ -139,16 +131,9 @@ public class FrameAnimMgr : ManagerBase, IUpdateable
             {
                 player.Release();
             }
-            _freePlayers.Add(player);
+            CoreMgr.ClassPool.Recycle(player);
         }
         _activePlayers.Clear();
         IsPaused = false;
-    }
-
-    private FrameAnimPlayer PopFree()
-    {
-        var player = _freePlayers[_freePlayers.Count - 1];
-        _freePlayers.RemoveAt(_freePlayers.Count - 1);
-        return player;
     }
 }

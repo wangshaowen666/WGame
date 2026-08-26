@@ -20,12 +20,18 @@ public abstract class ManagerBase
     }
 
     /// <summary>
-    /// 场景退出
+    /// 场景退出，不关心具体场景，框架层使用
     /// </summary>
-    /// <param name="sceneTp">场景类型</param>
-    public virtual void OnSceneExit(int sceneTp)
+    public virtual void OnSceneExit()
     {
-
+    }
+    
+    /// <summary>
+    /// 场景退出，关心具体场景，业务层使用
+    /// </summary>
+    public virtual void OnSceneExit(string sceneNm)
+    {
+        OnSceneExit();
     }
 
     /// <summary>

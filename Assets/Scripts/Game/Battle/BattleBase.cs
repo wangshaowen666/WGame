@@ -11,7 +11,6 @@ using UnityEngine;
 
 public enum BattleMode : byte
 {
-    Survival,   // 生存模式（旧测试玩法，已废弃）
     TowerDefense, // 帧同步塔防
 }
 

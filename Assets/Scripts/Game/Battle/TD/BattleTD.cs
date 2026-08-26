@@ -14,7 +14,7 @@ using UnityEngine.Rendering;
 /// 帧同步塔防（表现层）：
 /// - 订阅 FrameSyncMgr.OnFrame，把帧喂给 BattleSim（确定性模拟层），本类只做视图同步与日志
 /// - 进场时用空帧快进到服务器当前帧（前提：进场前无人放塔；阶段 6 由 StartGame 消息统一进场帧根治）
-/// - 视图用运行时图元（方块/圆柱），确定性验证优先，后续再接实体 prefab
+/// - 视图用运行时图元（方块/圆柱）经 ViewSync 对账（缺则建/多则销/刷坐标），确定性验证优先，后续可换 ViewPool 接 prefab
 /// - 每 50 帧打印状态哈希，双端对比哈希序列即可验证确定性
 /// </summary>
 public class BattleTD : BattleBase
@@ -24,8 +24,8 @@ public class BattleTD : BattleBase
     private Transform _world; // 物体层（子物体统一用格子局部坐标，_world 负责居中）
     private GameObject _cameraGo; // 自建俯视相机（仅场景无 BattleCamera 时创建，Dispose 时销毁）
     private readonly List<Camera> _disabledCameras = new(); // 战斗期间禁用的场景相机（Dispose 恢复）
-    private readonly Dictionary<int, Transform> _enemyViews = new();
-    private readonly Dictionary<int, Transform> _towerViews = new();
+    private ViewSync<BattleSim.SimEnemy, Transform> _enemyViews; // 敌人视图对账器（缺则建/多则删/刷坐标）
+    private ViewSync<BattleSim.SimTower, Transform> _towerViews; // 塔视图对账器
     private bool _overLogged;
     private string _lastReject = ""; // 上一次的拒绝原因（用于变化检测）
     private int _startFrame;         // 战斗起始帧（StartGamePush 下发，之前的帧丢弃）
@@ -66,6 +66,13 @@ public class BattleTD : BattleBase
             Object.Destroy(_cameraGo);
             _cameraGo = null;
         }
+
+        // 先清视图对账器（逐个销毁视图），再销毁 _root（地板/路径点/基地）
+        _enemyViews?.Clear();
+        _towerViews?.Clear();
+        _enemyViews = null;
+        _towerViews = null;
+
         if (_root != null)
         {
             // 先脱离相机层级再销毁（复用场景相机时 _root 挂在相机下）
@@ -74,8 +81,6 @@ public class BattleTD : BattleBase
             _root = null;
             _world = null;
         }
-        _enemyViews.Clear();
-        _towerViews.Clear();
         _sim = null;
     }
 
@@ -250,6 +255,12 @@ public class BattleTD : BattleBase
         home.transform.localScale = new Vector3(0.9f, 0.9f, 0.9f);
         home.transform.localPosition = new Vector3(last.x + 0.5f, 0.45f, last.y + 0.5f);
         SetMat(home.GetComponent<Renderer>(), Color.green);
+
+        // 视图对账器（依赖 _world，须在其创建之后构建）
+        _enemyViews = new ViewSync<BattleSim.SimEnemy, Transform>(
+            en => en.Id, SpawnEnemyView, RefreshEnemyView, DespawnView);
+        _towerViews = new ViewSync<BattleSim.SimTower, Transform>(
+            tw => tw.Id, SpawnTowerView, RefreshTowerView, DespawnView);
     }
 
     /// <summary>路径点格子坐标（与 BattleSim 内保持一致，阶段 6 随 StartGame 下发时统一收口）</summary>
@@ -311,67 +322,48 @@ public class BattleTD : BattleBase
     }
 
     /// <summary>
-    /// 同步表现：为模拟层新增实体建视图，移除死亡实体，刷新位置
+    /// 同步表现：ViewSync 对账（缺则建/多则销/刷坐标），视图创建/刷新细节见 Spawn/Refresh 方法
     /// </summary>
     private void SyncViews()
     {
-        // 敌人
-        for (int i = 0; i < _sim.Enemies.Count; i++)
-        {
-            var en = _sim.Enemies[i];
-            if (!_enemyViews.TryGetValue(en.Id, out var view))
-            {
-                view = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
-                view.name = $"Enemy_{en.Id}";
-                view.transform.SetParent(_world, false);
-                view.transform.localScale = new Vector3(0.6f, 0.6f, 0.6f);
-                SetMat(view.GetComponent<Renderer>(), Color.red);
-                _enemyViews[en.Id] = view.transform;
-            }
-            view.transform.localPosition = new Vector3(en.X.AsFloat, 0.3f, en.Y.AsFloat);
-        }
-        RemoveDeadViews(_enemyViews);
-
-        // 塔
-        for (int i = 0; i < _sim.Towers.Count; i++)
-        {
-            var tw = _sim.Towers[i];
-            if (!_towerViews.TryGetValue(tw.Id, out var view))
-            {
-                view = GameObject.CreatePrimitive(PrimitiveType.Cylinder).transform;
-                view.name = $"Tower_{tw.Id}";
-                view.transform.SetParent(_world, false);
-                view.transform.localScale = new Vector3(0.7f, 0.4f, 0.7f);
-                SetMat(view.GetComponent<Renderer>(), Color.blue);
-                _towerViews[tw.Id] = view.transform;
-            }
-            view.transform.localPosition = new Vector3(tw.CellX + 0.5f, 0.4f, tw.CellY + 0.5f);
-        }
-        RemoveDeadViews(_towerViews);
+        _enemyViews.Sync(_sim.Enemies);
+        _towerViews.Sync(_sim.Towers);
     }
 
-    /// <summary>
-    /// 销毁模拟层已不存在的实体视图（倒序遍历字典键，可安全删除）
-    /// </summary>
-    private void RemoveDeadViews(Dictionary<int, Transform> views)
-    {
-        if (views.Count == 0) return;
-        var aliveIds = new List<int>();
-        // 复用收集：敌人与塔各自调用，用视图字典与模拟层对账
-        if (views == _enemyViews)
-            for (int i = 0; i < _sim.Enemies.Count; i++) aliveIds.Add(_sim.Enemies[i].Id);
-        else
-            for (int i = 0; i < _sim.Towers.Count; i++) aliveIds.Add(_sim.Towers[i].Id);
+    // ---- 视图工厂与刷新（哑视图：只做表现，无逻辑） ----
 
-        var toRemove = new List<int>();
-        foreach (var id in views.Keys)
-            if (!aliveIds.Contains(id))
-                toRemove.Add(id);
-        for (int i = 0; i < toRemove.Count; i++)
-        {
-            if (views.TryGetValue(toRemove[i], out var view))
-                Object.Destroy(view.gameObject);
-            views.Remove(toRemove[i]);
-        }
+    private Transform SpawnEnemyView(int id)
+    {
+        var view = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
+        view.name = $"Enemy_{id}";
+        view.SetParent(_world, false);
+        view.localScale = new Vector3(0.6f, 0.6f, 0.6f);
+        SetMat(view.GetComponent<Renderer>(), Color.red);
+        return view;
+    }
+
+    private static void RefreshEnemyView(BattleSim.SimEnemy en, Transform view)
+    {
+        view.localPosition = new Vector3(en.X.AsFloat, 0.3f, en.Y.AsFloat);
+    }
+
+    private Transform SpawnTowerView(int id)
+    {
+        var view = GameObject.CreatePrimitive(PrimitiveType.Cylinder).transform;
+        view.name = $"Tower_{id}";
+        view.SetParent(_world, false);
+        view.localScale = new Vector3(0.7f, 0.4f, 0.7f);
+        SetMat(view.GetComponent<Renderer>(), Color.blue);
+        return view;
+    }
+
+    private static void RefreshTowerView(BattleSim.SimTower tw, Transform view)
+    {
+        view.localPosition = new Vector3(tw.CellX + 0.5f, 0.4f, tw.CellY + 0.5f);
+    }
+
+    private static void DespawnView(Transform view)
+    {
+        Object.Destroy(view.gameObject);
     }
 }

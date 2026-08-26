@@ -142,7 +142,7 @@ public class UpdateMgr : ManagerBase
         }
     }
 
-    public override void OnSceneExit(int sceneTp)
+    public override void OnSceneExit()
     {
         // _updateList.Clear();
         // _addCaches.Clear();

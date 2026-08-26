@@ -269,7 +269,7 @@ public class RoomMgr : ManagerBase
         BattlePlayerIds.Clear();
     }
 
-    public override void OnSceneExit(int sceneTp)
+    public override void OnSceneExit()
     {
         // 断开时服务器会自动把本连接移出房间并通知剩余成员
         // 本地镜像随断线事件清理，这里不重复处理

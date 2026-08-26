@@ -25,13 +25,3 @@ public enum GameEvent
     EnterBattle = 2001,
 }
 
-/// <summary>
-/// 场景类型
-/// </summary>
-public enum SceneType
-{
-    Main,
-    Battle,
-    Network,
-}
-

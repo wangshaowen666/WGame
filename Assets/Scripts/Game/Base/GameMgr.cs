@@ -19,8 +19,8 @@ public static class GameMgr
     public static readonly FrameSyncMgr FrameSync = new();
     public static readonly RoomMgr Room = new();
     public static readonly UIMgr UI = new();
+    public static readonly ViewPool ViewPool = new();
     public static readonly BattleMgr Battle = new();
-    public static readonly EntityMgr Entity = new();
     public static readonly FrameAnimMgr FrameAnim = new();
 
     private static readonly ManagerBase[] s_managers;
@@ -37,13 +37,26 @@ public static class GameMgr
             FrameSync,
             Room,
             UI,
+            ViewPool, // 须在 Battle 之前注册：逆序清理时战斗先 Dispose 归还视图，ViewPool 再清池
             Battle,
-            Entity,
             FrameAnim,
         };
     }
 
-    public static void Init() => ManagerContainerHelper.Init(s_managers);
-    public static void OnSceneExit(SceneType sceneTp) => ManagerContainerHelper.OnSceneExit(s_managers, (int)sceneTp);
-    public static void OnGameRestart() => ManagerContainerHelper.OnGameRestart(s_managers);
+    public static void Init()
+    {
+        foreach (var mgr in s_managers)
+            mgr.OnInit();
+    }
+
+    public static void OnSceneExit(string sceneNm)
+    {
+        for (int i = s_managers.Length - 1; i >= 0; i--)
+            s_managers[i].OnSceneExit(sceneNm);
+    }
+    public static void OnGameRestart()
+    {
+        for (int i = s_managers.Length - 1; i >= 0; i--)
+            s_managers[i].OnGameRestart();
+    }
 }

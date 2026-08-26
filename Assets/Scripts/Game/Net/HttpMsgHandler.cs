@@ -30,7 +30,7 @@ public class HttpMsgHandler : ManagerBase
         GameMgr.Account.OnLoginStateChanged += InvalidateHeaders;
     }
 
-    public override void OnSceneExit(int sceneTp)
+    public override void OnSceneExit()
     {
         //GameMgr.Account.OnLoginStateChanged -= InvalidateHeaders;
     }

@@ -125,7 +125,7 @@ public class TimerMgr : ManagerBase
         }
     }
 
-    public override void OnSceneExit(int sceneTp)
+    public override void OnSceneExit()
     {
         StopAll();
     }

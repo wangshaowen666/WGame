@@ -117,7 +117,7 @@ public class NetMgr : ManagerBase, IUpdateable
     /// <summary>
     /// 场景退出时断开连接
     /// </summary>
-    public override void OnSceneExit(int sceneTp)
+    public override void OnSceneExit()
     {
         //Disconnect();
     }

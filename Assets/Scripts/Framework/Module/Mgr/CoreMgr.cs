@@ -38,7 +38,20 @@ public static class CoreMgr
         };
     }
 
-    public static void Init() => ManagerContainerHelper.Init(s_managers);
-    public static void OnSceneExit(int sceneTp) => ManagerContainerHelper.OnSceneExit(s_managers, sceneTp);
-    public static void OnGameRestart() => ManagerContainerHelper.OnGameRestart(s_managers);
+    public static void Init()
+    {
+        foreach (var mgr in s_managers)
+            mgr.OnInit();
+    }
+
+    public static void OnSceneExit()
+    {
+        for (int i = s_managers.Length - 1; i >= 0; i--)
+            s_managers[i].OnSceneExit();
+    }
+    public static void OnGameRestart()
+    {
+        for (int i = s_managers.Length - 1; i >= 0; i--)
+            s_managers[i].OnGameRestart();
+    }
 }

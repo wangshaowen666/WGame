@@ -148,7 +148,7 @@ public class FrameSyncMgr : ManagerBase, IUpdateable
     /// <summary>在 NetMgr(100) 之后轮询：先收完网络数据，再消费帧</summary>
     public int Priority => 90;
 
-    public override void OnSceneExit(int sceneTp)
+    public override void OnSceneExit()
     {
         // _frameBuffer.Clear();
         // _frameTimer = 0;
