@@ -19,6 +19,9 @@ Server/**/bin/
 Server/**/obj/
 Server/**/*.db
 
+# 统计导出输出（自动生成，不入库）
+文档/统计输出/
+
 # Unity 项目文件
 *.csproj
 *.unityproj
