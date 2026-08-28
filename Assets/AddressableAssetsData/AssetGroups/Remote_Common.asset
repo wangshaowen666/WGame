@@ -1,5 +1,5 @@
 %YAML 1.1
-%TAG !u! tag:unity3d.com,2011:
+%TAG !u! tag:yousandi.cn,2023:
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17,6 +17,16 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: b0aff8f7d755e4f56a5fe72bc1a581b7
   m_SerializeEntries:
+  - m_GUID: 10b32bc9b733e432cbf99f02fb974b5f
+    m_Address: FrameAnimGpu
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2bb1b5e68369a442081ec2e554f51f3b
+    m_Address: FrameAnimGpuInst
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 43a531b438ee440018f1c973fea5aa37
     m_Address: button-outline
     m_ReadOnly: 0

@@ -14,7 +14,7 @@ public enum BattleMode : byte
     TowerDefense, // 帧同步塔防
 }
 
-public abstract class BattleBase 
+public abstract class BattleViewBase 
 {
     public virtual void Init()
     {

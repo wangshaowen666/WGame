@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------
- * File: BattleTD.cs
+ * File: TdView.cs
  * Author: Wsw
  * Feedback: 614270423@qq.com
  * Time: 2026/08/18 17:00:00
@@ -12,20 +12,20 @@ using UnityEngine.Rendering;
 
 /// <summary>
 /// 帧同步塔防（表现层）：
-/// - 订阅 FrameSyncMgr.OnFrame，把帧喂给 BattleSim（确定性模拟层），本类只做视图同步与日志
+/// - 订阅 FrameSyncMgr.OnFrame，把帧喂给 BattleLogic（确定性逻辑层），本类只做视图同步与日志
 /// - 进场时用空帧快进到服务器当前帧（前提：进场前无人放塔；阶段 6 由 StartGame 消息统一进场帧根治）
-/// - 视图用运行时图元（方块/圆柱）经 ViewSync 对账（缺则建/多则销/刷坐标），确定性验证优先，后续可换 ViewPool 接 prefab
+/// - 视图用运行时图元（方块/圆柱）经 ViewSync 对账（缺则建/多则销/刷坐标），确定性验证优先，后续可换 EntityPool 接 prefab
 /// - 每 50 帧打印状态哈希，双端对比哈希序列即可验证确定性
 /// </summary>
-public class BattleTD : BattleBase
+public class TdView : BattleViewBase
 {
-    private BattleSim _sim;
+    private TdLogic _logic;
     private Transform _root;  // 变换层（复用场景相机时挂到相机下做适配变换）
     private Transform _world; // 物体层（子物体统一用格子局部坐标，_world 负责居中）
     private GameObject _cameraGo; // 自建俯视相机（仅场景无 BattleCamera 时创建，Dispose 时销毁）
     private readonly List<Camera> _disabledCameras = new(); // 战斗期间禁用的场景相机（Dispose 恢复）
-    private ViewSync<BattleSim.SimEnemy, Transform> _enemyViews; // 敌人视图对账器（缺则建/多则删/刷坐标）
-    private ViewSync<BattleSim.SimTower, Transform> _towerViews; // 塔视图对账器
+    private ViewSync<TdLogic.LogicEnemy, Transform> _enemyViews; // 敌人视图对账器（缺则建/多则删/刷坐标）
+    private ViewSync<TdLogic.LogicTower, Transform> _towerViews; // 塔视图对账器
     private bool _overLogged;
     private string _lastReject = ""; // 上一次的拒绝原因（用于变化检测）
     private int _startFrame;         // 战斗起始帧（StartGamePush 下发，之前的帧丢弃）
@@ -37,7 +37,7 @@ public class BattleTD : BattleBase
         var seed = GameMgr.Room.Seed;
         var playerIds = GameMgr.Room.BattlePlayerIds;
         _startFrame = startFrame;
-        _sim = new BattleSim(seed, playerIds.ToArray());
+        _logic = new TdLogic(seed, playerIds.ToArray());
 
         var cam = InitCamera();
         InitViews();
@@ -81,23 +81,23 @@ public class BattleTD : BattleBase
             _root = null;
             _world = null;
         }
-        _sim = null;
+        _logic = null;
     }
 
     /// <summary>
     /// 收到逻辑帧：起始帧之前的帧丢弃（房间存在期间的等待帧），
-    /// 从起始帧起喂给模拟层（双端同帧同操作 => 状态一致，根治后进场漏操作）
+    /// 从起始帧起喂给逻辑层（双端同帧同操作 => 状态一致，根治后进场漏操作）
     /// </summary>
     private void OnFrame(NetMsg.FrameData frame)
     {
         if (frame.FrameId < _startFrame) return;
 
-        _sim.Tick(frame.FrameId, frame.Inputs);
+        _logic.Tick(frame.FrameId, frame.Inputs);
 
         // 操作被拒原因（变化时输出，方便测试时看出"为什么放塔/升级没生效"）
-        if (_sim.LastReject != _lastReject)
+        if (_logic.LastReject != _lastReject)
         {
-            _lastReject = _sim.LastReject;
+            _lastReject = _logic.LastReject;
             if (!string.IsNullOrEmpty(_lastReject))
                 Log.Warning("[操作被拒]", _lastReject);
         }
@@ -108,7 +108,7 @@ public class BattleTD : BattleBase
         if (frame.FrameId % 50 == 0)
             Log.Info("[校验] 帧", frame.FrameId, GetDebugState());
 
-        if (_sim.GameOver && !_overLogged)
+        if (_logic.GameOver && !_overLogged)
         {
             _overLogged = true;
             Log.Error("[战斗] 基地被攻破, 游戏失败 @帧", frame.FrameId);
@@ -128,15 +128,15 @@ public class BattleTD : BattleBase
     public string GetDebugState()
     {
         var sb = new System.Text.StringBuilder();
-        sb.Append("哈希:").Append(_sim.StateHash().ToString("x8"))
-          .Append(" 敌:").Append(_sim.Enemies.Count)
-          .Append(" 塔:").Append(_sim.Towers.Count)
-          .Append(" 基地:").Append(_sim.BaseHp)
+        sb.Append("哈希:").Append(_logic.StateHash().ToString("x8"))
+          .Append(" 敌:").Append(_logic.Enemies.Count)
+          .Append(" 塔:").Append(_logic.Towers.Count)
+          .Append(" 基地:").Append(_logic.BaseHp)
           .Append(" 金币:");
-        for (int i = 0; i < _sim.Players.Count; i++)
+        for (int i = 0; i < _logic.Players.Count; i++)
         {
             if (i > 0) sb.Append('/');
-            sb.Append("P").Append(_sim.Players[i].PlayerId).Append(':').Append(_sim.Players[i].Gold);
+            sb.Append("P").Append(_logic.Players[i].PlayerId).Append(':').Append(_logic.Players[i].Gold);
         }
         return sb.ToString();
     }
@@ -191,7 +191,7 @@ public class BattleTD : BattleBase
         cam.backgroundColor = new Color(0.05f, 0.06f, 0.10f);
         cam.depth = 10f;
         cam.transform.SetPositionAndRotation(
-            new Vector3(BattleSim.MapW / 2f, 16f, BattleSim.MapH / 2f),
+            new Vector3(TdLogic.MapW / 2f, 16f, TdLogic.MapH / 2f),
             Quaternion.Euler(90f, 0f, 0f)); // 垂直下看
         return cam;
     }
@@ -207,7 +207,7 @@ public class BattleTD : BattleBase
         var fovRad = cam.fieldOfView * Mathf.Deg2Rad;
         var visH = 2f * dist * Mathf.Tan(fovRad / 2f); // dist 处垂直可视高度
         var visW = visH * cam.aspect;                  // 水平可视宽度
-        var scale = Mathf.Min(visW / BattleSim.MapW, visH / BattleSim.MapH) * 0.92f; // 留 8% 边距
+        var scale = Mathf.Min(visW / TdLogic.MapW, visH / TdLogic.MapH) * 0.92f; // 留 8% 边距
 
         _root.SetParent(cam.transform, false);
         _root.localPosition = new Vector3(0, 0, dist);
@@ -215,7 +215,7 @@ public class BattleTD : BattleBase
         _root.localScale = Vector3.one * scale;
 
         // 地图中心对齐 _root 原点（子物体保持格子坐标，由 _world 统一居中）
-        _world.localPosition = new Vector3(-BattleSim.MapW / 2f, 0, -BattleSim.MapH / 2f);
+        _world.localPosition = new Vector3(-TdLogic.MapW / 2f, 0, -TdLogic.MapH / 2f);
 
         Log.Info("[战斗] 适配场景相机: fov=", cam.fieldOfView, "aspect=", cam.aspect.ToString("F2"),
             "scale=", scale.ToString("F3"));
@@ -223,7 +223,7 @@ public class BattleTD : BattleBase
 
     private void InitViews()
     {
-        _root = new GameObject("BattleTD").transform;
+        _root = new GameObject("TdView").transform;
         // 物体层：子物体统一用格子局部坐标；复用场景相机时由 _world 负责把地图中心对齐 _root 原点
         _world = new GameObject("World").transform;
         _world.SetParent(_root, false);
@@ -232,8 +232,8 @@ public class BattleTD : BattleBase
         var floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
         floor.name = "Floor";
         floor.transform.SetParent(_world, false);
-        floor.transform.localScale = new Vector3(BattleSim.MapW / 10f, 1, BattleSim.MapH / 10f);
-        floor.transform.localPosition = new Vector3(BattleSim.MapW / 2f, 0, BattleSim.MapH / 2f);
+        floor.transform.localScale = new Vector3(TdLogic.MapW / 10f, 1, TdLogic.MapH / 10f);
+        floor.transform.localPosition = new Vector3(TdLogic.MapW / 2f, 0, TdLogic.MapH / 2f);
         SetMat(floor.GetComponent<Renderer>(), new Color(0.18f, 0.22f, 0.18f));
 
         // 路径点标记（黄色）
@@ -257,13 +257,13 @@ public class BattleTD : BattleBase
         SetMat(home.GetComponent<Renderer>(), Color.green);
 
         // 视图对账器（依赖 _world，须在其创建之后构建）
-        _enemyViews = new ViewSync<BattleSim.SimEnemy, Transform>(
+        _enemyViews = new ViewSync<TdLogic.LogicEnemy, Transform>(
             en => en.Id, SpawnEnemyView, RefreshEnemyView, DespawnView);
-        _towerViews = new ViewSync<BattleSim.SimTower, Transform>(
+        _towerViews = new ViewSync<TdLogic.LogicTower, Transform>(
             tw => tw.Id, SpawnTowerView, RefreshTowerView, DespawnView);
     }
 
-    /// <summary>路径点格子坐标（与 BattleSim 内保持一致，阶段 6 随 StartGame 下发时统一收口）</summary>
+    /// <summary>路径点格子坐标（与 BattleLogic 内保持一致，阶段 6 随 StartGame 下发时统一收口）</summary>
     private static Vector2Int[] BattlePath()
     {
         return new[]
@@ -326,8 +326,8 @@ public class BattleTD : BattleBase
     /// </summary>
     private void SyncViews()
     {
-        _enemyViews.Sync(_sim.Enemies);
-        _towerViews.Sync(_sim.Towers);
+        _enemyViews.Sync(_logic.Enemies);
+        _towerViews.Sync(_logic.Towers);
     }
 
     // ---- 视图工厂与刷新（哑视图：只做表现，无逻辑） ----
@@ -342,7 +342,7 @@ public class BattleTD : BattleBase
         return view;
     }
 
-    private static void RefreshEnemyView(BattleSim.SimEnemy en, Transform view)
+    private static void RefreshEnemyView(TdLogic.LogicEnemy en, Transform view)
     {
         view.localPosition = new Vector3(en.X.AsFloat, 0.3f, en.Y.AsFloat);
     }
@@ -357,7 +357,7 @@ public class BattleTD : BattleBase
         return view;
     }
 
-    private static void RefreshTowerView(BattleSim.SimTower tw, Transform view)
+    private static void RefreshTowerView(TdLogic.LogicTower tw, Transform view)
     {
         view.localPosition = new Vector3(tw.CellX + 0.5f, 0.4f, tw.CellY + 0.5f);
     }

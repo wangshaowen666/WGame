@@ -35,6 +35,7 @@ public class ProcedureChangeScene : ProcedureBase
 
     private void OnSceneComplete()
     {
+        Log.Info("OnSceneComplete");
         var nm = _fsm.GetData<string>(ProcedureKey.SceneName);
 
         GameMgr.UI.PanelOff(DPnlId.LoadingPanel);
@@ -47,6 +48,10 @@ public class ProcedureChangeScene : ProcedureBase
             case GameConfig.BattleScene:
             case GameConfig.NetworkScene:
                 ChangeTo<ProcedureBattle>();
+                break;
+            
+            case GameConfig.TestScene:
+                ChangeTo<ProcedureTest>();
                 break;
         }
 

@@ -15,7 +15,7 @@ using UnityEngine;
 /// - 核心原理：动画 = 按时间查表换 Sprite 引用，每帧成本仅一次加法与比较，
 ///   只有跨帧边界那一拍才触碰 SpriteRenderer
 /// - 由 FrameAnimMgr 统一驱动与池化管理，禁止直接 new，走 GameMgr.FrameAnim.CreatePlayer
-/// - 表现层组件：允许 float / UnityEngine API，不受模拟层确定性纪律约束
+/// - 表现层组件：允许 float / UnityEngine API，不受逻辑层确定性纪律约束
 /// </summary>
 public class FrameAnimPlayer : IResetable
 {

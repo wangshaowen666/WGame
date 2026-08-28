@@ -54,7 +54,7 @@ public class TTTT : MonoBehaviour
         {
             var frames = push.EndFrame - GameMgr.Room.StartFrame;
             var secs = frames * FrameSyncMgr.LogicFrameMs / 1000;
-            var waves = frames / BattleSim.SpawnEveryFrames;
+            var waves = frames / TdLogic.SpawnEveryFrames;
             UiLog($"游戏结束({push.Result})! 坚持{secs}秒/{waves}波, 奖励{push.GoldReward}金币(服务器结算), 可再就绪重开");
         };
     }
@@ -191,7 +191,7 @@ public class TTTT : MonoBehaviour
 
     private bool IsInBattle()
     {
-        if (GameMgr.Battle.CurrentBattle is BattleTD) return true;
+        if (GameMgr.Battle.CurrentBattleView is TdView) return true;
         Log.Warning("未进入战斗，请先执行 2.进入战斗");
         UiLog("未进入战斗，请先点 2.进入战斗");
         return false;
@@ -309,7 +309,7 @@ public class TTTT : MonoBehaviour
 
     private string BattleStateText()
     {
-        if (GameMgr.Battle.CurrentBattle is BattleTD td)
+        if (GameMgr.Battle.CurrentBattleView is TdView td)
         {
             var reject = td.RejectText;
             return td.GetDebugState() + (string.IsNullOrEmpty(reject) ? "" : $"\n被拒: {reject}");

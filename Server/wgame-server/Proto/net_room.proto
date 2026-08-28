@@ -68,11 +68,11 @@ message ReadyResp {
 
 // 开战推送（服务器 -> 房间内所有成员，全员就绪时触发一次）
 // 客户端以 start_frame 为统一起始帧：服务器广播的帧号达到 start_frame 之前的帧全部丢弃，
-// 从 start_frame 起喂给模拟层（不再空帧快进，根治后进场漏操作）；seed 为战斗随机种子
+// 从 start_frame 起喂给逻辑层（不再空帧快进，根治后进场漏操作）；seed 为战斗随机种子
 message StartGamePush {
   int32 start_frame = 1;      // 战斗起始帧号（服务器当前帧 + 缓冲，双端一致）
-  int64 seed = 2;             // 战斗随机种子（双端 BattleSim 用同一种子）
-  repeated int32 player_ids = 3;  // 参战玩家列表（playerId 升序，双端一致初始化模拟层）
+  int64 seed = 2;             // 战斗随机种子（双端 BattleLogic 用同一种子）
+  repeated int32 player_ids = 3;  // 参战玩家列表（playerId 升序，双端一致初始化逻辑层）
 }
 
 // 游戏结果
@@ -83,7 +83,7 @@ enum GameResult {
 }
 
 // 游戏结束上报（客户端 -> 服务器）
-// 客户端本地模拟层判定结束后上报（双端同帧判定、都会上报，服务器以第一份为准，其余幂等忽略）
+// 客户端本地逻辑层判定结束后上报（双端同帧判定、都会上报，服务器以第一份为准，其余幂等忽略）
 message GameEndReq {
   int32 end_frame = 1;        // 结束帧号（本地模拟判定的帧，阶段 7 校验用）
 }

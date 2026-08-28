@@ -8,6 +8,7 @@ public static class GameCamera
 {
     public const string MapCameraName = "MapCamera";
     public const string BattleCameraName = "BattleCamera";
+    public const string TestCameraName = "TestCamera";
     public const string UICameraName = "UICamera";
     
     public static Camera UICamera { get; private set; }

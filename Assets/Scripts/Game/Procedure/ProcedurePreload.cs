@@ -36,10 +36,10 @@ public class ProcedurePreload : ProcedureBase
         _fsm.RemoveData(LaunchConfig.LoginPanel);
         Object.Destroy(_loginPanel.gameObject);
         
-        // _fsm.SetData(ProcedureKey.SceneName, GameConfig.MainScene);
-        // ChangeTo<ProcedureChangeScene>();
+        //_fsm.SetData(ProcedureKey.SceneName, GameConfig.MainScene);
         
-        // 进入测试场景
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Test", UnityEngine.SceneManagement.LoadSceneMode.Single);
+        _fsm.SetData(ProcedureKey.SceneName, GameConfig.TestScene);
+        
+        ChangeTo<ProcedureChangeScene>();
     }
 }

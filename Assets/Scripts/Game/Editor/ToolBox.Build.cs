@@ -43,6 +43,17 @@ public partial class ToolBox
     [Button("构建新Bundle", ButtonSizes.Large)]
     public void NewBuild()
     {
+        // 二次确认：本操作是全量重建（非热更增量），误点会覆盖远端 bundle，务必确认
+        if (!EditorUtility.DisplayDialog(
+            "确认执行「构建新Bundle」",
+            "此操作将执行 HybridCLR Generate/All 并全量重建 Addressable bundle，随后同步 dll、清无效 bundle 并拷贝到服务器，耗时较长。\n\n" +
+            "若只是想发代码改动，请返回点左侧「构建热更Bundle」。\n\n确认执行？",
+            "确定", "取消"))
+        {
+            AddLogInfo("已取消：构建新Bundle");
+            return;
+        }
+
         EditorApplication.ExecuteMenuItem("HybridCLR/Generate/All");
         AddLogInfo("已调用HybridCLR Generate/All编译");
         

@@ -91,7 +91,7 @@ public class Room
         StartFrame = FrameId + 60;
         Seed = DateTime.UtcNow.Ticks;
 
-        // 参战玩家列表（升序，双端按同一顺序初始化模拟层）
+        // 参战玩家列表（升序，双端按同一顺序初始化逻辑层）
         var playerIds = MemberIds();
         playerIds.Sort();
 

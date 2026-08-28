@@ -9,8 +9,8 @@ public sealed class BattleHandler
 {
     private const int MaxOpType = 2;         // 合法操作类型上限（1=放置塔 2=升级塔，0 已废弃）
     private const int MaxInputsPerFrame = 8; // 每玩家每帧最多操作数（防刷）
-    private const int MaxCoordX = 7;         // 格子 x 上限（与客户端 BattleSim.MapW-1 一致）
-    private const int MaxCoordY = 15;        // 格子 y 上限（与客户端 BattleSim.MapH-1 一致）
+    private const int MaxCoordX = 7;         // 格子 x 上限（与客户端 BattleLogic.MapW-1 一致）
+    private const int MaxCoordY = 15;        // 格子 y 上限（与客户端 BattleLogic.MapH-1 一致）
 
     private readonly NetServer _net;
     private readonly SessionMgr _sessions;
@@ -52,7 +52,7 @@ public sealed class BattleHandler
             return;
         }
 
-        // 校验 2.5：房间未开局不收操作（等待期伪造操作无意义，直接丢弃；模拟层对坐标还有二次校验）
+        // 校验 2.5：房间未开局不收操作（等待期伪造操作无意义，直接丢弃；逻辑层对坐标还有二次校验）
         if (!room.IsStarted)
         {
             Console.WriteLine($"[校验失败] playerId={playerId} 房间未开局，操作丢弃");

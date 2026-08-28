@@ -10,7 +10,7 @@ namespace GameServer;
 /// </summary>
 public static class Settlement
 {
-    /// <summary>波次间隔帧数（与客户端 BattleSim.SpawnEveryFrames 一致；波次玩法 Excel 配置化后统一收口此处）</summary>
+    /// <summary>波次间隔帧数（与客户端 BattleLogic.SpawnEveryFrames 一致；波次玩法 Excel 配置化后统一收口此处）</summary>
     private const int SpawnEveryFrames = 60;
 
     /// <summary>保底奖励（进了游戏就给）</summary>

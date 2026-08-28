@@ -13,7 +13,6 @@ public class LaunchEntry : MonoBehaviour
     void Awake()
     {
         CoreMgr.Init();
-        
         InitProcedure();
         DontDestroyOnLoad(gameObject);
     }

@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------
- * File: BattleSim.cs
+ * File: BattleLogic.cs
  * Author: Wsw
  * Feedback: 614270423@qq.com
  * Time: 2026/08/18 16:30:00
@@ -9,13 +9,13 @@
 using System.Collections.Generic;
 
 /// <summary>
-/// 确定性塔防模拟层（纯 C#，无 UnityEngine）：
+/// 确定性塔防逻辑层（纯 C#，无 UnityEngine）：
 /// - 以服务器绝对帧号锚定：Tick(absFrame, inputs)，同一帧号 + 同一操作序列 => 任意客户端状态完全一致
 /// - 构造传入随机种子（由 StartGamePush 统一下发，双端一致）
 /// - 禁止：float/double、UnityEngine.Random、Time.*、Dictionary 遍历（本类只用 List/按索引访问）
 /// - 操作类型：1=放塔(param1=格子x, param2=格子y) 2=升级塔(同参数，需塔主人)
 /// </summary>
-public class BattleSim
+public class TdLogic
 {
     // ---- 地图与规则常量（阶段 6 起由 StartGame 消息/配置表下发） ----
     // 竖屏布局：窄×高（配合俯视相机，手机竖屏友好）
@@ -38,7 +38,7 @@ public class BattleSim
     public const int TowerDamagePerLevel = 20; // 1/2/3 级: 40/60/80 伤害
 
     /// <summary>敌人（有序列表，遍历与目标选择顺序确定）</summary>
-    public class SimEnemy
+    public class LogicEnemy
     {
         public int Id;
         public long Hp;
@@ -47,7 +47,7 @@ public class BattleSim
     }
 
     /// <summary>塔</summary>
-    public class SimTower
+    public class LogicTower
     {
         public int Id;
         public int OwnerPlayerId;
@@ -57,7 +57,7 @@ public class BattleSim
     }
 
     /// <summary>玩家（按初始化顺序排列，遍历顺序确定）</summary>
-    public class SimPlayer
+    public class LogicPlayer
     {
         public int PlayerId;
         public long Gold = StartGold;
@@ -73,9 +73,9 @@ public class BattleSim
         (0, 0), (0, 6), (3, 6), (3, 11), (6, 11), (6, 15),
     };
 
-    public readonly List<SimEnemy> Enemies = new();
-    public readonly List<SimTower> Towers = new();
-    public readonly List<SimPlayer> Players = new();
+    public readonly List<LogicEnemy> Enemies = new();
+    public readonly List<LogicTower> Towers = new();
+    public readonly List<LogicPlayer> Players = new();
 
     public int BaseHp { get; private set; } = StartBaseHp;
     public bool GameOver { get; private set; }
@@ -90,14 +90,14 @@ public class BattleSim
     /// 构造。seed/初始玩家列表来自 StartGamePush（双端一致）；
     /// playerIds 为空时（旧测试入口）不预登记，保持"首次操作进场"的旧行为
     /// </summary>
-    public BattleSim(long seed = 12345, int[]? playerIds = null)
+    public TdLogic(long seed = 12345, int[]? playerIds = null)
     {
         _rng = new XRng((ulong)seed);
 
         // 开局登记参战玩家（金币=StartGold；阶段 7 可改为从养成数据带初始金币）
         if (playerIds != null)
             foreach (var pid in playerIds)
-                Players.Add(new SimPlayer { PlayerId = pid });
+                Players.Add(new LogicPlayer { PlayerId = pid });
     }
     private int _nextId = 1;
 
@@ -185,7 +185,7 @@ public class BattleSim
 
         LastReject = "";
         player.Gold -= TowerCost;
-        Towers.Add(new SimTower
+        Towers.Add(new LogicTower
         {
             Id = _nextId++,
             OwnerPlayerId = playerId,
@@ -230,13 +230,13 @@ public class BattleSim
     }
 
     /// <summary>按 id 查玩家，不存在则进场（首次操作的顺序决定 Players 列表顺序，双端一致）</summary>
-    private SimPlayer GetOrAddPlayer(int playerId)
+    private LogicPlayer GetOrAddPlayer(int playerId)
     {
         for (int i = 0; i < Players.Count; i++)
             if (Players[i].PlayerId == playerId)
                 return Players[i];
 
-        var p = new SimPlayer { PlayerId = playerId };
+        var p = new LogicPlayer { PlayerId = playerId };
         Players.Add(p);
         return p;
     }
@@ -244,7 +244,7 @@ public class BattleSim
     private void SpawnEnemy(long hp)
     {
         var (wx, wy) = s_waypoints[0];
-        Enemies.Add(new SimEnemy
+        Enemies.Add(new LogicEnemy
         {
             Id = _nextId++,
             Hp = hp,
@@ -257,7 +257,7 @@ public class BattleSim
     /// <summary>
     /// 塔攻击：冷却递减，就绪后打"距离最近的存活敌人"（并列取列表靠前即更早刷出的，结果确定）
     /// </summary>
-    private void TowerFire(SimTower tower)
+    private void TowerFire(LogicTower tower)
     {
         if (tower.Cooldown > 0)
         {
@@ -270,7 +270,7 @@ public class BattleSim
         var range = s_towerRange + Fix.FromInt(tower.Level - 1) / Fix.FromInt(4);
         var rangeSq = range * range;
 
-        SimEnemy target = null;
+        LogicEnemy target = null;
         var bestSq = Fix.Zero;
         for (int i = 0; i < Enemies.Count; i++)
         {
@@ -308,7 +308,7 @@ public class BattleSim
     /// <summary>
     /// 敌人向当前路径点匀速移动；到达终点扣基地血
     /// </summary>
-    private void MoveEnemy(SimEnemy en)
+    private void MoveEnemy(LogicEnemy en)
     {
         if (en.WpIndex >= s_waypoints.Length)
         {

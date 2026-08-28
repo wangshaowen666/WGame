@@ -4,4 +4,17 @@
        C# 代码无显式引用，IL2CPP 裁剪扫描不到 -> 真机报
        "Can't add component because class 'BoxCollider' doesn't exist!" -->
   <assembly fullname="UnityEngine.PhysicsModule" preserve="all" />
+
+  <!-- 热更测试代码（FrameAnimGpuTest）用 ProfilerRecorder 读渲染统计：
+       GCProfiler 只引用了 ProfilerCategory.Memory，get_Render 无 AOT 引用被裁
+       -> 真机报 MethodNotFind Unity.Profiling.ProfilerCategory::get_Render；
+       连带保留 ProfilerRecorder（LastValue/IsRunning/Dispose 也可能被裁） -->
+  <assembly fullname="UnityEngine.CoreModule">
+    <type fullname="Unity.Profiling.ProfilerCategory" preserve="all" />
+    <type fullname="Unity.Profiling.ProfilerRecorder" preserve="all" />
+    <!-- 热更测试代码（FrameAnimGpuTest 的 GpuInstancing 模式）调用 Graphics.DrawMeshInstanced：
+         项目 AOT 代码无此引用，IL2CPP 裁剪扫描不到 -> 真机报 MethodNotFind UnityEngine.Graphics::DrawMeshInstanced；
+         连带保留整个 Graphics 类型（同类的 RenderMesh/RenderMeshInstanced 等 API 后续也可能被裁） -->
+    <type fullname="UnityEngine.Graphics" preserve="all" />
+  </assembly>
 </linker>

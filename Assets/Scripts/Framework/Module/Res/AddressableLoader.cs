@@ -218,7 +218,7 @@ public class AddressableLoader : IResLoader
         }
         catch (Exception e)
         {
-            Log.Error("场景加载异常:", sceneName, e.Message);
+            Log.Error("场景加载异常:", sceneName, e.Message, e.StackTrace);
         }
     }
     

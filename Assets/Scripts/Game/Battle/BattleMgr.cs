@@ -11,8 +11,8 @@ using UnityEngine;
 
 public class BattleMgr : ManagerBase
 {
-    public BattleBase CurrentBattle => _battle;
-    private BattleBase _battle;
+    public BattleViewBase CurrentBattleView => _battleView;
+    private BattleViewBase _battleView;
 
     /// <summary>
     /// 进入帧同步塔防战斗。前置条件：收到 StartGamePush（全员就绪，起始帧+种子已就位）
@@ -24,9 +24,9 @@ public class BattleMgr : ManagerBase
             Log.Warning("未收到开战推送（需房间内全员就绪），拒绝进入战斗");
             return;
         }
-        _battle?.Dispose();
-        _battle = new BattleTD();
-        _battle.Init();
+        _battleView?.Dispose();
+        _battleView = new TdView();
+        _battleView.Init();
     }
 
     /// <summary>
@@ -34,8 +34,8 @@ public class BattleMgr : ManagerBase
     /// </summary>
     public void ExitBattle()
     {
-        _battle?.Dispose();
-        _battle = null;
+        _battleView?.Dispose();
+        _battleView = null;
     }
 
     public override void OnSceneExit(string sceneNm)
@@ -43,15 +43,15 @@ public class BattleMgr : ManagerBase
         // 离开战斗类场景（战斗/联机战斗）时清理战斗
         if (sceneNm == GameConfig.BattleScene)
         {
-            _battle?.Dispose();
-            _battle = null;
+            _battleView?.Dispose();
+            _battleView = null;
         }
     }
 
     public override void OnGameRestart()
     {
         base.OnGameRestart();
-        _battle?.Dispose();
-        _battle = null;
+        _battleView?.Dispose();
+        _battleView = null;
     }
 }

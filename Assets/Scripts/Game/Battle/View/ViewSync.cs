@@ -10,21 +10,21 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// 通用视图对账器（表现层，TD/VS 共用，提炼自 BattleTD 的字典对账模式）：
-/// 每逻辑帧把模拟层实体列表与视图表对账--缺则建、多则销、存在则刷新。
+/// 通用视图对账器（表现层，TD/VS 共用，提炼自 TdView 的字典对账模式）：
+/// 每逻辑帧把逻辑层实体列表与视图表对账--缺则建、多则销、存在则刷新。
 /// 使用规则：
 /// - 视图必须"哑"：只做表现（坐标/朝向/特效），禁止逻辑、禁止自我驱动（不走 UpdateMgr）
-/// - 模拟层实体 Id 必须稳定自增不复用（BattleSim._nextId 模式），否则对账会张冠李戴
+/// - 逻辑层实体 Id 必须稳定自增不复用（BattleLogic._nextId 模式），否则对账会张冠李戴
 /// - spawn 返回 null 表示异步加载中（登记 pending 防止每帧重复发起），
 ///   加载完成后调 Attach 补挂，之后交给下一次 Sync 对账（实体已死则自动回收）
 /// - Clear 为终态（战斗 Dispose 调用），之后 Attach 直接回收，防止异步回调泄漏
-/// - 本类为表现层设施，可用 Dictionary/HashSet；模拟层确定性纪律不受影响
+/// - 本类为表现层设施，可用 Dictionary/HashSet；逻辑层确定性纪律不受影响
 /// </summary>
-public sealed class ViewSync<TSim, TView> where TView : class
+public sealed class ViewSync<TLogic, TView> where TView : class
 {
-    private readonly Func<TSim, int> _getId;
+    private readonly Func<TLogic, int> _getId;
     private readonly Func<int, TView> _spawn;
-    private readonly Action<TSim, TView> _refresh;
+    private readonly Action<TLogic, TView> _refresh;
     private readonly Action<TView> _despawn;
 
     private readonly Dictionary<int, TView> _views = new();
@@ -33,8 +33,8 @@ public sealed class ViewSync<TSim, TView> where TView : class
     private readonly List<int> _scratch = new();    // 待删除 id 收集（避免遍历中修改字典）
     private bool _cleared;
 
-    public ViewSync(Func<TSim, int> getId, Func<int, TView> spawn,
-        Action<TSim, TView> refresh, Action<TView> despawn)
+    public ViewSync(Func<TLogic, int> getId, Func<int, TView> spawn,
+        Action<TLogic, TView> refresh, Action<TView> despawn)
     {
         _getId = getId;
         _spawn = spawn;
@@ -49,23 +49,23 @@ public sealed class ViewSync<TSim, TView> where TView : class
     public bool TryGet(int id, out TView view) => _views.TryGetValue(id, out view);
 
     /// <summary>
-    /// 对账入口：每逻辑帧 Sim.Tick 后调用一次（容器复用，零 GC）
+    /// 对账入口：每逻辑帧 Logic.Tick 后调用一次（容器复用，零 GC）
     /// </summary>
-    public void Sync(List<TSim> sims)
+    public void Sync(List<TLogic> logics)
     {
         if (_cleared) return;
 
         // 1. 刷存活：缺视图则建（null = 异步加载中），存在则刷新
         _alive.Clear();
-        for (int i = 0; i < sims.Count; i++)
+        for (int i = 0; i < logics.Count; i++)
         {
-            var sim = sims[i];
-            int id = _getId(sim);
+            var logic = logics[i];
+            int id = _getId(logic);
             _alive.Add(id);
 
             if (_views.TryGetValue(id, out var view))
             {
-                _refresh(sim, view);
+                _refresh(logic, view);
                 continue;
             }
 
@@ -78,10 +78,10 @@ public sealed class ViewSync<TSim, TView> where TView : class
                 continue;
             }
             _views[id] = view;
-            _refresh(sim, view);
+            _refresh(logic, view);
         }
 
-        // 2. 销毁模拟层已不存在的视图（先收集再删，避免遍历中修改字典）
+        // 2. 销毁逻辑层已不存在的视图（先收集再删，避免遍历中修改字典）
         if (_views.Count > 0)
         {
             _scratch.Clear();
@@ -106,7 +106,7 @@ public sealed class ViewSync<TSim, TView> where TView : class
     }
 
     /// <summary>
-    /// 异步视图加载完成补挂（与 ViewPool.Acquire 回调配合）：
+    /// 异步视图加载完成补挂（与 EntityPool.Acquire 回调配合）：
     /// 实体仍存活则入表等下一次 Sync 刷新；战斗已结束或重复补挂则立即回收
     /// </summary>
     public void Attach(int id, TView view)

@@ -19,7 +19,7 @@ public static class GameMgr
     public static readonly FrameSyncMgr FrameSync = new();
     public static readonly RoomMgr Room = new();
     public static readonly UIMgr UI = new();
-    public static readonly ViewPool ViewPool = new();
+    public static readonly EntityPool EntityPool = new();
     public static readonly BattleMgr Battle = new();
     public static readonly FrameAnimMgr FrameAnim = new();
 
@@ -37,7 +37,7 @@ public static class GameMgr
             FrameSync,
             Room,
             UI,
-            ViewPool, // 须在 Battle 之前注册：逆序清理时战斗先 Dispose 归还视图，ViewPool 再清池
+            EntityPool, // 须在 Battle 之前注册：逆序清理时战斗先 Dispose 归还实体，EntityPool 再清池
             Battle,
             FrameAnim,
         };

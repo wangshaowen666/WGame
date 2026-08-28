@@ -65,6 +65,7 @@ public class UIMgr : ManagerBase
         }
     }
     
+    // 幂等关闭，允许多次调用
     public void PanelOff(DPnlId id)
     {
         var panel = HasPanel(id);
@@ -83,7 +84,7 @@ public class UIMgr : ManagerBase
             }
         }
 
-        Log.Error("正在关闭不存在的界面：", id);
+        Log.Info("正在关闭不存在的界面：", id);
     }
 
     public void PanelOff(UIPanelBase panel)
@@ -111,8 +112,11 @@ public class UIMgr : ManagerBase
     public UIPanelBase HasPanel(DPnlId id)
     {
         var cfg = GameMgr.DataTable.TbUIPanel[id];
-        var group = _layerGroupMap[cfg.Group];
-        return group.HasPanel(id);
+        // 容错还未创建的Group，直接拿id判断存在了
+        if (_layerGroupMap.TryGetValue(cfg.Group, out var group))
+            return group.HasPanel(id);
+        
+        return null;
     }
     
     private void OnLoadFinish(GameObject obj, object userData)

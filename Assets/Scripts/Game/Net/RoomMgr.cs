@@ -37,7 +37,7 @@ public class RoomMgr : ManagerBase
     public int StartFrame { get; private set; }
     public long Seed { get; private set; }
 
-    /// <summary>参战玩家列表（开战推送下发，playerId 升序；BattleSim 按此初始化）</summary>
+    /// <summary>参战玩家列表（开战推送下发，playerId 升序；BattleLogic 按此初始化）</summary>
     public List<int> BattlePlayerIds { get; } = new();
 
     /// <summary>是否处于战斗结束态（收到 GameEndPush 置 true，重新开局/退房/断线清 false）</summary>
@@ -75,7 +75,7 @@ public class RoomMgr : ManagerBase
         GameMgr.NetMsg.Send(NetMsg.MsgType.MsgReadyReq, new NetMsg.ReadyReq());
     }
 
-    /// <summary>上报游戏结束（BattleTD 本地模拟判定 GameOver 后调用；
+    /// <summary>上报游戏结束（TdView 本地模拟判定 GameOver 后调用；
     /// 双端同帧判定都会上报，服务器以第一份为准广播 GameEndPush）</summary>
     public void ReportGameEnd(int endFrame)
     {
@@ -229,7 +229,7 @@ public class RoomMgr : ManagerBase
         OnReadyResp?.Invoke(resp);
     }
 
-    /// <summary>开战推送：记录起始帧与种子（进房对局锚点，BattleTD 用）</summary>
+    /// <summary>开战推送：记录起始帧与种子（进房对局锚点，TdView 用）</summary>
     private void HandleStartGamePush(NetMsg.StartGamePush push)
     {
         IsReady = false;
