@@ -33,12 +33,10 @@ public class ProcedurePreload : ProcedureBase
         GameMgr.DataTable.LoadTable();
         
         await UniTask.Yield();
-        _fsm.RemoveData(LaunchConfig.LoginPanel);
-        Object.Destroy(_loginPanel.gameObject);
         
-        //_fsm.SetData(ProcedureKey.SceneName, GameConfig.MainScene);
+        _fsm.SetData(ProcedureKey.SceneName, GameConfig.MainScene);
         
-        _fsm.SetData(ProcedureKey.SceneName, GameConfig.TestScene);
+        //_fsm.SetData(ProcedureKey.SceneName, GameConfig.TestScene);
         
         ChangeTo<ProcedureChangeScene>();
     }

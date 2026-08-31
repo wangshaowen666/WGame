@@ -29,7 +29,8 @@ public class UIMgr : ManagerBase
         var cfg = GameMgr.DataTable.TbUIPanel[id];
         if (cfg == null)
         {
-            throw new System.Exception("不存在的界面：" + id);
+            Log.Error("不存在的界面：" + id);
+            return;
         }
 
         var g = cfg.Group;

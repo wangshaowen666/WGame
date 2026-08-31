@@ -42,10 +42,11 @@ public class TTTT : MonoBehaviour
         // 建房/加房成功自动记录房间号（供 ContextMenu 快捷加入）
         GameMgr.Room.OnRoomResp += OnRoomResp;
 
-        // 全员就绪收到开战推送 -> 自动进入战斗
+        // 全员就绪收到开战推送 -> 自动进入战斗（仅联机测试场景：帧同步塔防走此路径；
+        // 单机吸血鬼幸存者用下方"进入吸血鬼单机战斗"入口，不走房间/联机）
         GameMgr.Room.OnStartGamePush += _ =>
         {
-            GameMgr.Battle.EnterBattle();
+            GameMgr.Battle.EnterBattle(BattleMode.TowerDefense);
             UiLog("全员就绪，开战!");
         };
 
@@ -170,6 +171,25 @@ public class TTTT : MonoBehaviour
         GameMgr.Battle.ExitBattle();
     }
 
+    [ContextMenu("7.进入吸血鬼单机战斗(骨架)")]
+    void EnterVampireBattle()
+    {
+        // 临时入口（阶段 1-2 骨架验证）：单机跳过 Room.StartFrame 校验，直接进入
+        GameMgr.Battle.EnterBattle(BattleMode.VampireSurvivor);
+        UiLog("进入吸血鬼幸存者单机战斗(骨架)");
+    }
+
+    [ContextMenu("8.性能基线测试(300物体)")]
+    void PerfBaseline()
+    {
+        // 临时入口（阶段 1-1）：300 池化 GameObject 每帧位移测帧率，见 PerfBaselineTest
+        if (FindObjectOfType<PerfBaselineTest>() == null)
+            new GameObject("PerfBaseline", typeof(PerfBaselineTest));
+        else
+            UiLog("性能基线测试已存在");
+        UiLog("性能基线测试启动(300物体)");
+    }
+
     [ContextMenu("6.查询金币(HTTP)")]
     void QueryGold()
     {
@@ -272,6 +292,8 @@ public class TTTT : MonoBehaviour
         if (GUILayout.Button("3. 放塔", GetBtnStyle())) PlaceTower();
         if (GUILayout.Button("4. 升级塔", GetBtnStyle())) UpgradeTower();
         if (GUILayout.Button("5. 退出战斗", GetBtnStyle())) ExitBattle();
+        if (GUILayout.Button("7. 吸血鬼单机(骨架)", GetBtnStyle())) EnterVampireBattle();
+        if (GUILayout.Button("8. 性能基线测试", GetBtnStyle())) PerfBaseline();
         if (GUILayout.Button("6. 查询金币", GetBtnStyle())) QueryGold();
 
         GUILayout.Space(10);

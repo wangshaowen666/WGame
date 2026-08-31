@@ -18,6 +18,7 @@ public class ProcedureBattle : ProcedureBase
         
         GameCamera.SetMainCamera(GameCamera.BattleCameraName);
         GameMgr.UI.PanelOn(DPnlId.BattlePanel);
-        GameMgr.Battle.EnterBattle();
+        // 按预置模式分支进入战斗（临时入口在进战斗场景前设置 PendingMode；默认塔防联机）
+        GameMgr.Battle.EnterBattle(GameMgr.Battle.PendingMode);
     }
 }

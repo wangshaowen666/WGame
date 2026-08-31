@@ -23,5 +23,9 @@ public enum GameEvent
     
     // 战斗相关
     EnterBattle = 2001,
+
+    // 吸血鬼战斗输入（解耦：GameJoystick 由战斗 UI BattlePanel 登记到 GameMgr.Battle，
+    // 战斗侧 VampireView 经"查缓存 + 就绪事件"获取，双方互不持有引用）
+    VsJoystickReady = 2101,   // 战斗 UI 登记摇杆后广播，携带 GameJoystick（面板异步加载完成才发）
 }
 

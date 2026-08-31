@@ -55,6 +55,13 @@ public class ProcedureChangeScene : ProcedureBase
                 break;
         }
 
+        if (string.IsNullOrEmpty(_curScene))
+        {
+            var loadingPanel = _fsm.GetData<LoginPanel>(LaunchConfig.LoginPanel);
+            _fsm.RemoveData(LaunchConfig.LoginPanel);
+            UnityEngine.Object.Destroy(loadingPanel.gameObject);
+        }
+        
         _curScene = nm;
     }
 }

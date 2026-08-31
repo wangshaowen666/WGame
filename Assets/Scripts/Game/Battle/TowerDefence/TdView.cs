@@ -8,7 +8,6 @@
 
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 /// <summary>
 /// 帧同步塔防（表现层）：
@@ -17,7 +16,7 @@ using UnityEngine.Rendering;
 /// - 视图用运行时图元（方块/圆柱）经 ViewSync 对账（缺则建/多则销/刷坐标），确定性验证优先，后续可换 EntityPool 接 prefab
 /// - 每 50 帧打印状态哈希，双端对比哈希序列即可验证确定性
 /// </summary>
-public class TdView : BattleViewBase
+public class TdView : BattleView
 {
     private TdLogic _logic;
     private Transform _root;  // 变换层（复用场景相机时挂到相机下做适配变换）
@@ -234,7 +233,7 @@ public class TdView : BattleViewBase
         floor.transform.SetParent(_world, false);
         floor.transform.localScale = new Vector3(TdLogic.MapW / 10f, 1, TdLogic.MapH / 10f);
         floor.transform.localPosition = new Vector3(TdLogic.MapW / 2f, 0, TdLogic.MapH / 2f);
-        SetMat(floor.GetComponent<Renderer>(), new Color(0.18f, 0.22f, 0.18f));
+        ViewMats.Set(floor.GetComponent<Renderer>(), new Color(0.18f, 0.22f, 0.18f));
 
         // 路径点标记（黄色）
         foreach (var wp in BattlePath())
@@ -244,7 +243,7 @@ public class TdView : BattleViewBase
             mark.transform.SetParent(_world, false);
             mark.transform.localScale = new Vector3(0.3f, 0.1f, 0.3f);
             mark.transform.localPosition = new Vector3(wp.x + 0.5f, 0.06f, wp.y + 0.5f);
-            SetMat(mark.GetComponent<Renderer>(), Color.yellow);
+            ViewMats.Set(mark.GetComponent<Renderer>(), Color.yellow);
         }
 
         // 终点基地（绿色）
@@ -254,7 +253,7 @@ public class TdView : BattleViewBase
         home.transform.SetParent(_world, false);
         home.transform.localScale = new Vector3(0.9f, 0.9f, 0.9f);
         home.transform.localPosition = new Vector3(last.x + 0.5f, 0.45f, last.y + 0.5f);
-        SetMat(home.GetComponent<Renderer>(), Color.green);
+        ViewMats.Set(home.GetComponent<Renderer>(), Color.green);
 
         // 视图对账器（依赖 _world，须在其创建之后构建）
         _enemyViews = new ViewSync<TdLogic.LogicEnemy, Transform>(
@@ -274,52 +273,7 @@ public class TdView : BattleViewBase
     }
 
     // ---- URP 材质工厂 ----
-    // CreatePrimitive 的默认材质是 Built-in Standard shader，URP 真机渲染为粉色（Editor 有兜底）；
-    // 必须显式创建 URP 材质，且 URP Lit 颜色属性是 _BaseColor（Material.color 写 _Color 无效）
-    private static readonly Dictionary<Color, Material> s_matCache = new();
-
-    private static Material GetMat(Color c)
-    {
-        if (s_matCache.TryGetValue(c, out var m)) return m;
-
-        // 1) 按名查找（要求 shader 已进主包：Always Included Shaders 或被主包材质引用）
-        var shader = Shader.Find("Universal Render Pipeline/Lit")
-                     ?? Shader.Find("Universal Render Pipeline/Unlit");
-        if (shader != null)
-        {
-            m = new Material(shader);
-        }
-        else
-        {
-            // 2) 兜底：克隆当前渲染管线的默认材质。真机上项目所有材质都在 Addressables
-            //    bundle 里，URP Lit shader 只进 bundle 不进主包，主包阶段 Shader.Find 查不到
-            //    （会 null 导致 new Material 抛 ArgumentNullException）；
-            //    管线默认材质随 URP 初始化必备，真机一定存在
-            var rp = GraphicsSettings.currentRenderPipeline;
-            if (rp != null && rp.defaultMaterial != null)
-            {
-                m = new Material(rp.defaultMaterial);
-                Log.Info("[战斗] Shader.Find 未命中，已克隆管线默认材质");
-            }
-            else
-            {
-                // 3) 最后兜底：UGUI 用的 Sprites/Default（主场景有 UI，必在包内）
-                m = new Material(Shader.Find("Sprites/Default"));
-                Log.Warning("[战斗] 使用 Sprites/Default 兜底材质");
-            }
-        }
-
-        m.SetColor("_BaseColor", c);
-        m.SetColor("_Color", c); // Sprites/Standard 等 Built-in 系 shader 用 _Color，不存在的属性写入无效不报错
-        s_matCache[c] = m;
-        return m;
-    }
-
-    /// <summary>给图元设置 URP 材质（按颜色缓存，sharedMaterial 避免实例化泄漏）</summary>
-    private static void SetMat(Renderer r, Color c)
-    {
-        r.sharedMaterial = GetMat(c);
-    }
+    // CreatePrimitive 的默认材质在 URP 真机渲染为粉色，须显式创建 URP 材质（按颜色缓存，见 ViewMats）
 
     /// <summary>
     /// 同步表现：ViewSync 对账（缺则建/多则销/刷坐标），视图创建/刷新细节见 Spawn/Refresh 方法
@@ -338,7 +292,7 @@ public class TdView : BattleViewBase
         view.name = $"Enemy_{id}";
         view.SetParent(_world, false);
         view.localScale = new Vector3(0.6f, 0.6f, 0.6f);
-        SetMat(view.GetComponent<Renderer>(), Color.red);
+        ViewMats.Set(view.GetComponent<Renderer>(), Color.red);
         return view;
     }
 
@@ -353,7 +307,7 @@ public class TdView : BattleViewBase
         view.name = $"Tower_{id}";
         view.SetParent(_world, false);
         view.localScale = new Vector3(0.7f, 0.4f, 0.7f);
-        SetMat(view.GetComponent<Renderer>(), Color.blue);
+        ViewMats.Set(view.GetComponent<Renderer>(), Color.blue);
         return view;
     }
 

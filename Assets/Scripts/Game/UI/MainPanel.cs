@@ -37,7 +37,7 @@ public class MainPanel : UIPanelBase
 
     private void OnClickStart()
     {
-        CoreMgr.Event.Send(GameEvent.ProcedureExitMain);
+        GameMgr.Event.Send(GameEvent.ProcedureExitMain);
         GameMgr.UI.PanelOff(this);
     }
 }

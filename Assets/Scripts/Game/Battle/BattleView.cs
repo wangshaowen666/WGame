@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------
- * File: BattleBase.cs
+ * File: BattleView.cs
  * Author: Wsw
  * Feedback: 614270423@qq.com
  * Time: 2026/01/26 14:40:45 
@@ -11,10 +11,11 @@ using UnityEngine;
 
 public enum BattleMode : byte
 {
-    TowerDefense, // 帧同步塔防
+    TowerDefense,     // 帧同步塔防（联机，FrameSyncMgr 驱动）
+    VampireSurvivor,  // 吸血鬼幸存者（单机，LocalDriver 驱动，阶段 3/4 起支持同机双人）
 }
 
-public abstract class BattleViewBase 
+public abstract class BattleView 
 {
     public virtual void Init()
     {

@@ -22,6 +22,7 @@ public static class GameMgr
     public static readonly EntityPool EntityPool = new();
     public static readonly BattleMgr Battle = new();
     public static readonly FrameAnimMgr FrameAnim = new();
+    public static readonly EventMgr<GameEvent> Event = new();
 
     private static readonly ManagerBase[] s_managers;
 
@@ -40,6 +41,7 @@ public static class GameMgr
             EntityPool, // 须在 Battle 之前注册：逆序清理时战斗先 Dispose 归还实体，EntityPool 再清池
             Battle,
             FrameAnim,
+            Event,
         };
     }
 

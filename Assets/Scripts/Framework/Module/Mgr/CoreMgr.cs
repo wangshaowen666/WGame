@@ -14,7 +14,6 @@ public static class CoreMgr
     public static readonly UpdateMgr Update = new();
     public static readonly TimerMgr Timer = new();
     public static readonly ClassPoolMgr ClassPool = new();
-    public static readonly EventMgr Event = new();
     public static readonly ResMgr Res = new();
     public static readonly ObjectPoolMgr ObjectPool = new();
     public static readonly HttpMgr Http = new();
@@ -30,7 +29,6 @@ public static class CoreMgr
             Update,
             Timer,
             ClassPool,
-            Event,
             Res,
             ObjectPool,
             Http,

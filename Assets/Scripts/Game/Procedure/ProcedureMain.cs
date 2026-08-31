@@ -16,7 +16,7 @@ public class ProcedureMain : ProcedureBase
     {
         base.OnEnter();
         
-        CoreMgr.Event.Register(GameEvent.ProcedureExitMain, RunProcedure);
+        GameMgr.Event.Register(GameEvent.ProcedureExitMain, RunProcedure);
         GameCamera.SetMainCamera(GameCamera.MapCameraName);
         GameMgr.UI.PanelOn(DPnlId.MainPanel);
     }
@@ -24,7 +24,7 @@ public class ProcedureMain : ProcedureBase
     public override void OnExit()
     {
         base.OnExit();
-        CoreMgr.Event.UnRegister(GameEvent.ProcedureExitMain, RunProcedure);
+        GameMgr.Event.UnRegister(GameEvent.ProcedureExitMain, RunProcedure);
     }
 
     private void RunProcedure()
