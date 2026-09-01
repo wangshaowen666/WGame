@@ -165,12 +165,6 @@ public class TTTT : MonoBehaviour
         LogBattleState("[操作] 升级塔:", _lastTowerX, ",", _lastTowerY);
     }
 
-    [ContextMenu("5.退出战斗")]
-    void ExitBattle()
-    {
-        GameMgr.Battle.ExitBattle();
-    }
-
     [ContextMenu("7.进入吸血鬼单机战斗(骨架)")]
     void EnterVampireBattle()
     {
@@ -291,7 +285,6 @@ public class TTTT : MonoBehaviour
         if (GUILayout.Button("2. 就绪(自动开战)", GetBtnStyle())) ReadyForBattle();
         if (GUILayout.Button("3. 放塔", GetBtnStyle())) PlaceTower();
         if (GUILayout.Button("4. 升级塔", GetBtnStyle())) UpgradeTower();
-        if (GUILayout.Button("5. 退出战斗", GetBtnStyle())) ExitBattle();
         if (GUILayout.Button("7. 吸血鬼单机(骨架)", GetBtnStyle())) EnterVampireBattle();
         if (GUILayout.Button("8. 性能基线测试", GetBtnStyle())) PerfBaseline();
         if (GUILayout.Button("6. 查询金币", GetBtnStyle())) QueryGold();

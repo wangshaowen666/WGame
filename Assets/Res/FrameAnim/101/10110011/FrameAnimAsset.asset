@@ -39,3 +39,20 @@ MonoBehaviour:
     - {fileID: -340637658, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
     duration: 0.5
     loop: 1
+  - clipName: idle
+    sprites:
+    - {fileID: -651437379, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: 1475315628, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: 512591682, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -1334127060, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -1782748038, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: 1506697144, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: 809159831, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -864896319, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: 1588050416, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: 624414234, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -1234747106, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: -880049251, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    - {fileID: 471497847, guid: 4355da411aaa9464e8cc1f246f6352fe, type: 3}
+    duration: 0.8
+    loop: 1

@@ -31,7 +31,7 @@ public class VampireLogic
     public bool GameOver { get; private set; }
     public int LastTickFrame { get; private set; }
 
-    public readonly List<LogicPlayer> Players = new();
+    public readonly List<LogicHero> Heroes = new();
 
     private readonly XRng _rng;
     private int _nextId = 1; // 实体稳定自增 ID（视图对账按此 ID 增删）
@@ -40,10 +40,10 @@ public class VampireLogic
     {
         _rng = new XRng((ulong)seed);
         // 单机单人：创建 P1 玩家（出生在地图中心）
-        Players.Add(new LogicPlayer
+        Heroes.Add(new LogicHero
         {
             Id = _nextId++,
-            PlayerIndex = 0,
+            HeroIndex = 0,
             MoveSpeed = s_playerMoveSpeed,
             Radius = s_playerRadius,
             MaxHp = StartHp,
@@ -57,18 +57,18 @@ public class VampireLogic
         if (GameOver) return;
         LastTickFrame = absFrame;
 
-        for (int p = 0; p < Players.Count; p++)
-            MovePlayer(Players[p], inputs);
+        for (int p = 0; p < Heroes.Count; p++)
+            MovePlayer(Heroes[p], inputs);
     }
 
     /// <summary>应用该玩家的输入方向移动，并更新面朝方向</summary>
-    private void MovePlayer(LogicPlayer player, IList<VsInput> inputs)
+    private void MovePlayer(LogicHero hero, IList<VsInput> inputs)
     {
         var dirX = Fix.Zero;
         var dirY = Fix.Zero;
         if (inputs != null)
             for (int i = 0; i < inputs.Count; i++)
-                if (inputs[i].PlayerIndex == player.PlayerIndex)
+                if (inputs[i].PlayerIndex == hero.HeroIndex)
                 {
                     dirX = inputs[i].DirX;
                     dirY = inputs[i].DirY;
@@ -77,10 +77,10 @@ public class VampireLogic
 
         if (dirX == Fix.Zero && dirY == Fix.Zero) return;
 
-        player.X += dirX * player.MoveSpeed;
-        player.Y += dirY * player.MoveSpeed;
-        player.FacingX = dirX;
-        player.FacingY = dirY;
+        hero.X += dirX * hero.MoveSpeed;
+        hero.Y += dirY * hero.MoveSpeed;
+        hero.FacingX = dirX;
+        hero.FacingY = dirY;
     }
 
     /// <summary>全量状态哈希（FNV-1a 64）：复现/联机时逐帧对比验证确定性</summary>
@@ -89,11 +89,11 @@ public class VampireLogic
         var h = 14695981039346656037UL;
         Mix(ref h, LastTickFrame);
         Mix(ref h, GameOver ? 1 : 0);
-        for (int i = 0; i < Players.Count; i++)
+        for (int i = 0; i < Heroes.Count; i++)
         {
-            var p = Players[i];
+            var p = Heroes[i];
             Mix(ref h, p.Id);
-            Mix(ref h, p.PlayerIndex);
+            Mix(ref h, p.HeroIndex);
             Mix(ref h, p.X.Raw);
             Mix(ref h, p.Y.Raw);
             Mix(ref h, p.FacingX.Raw);
@@ -106,7 +106,7 @@ public class VampireLogic
     /// <summary>战斗结束清理逻辑层资源</summary>
     public void Dispose()
     {
-        Players.Clear();
+        Heroes.Clear();
     }
 
     private static void Mix(ref ulong h, long v)
@@ -116,10 +116,10 @@ public class VampireLogic
 }
 
 /// <summary>玩家实体（逻辑层）：位置/面朝/移动/血量，Tick 内由输入驱动移动</summary>
-public class LogicPlayer
+public class LogicHero
 {
     public int Id;
-    public int PlayerIndex;
+    public int HeroIndex;
     public Fix X, Y;
     public Fix FacingX, FacingY; // 当前移动方向
     public Fix MoveSpeed;

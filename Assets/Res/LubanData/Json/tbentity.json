@@ -46,5 +46,9 @@
   {
     "id": 70004,
     "name": "EnemyEngine"
+  },
+  {
+    "id": 101001,
+    "name": "Hero_101001"
   }
 ]

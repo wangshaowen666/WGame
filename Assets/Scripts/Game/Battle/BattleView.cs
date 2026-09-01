@@ -11,8 +11,8 @@ using UnityEngine;
 
 public enum BattleMode : byte
 {
-    TowerDefense,     // 帧同步塔防（联机，FrameSyncMgr 驱动）
-    VampireSurvivor,  // 吸血鬼幸存者（单机，LocalDriver 驱动，阶段 3/4 起支持同机双人）
+    TowerDefense,     // 帧同步塔防
+    VampireSurvivor,  // 吸血鬼幸存者
 }
 
 public abstract class BattleView 

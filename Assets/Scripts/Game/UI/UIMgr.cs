@@ -14,7 +14,6 @@ using Object = UnityEngine.Object;
 public class UIMgr : ManagerBase
 {
     private const string UILayerName = "UI";
-    private const string UIRootName = "UIRoot";
     
     private readonly Dictionary<DUIGroup, UIGroup> _layerGroupMap = new();
     // 正在加载中的界面，如果还没加载完就被关闭了，value会被置为0
@@ -23,6 +22,12 @@ public class UIMgr : ManagerBase
     
     private Transform _uiRoot;
     private ObjectPool<UIPanelBase> _uiPanelPool = CoreMgr.ObjectPool.RegisterPool<UIPanelBase>(5);
+
+    public override void OnInit()
+    {
+        base.OnInit();
+        _uiRoot = GameObject.Find(LaunchConfig.UIRoot).transform;
+    }
 
     public void PanelOn(DPnlId id, object userData = null)
     {

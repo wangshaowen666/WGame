@@ -35,7 +35,6 @@ public class ProcedurePreload : ProcedureBase
         await UniTask.Yield();
         
         _fsm.SetData(ProcedureKey.SceneName, GameConfig.MainScene);
-        
         //_fsm.SetData(ProcedureKey.SceneName, GameConfig.TestScene);
         
         ChangeTo<ProcedureChangeScene>();
