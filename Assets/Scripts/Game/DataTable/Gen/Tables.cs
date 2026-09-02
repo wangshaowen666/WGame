@@ -14,15 +14,29 @@ namespace cfg
 public partial class Tables
 {
     public TbEffect TbEffect {get; }
+    public TbVSStage TbVSStage {get; }
     public TbPlane TbPlane {get; }
+    public TbVSWeapon TbVSWeapon {get; }
+    public TbVSEnemy TbVSEnemy {get; }
+    public TbVSWeaponLevel TbVSWeaponLevel {get; }
+    public TbVSPassive TbVSPassive {get; }
     public TbUIPanel TbUIPanel {get; }
+    public TbVSPickup TbVSPickup {get; }
+    public TbVSCharacter TbVSCharacter {get; }
     public TbEntity TbEntity {get; }
 
     public Tables(System.Func<string, ByteBuf> loader)
     {
         TbEffect = new TbEffect(loader("tbeffect"));
+        TbVSStage = new TbVSStage(loader("tbvsstage"));
         TbPlane = new TbPlane(loader("tbplane"));
+        TbVSWeapon = new TbVSWeapon(loader("tbvsweapon"));
+        TbVSEnemy = new TbVSEnemy(loader("tbvsenemy"));
+        TbVSWeaponLevel = new TbVSWeaponLevel(loader("tbvsweaponlevel"));
+        TbVSPassive = new TbVSPassive(loader("tbvspassive"));
         TbUIPanel = new TbUIPanel(loader("tbuipanel"));
+        TbVSPickup = new TbVSPickup(loader("tbvspickup"));
+        TbVSCharacter = new TbVSCharacter(loader("tbvscharacter"));
         TbEntity = new TbEntity(loader("tbentity"));
         ResolveRef();
     }
@@ -30,8 +44,15 @@ public partial class Tables
     private void ResolveRef()
     {
         TbEffect.ResolveRef(this);
+        TbVSStage.ResolveRef(this);
         TbPlane.ResolveRef(this);
+        TbVSWeapon.ResolveRef(this);
+        TbVSEnemy.ResolveRef(this);
+        TbVSWeaponLevel.ResolveRef(this);
+        TbVSPassive.ResolveRef(this);
         TbUIPanel.ResolveRef(this);
+        TbVSPickup.ResolveRef(this);
+        TbVSCharacter.ResolveRef(this);
         TbEntity.ResolveRef(this);
     }
 }

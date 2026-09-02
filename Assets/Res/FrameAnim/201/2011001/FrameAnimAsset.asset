@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02ea2bed296b144cb8766c3714e3c814, type: 3}
+  m_Name: FrameAnimAsset
+  m_EditorClassIdentifier: 
+  clips:
+  - clipName: run
+    sprites:
+    - {fileID: -1988850342, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: -1019722591, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: 1368710646, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: 1923442698, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: 945069130, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: -540062141, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: -1214572845, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: -1468364490, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: -1002250089, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: -1685451250, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    duration: 0.6
+    loop: 1
+  - clipName: die
+    sprites:
+    - {fileID: -82020805, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: 1019571077, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: -437359696, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: 1445216721, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: -188541681, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: 957811276, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: -1926592948, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: 631636714, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: 989566976, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: 2119537595, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    - {fileID: -479216193, guid: cabefd5b8236c4dbd809aa29e461efe8, type: 3}
+    duration: 0.5
+    loop: 0

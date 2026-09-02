@@ -1,0 +1,3 @@
+=== Prefab Hierarchy: Hero_101001 ===
+
+Hero_101001  <Transform, FrameAnimGpuView, MeshRenderer, MeshFilter>

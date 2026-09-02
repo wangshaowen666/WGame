@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "name": "标准生存",
+    "durationSec": 0,
+    "killTarget": 0,
+    "spawnIntervalSec": 1,
+    "spawnCountPerWave": 2,
+    "spawnRadius": 15,
+    "enemyId": 201001
+  }
+]

@@ -1,0 +1,11 @@
+[
+  {
+    "id": 101001,
+    "name": "英雄",
+    "entityId": 101001,
+    "maxHp": 100,
+    "moveSpeed": 0.15,
+    "radius": 0.4,
+    "startWeaponId": 1
+  }
+]

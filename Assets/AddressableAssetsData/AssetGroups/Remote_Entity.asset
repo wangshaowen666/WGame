@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Remote_Entity
+  m_EditorClassIdentifier: 
+  m_GroupName: Remote_Entity
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 73919f9b31dac44a9a5dd7a025c98248
+  m_SerializeEntries:
+  - m_GUID: 3d7b987cf517d4e5e920842db46e877b
+    m_Address: Hero_101001
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4de29419df94c4bdf95dd25203024396
+    m_Address: Enemy_201001
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 887a2619f93d5433294a38258012af01, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 4f4fc36d0dd804767adc7bc95e44b814, type: 2}
+    - {fileID: 11400000, guid: f0ea760076da641c2a07f40312e7526e, type: 2}

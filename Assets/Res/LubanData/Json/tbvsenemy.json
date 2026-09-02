@@ -1,0 +1,14 @@
+[
+  {
+    "id": 201001,
+    "name": "自爆怪",
+    "entityId": 201001,
+    "hp": 50,
+    "damage": 0,
+    "moveSpeed": 0.08,
+    "radius": 0.35,
+    "exp": 1,
+    "dropId": 0,
+    "behavior": 1
+  }
+]

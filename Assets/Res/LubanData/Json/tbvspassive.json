@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "name": "生命上限",
+    "attrType": 1,
+    "perLevelValue": 20,
+    "maxLevel": 5
+  },
+  {
+    "id": 2,
+    "name": "移速",
+    "attrType": 2,
+    "perLevelValue": 0.05,
+    "maxLevel": 5
+  },
+  {
+    "id": 3,
+    "name": "攻击力",
+    "attrType": 3,
+    "perLevelValue": 0.1,
+    "maxLevel": 5
+  },
+  {
+    "id": 4,
+    "name": "冷却缩减",
+    "attrType": 4,
+    "perLevelValue": 0.08,
+    "maxLevel": 5
+  },
+  {
+    "id": 5,
+    "name": "范围",
+    "attrType": 5,
+    "perLevelValue": 0.1,
+    "maxLevel": 5
+  },
+  {
+    "id": 6,
+    "name": "弹数",
+    "attrType": 6,
+    "perLevelValue": 1,
+    "maxLevel": 3
+  },
+  {
+    "id": 7,
+    "name": "弹速",
+    "attrType": 7,
+    "perLevelValue": 0.1,
+    "maxLevel": 5
+  },
+  {
+    "id": 8,
+    "name": "磁力",
+    "attrType": 9,
+    "perLevelValue": 0.5,
+    "maxLevel": 5
+  }
+]

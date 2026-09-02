@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "经验宝石",
+    "pickupType": 1,
+    "value": 1
+  },
+  {
+    "id": 2,
+    "name": "治疗药水",
+    "pickupType": 2,
+    "value": 30
+  },
+  {
+    "id": 3,
+    "name": "磁铁",
+    "pickupType": 3,
+    "value": 0
+  },
+  {
+    "id": 4,
+    "name": "宝箱",
+    "pickupType": 4,
+    "value": 0
+  }
+]

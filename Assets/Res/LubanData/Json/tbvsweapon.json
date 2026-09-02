@@ -1,0 +1,9 @@
+[
+  {
+    "id": 1,
+    "name": "魔杖",
+    "behavior": 1,
+    "targetStrategy": 1,
+    "desc": "自动索敌最近敌人，发射穿透弹"
+  }
+]
