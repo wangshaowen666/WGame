@@ -12,7 +12,7 @@ using UnityEngine;
 /// <summary>
 /// 单机战斗驱动器（吸血鬼幸存者本地固定步长）：
 /// - 注册 CoreMgr.Update（IUpdateable），用墙钟时间（realtimeSinceStartup）累积毫秒预算，
-///   每满 VampireLogic.LogicFrameMs(33ms) 推进一逻辑帧，帧号从 1 递增
+///   每满 VampireLogic.LogicFrameMs(50ms) 推进一逻辑帧，帧号从 1 递增
 /// - 帧边界采样输入后调 VampireLogic.Tick(frame, inputs)，形状与 FrameSyncMgr.OnFrame 对齐：
 ///   同一逻辑层既可被本驱动器驱动（单机），阶段 7 联机时换成 FrameSyncMgr 驱动，Logic/表现层零改动
 /// - 暂停：直接停步进（不消费帧、不累积墙钟预算），不动 TimeScale；
@@ -39,6 +39,12 @@ public class LocalDriver : IUpdateable
     /// <summary>每推一帧触发一次（携带帧号），表现层在此做视图对账（对齐 FrameSyncMgr.OnFrame）</summary>
     public event Action<int> OnFrame;
 
+    /// <summary>
+    /// 每渲染帧触发一次（alpha = 当前逻辑帧推进进度 0~1，deltaSeconds = 本渲染帧真实秒数），
+    /// 表现层据此做帧间插值与视觉动画（联机时 FrameSyncMgr 以消费节拍器进度提供同形状事件）
+    /// </summary>
+    public event Action<float, float> OnRenderFrame;
+
     public LocalDriver(VampireLogic logic)
     {
         _logic = logic;
@@ -53,13 +59,19 @@ public class LocalDriver : IUpdateable
 
     public void MyUpdate(float deltaTime, float realDeltaTime)
     {
-        if (Paused) return; // 暂停：直接停步进（不消费帧/不累积预算），不动 TimeScale
+        if (Paused)
+        {
+            // 暂停：停步进（不消费帧/不累积预算），alpha 冻结，插值输出恒定（表现世界冻结）
+            OnRenderFrame?.Invoke(Mathf.Clamp01(_frameTimer / VampireLogic.LogicFrameMs), 0f);
+            return;
+        }
 
         // 用墙钟时间累积（同 FrameSyncMgr）：编辑器失焦/长卡顿仍按真实流逝时间步进，
         // 预算 = 真实流逝时间，逻辑帧与墙钟同步
         var now = Time.realtimeSinceStartup;
         if (_lastRealTime < 0) _lastRealTime = now;
         _frameTimer += (float)((now - _lastRealTime) * 1000.0);
+        var deltaSeconds = (float)(now - _lastRealTime); // 本渲染帧真实流逝秒数（表现层视觉动画用）
         _lastRealTime = now;
 
         while (_frameTimer >= VampireLogic.LogicFrameMs)
@@ -72,6 +84,9 @@ public class LocalDriver : IUpdateable
             _logic.Tick(CurFrameId, _inputs);
             OnFrame?.Invoke(CurFrameId);
         }
+
+        // 渲染帧插值驱动：alpha = 当前帧推进进度（追帧多帧时 prev/cur 仍为最后相邻两帧，插值平滑）
+        OnRenderFrame?.Invoke(Mathf.Clamp01(_frameTimer / VampireLogic.LogicFrameMs), deltaSeconds);
     }
 
     /// <summary>

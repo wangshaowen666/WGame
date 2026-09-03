@@ -24,6 +24,7 @@ public sealed partial class DVSStage : Luban.BeanBase
         SpawnCountPerWave = _buf.ReadInt();
         SpawnRadius = _buf.ReadFloat();
         EnemyId = _buf.ReadInt();
+        DamageTextEntityId = _buf.ReadInt();
     }
 
     public static DVSStage DeserializeDVSStage(ByteBuf _buf)
@@ -63,6 +64,10 @@ public sealed partial class DVSStage : Luban.BeanBase
     /// 本关刷的敌人id(#VSEnemy)
     /// </summary>
     public readonly int EnemyId;
+    /// <summary>
+    /// 伤害飘字实体id(#Entity)
+    /// </summary>
+    public readonly int DamageTextEntityId;
    
     public const int __ID__ = -275652227;
     public override int GetTypeId() => __ID__;
@@ -82,6 +87,7 @@ public sealed partial class DVSStage : Luban.BeanBase
         + "spawnCountPerWave:" + SpawnCountPerWave + ","
         + "spawnRadius:" + SpawnRadius + ","
         + "enemyId:" + EnemyId + ","
+        + "damageTextEntityId:" + DamageTextEntityId + ","
         + "}";
     }
 }

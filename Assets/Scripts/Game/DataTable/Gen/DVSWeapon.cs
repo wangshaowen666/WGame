@@ -20,6 +20,9 @@ public sealed partial class DVSWeapon : Luban.BeanBase
         Name = _buf.ReadString();
         Behavior = (VSWeaponBehavior)_buf.ReadInt();
         TargetStrategy = (VSTargetStrategy)_buf.ReadInt();
+        EntityId = _buf.ReadInt();
+        HitEffectId = _buf.ReadInt();
+        Knockback = _buf.ReadFloat();
         Desc = _buf.ReadString();
     }
 
@@ -45,6 +48,18 @@ public sealed partial class DVSWeapon : Luban.BeanBase
     /// </summary>
     public readonly VSTargetStrategy TargetStrategy;
     /// <summary>
+    /// 弹体表现实体id(#Entity)
+    /// </summary>
+    public readonly int EntityId;
+    /// <summary>
+    /// 命中特效实体id(#Entity)
+    /// </summary>
+    public readonly int HitEffectId;
+    /// <summary>
+    /// 击退力度(首帧位移,单位)
+    /// </summary>
+    public readonly float Knockback;
+    /// <summary>
     /// 说明
     /// </summary>
     public readonly string Desc;
@@ -63,6 +78,9 @@ public sealed partial class DVSWeapon : Luban.BeanBase
         + "name:" + Name + ","
         + "behavior:" + Behavior + ","
         + "targetStrategy:" + TargetStrategy + ","
+        + "entityId:" + EntityId + ","
+        + "hitEffectId:" + HitEffectId + ","
+        + "knockback:" + Knockback + ","
         + "desc:" + Desc + ","
         + "}";
     }

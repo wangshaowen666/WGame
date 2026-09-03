@@ -4,6 +4,9 @@
     "name": "魔杖",
     "behavior": 1,
     "targetStrategy": 1,
+    "entityId": 500001,
+    "hitEffectId": 701001,
+    "knockback": 0.1,
     "desc": "自动索敌最近敌人，发射穿透弹"
   }
 ]

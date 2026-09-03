@@ -1,5 +1,0 @@
-=== Prefab Hierarchy: Enemy_201001 ===
-
-Enemy_201001  <Transform, HeroView>
-  Flip  <Transform>
-    Mesh  <Transform, FrameAnimGpuView, MeshRenderer, MeshFilter>

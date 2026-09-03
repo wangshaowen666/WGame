@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02ea2bed296b144cb8766c3714e3c814, type: 3}
+  m_Name: Anim_701001
+  m_EditorClassIdentifier: 
+  clips:
+  - clipName: hit
+    sprites:
+    - {fileID: 1562881483, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: -531624989, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: 2018857888, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: -1779951567, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    - {fileID: 192062648, guid: bb441f6c73907ff4586a60b2b35d47ff, type: 3}
+    duration: 0.3
+    loop: 0

@@ -66,7 +66,7 @@ public sealed partial class DVSWeaponLevel : Luban.BeanBase
     /// </summary>
     public readonly int Amount;
     /// <summary>
-    /// 持续时间(秒,0=瞬时)
+    /// 弹体存活时长(秒)
     /// </summary>
     public readonly float DurationSec;
     /// <summary>

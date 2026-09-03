@@ -38,7 +38,8 @@ public sealed class FrameAnimGpuView : MonoBehaviour
     private float _fps = 1f;
     private float _speed = 1f;
 
-    private void Start()
+    /// <summary>每次激活重播默认动画（Start 只跑一次，池化复用后不会触发；OnDisable 的 Release 已清材质/状态，激活即回到默认动画）</summary>
+    private void OnEnable()
     {
         if (!string.IsNullOrEmpty(_defaultClipNm))
         {

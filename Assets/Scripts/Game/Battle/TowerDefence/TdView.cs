@@ -286,10 +286,10 @@ public class TdView : BattleView
 
     // ---- 视图工厂与刷新（哑视图：只做表现，无逻辑） ----
 
-    private Transform SpawnEnemyView(int id)
+    private Transform SpawnEnemyView(TdLogic.LogicEnemy en)
     {
         var view = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
-        view.name = $"Enemy_{id}";
+        view.name = $"Enemy_{en.Id}";
         view.SetParent(_world, false);
         view.localScale = new Vector3(0.6f, 0.6f, 0.6f);
         ViewMats.Set(view.GetComponent<Renderer>(), Color.red);
@@ -301,10 +301,10 @@ public class TdView : BattleView
         view.localPosition = new Vector3(en.X.AsFloat, 0.3f, en.Y.AsFloat);
     }
 
-    private Transform SpawnTowerView(int id)
+    private Transform SpawnTowerView(TdLogic.LogicTower tw)
     {
         var view = GameObject.CreatePrimitive(PrimitiveType.Cylinder).transform;
-        view.name = $"Tower_{id}";
+        view.name = $"Tower_{tw.Id}";
         view.SetParent(_world, false);
         view.localScale = new Vector3(0.7f, 0.4f, 0.7f);
         ViewMats.Set(view.GetComponent<Renderer>(), Color.blue);

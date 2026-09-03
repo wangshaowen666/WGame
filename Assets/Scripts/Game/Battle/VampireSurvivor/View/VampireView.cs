@@ -24,9 +24,20 @@ public class VampireView : BattleView
     private LocalDriver _driver;
     private ViewSync<LogicHero, HeroView> _playerViews;
     private ViewSync<LogicEnemy, EnemyView> _enemyViews;
+    private ViewSync<LogicProjectile, ProjectileView> _boltViews;
+    private ViewSync<LogicDrop, DropView> _dropViews;
     private bool _inputBound;
 
     private Transform _entityRoot;
+
+    // ---- 表现实体 id（Init 读配置表派生，逻辑实体不携带表现字段）----
+    // 英雄/关卡怪种/弹体/命中特效锚点：VampireLogic 公开常量 → 角色/关卡/武器表 → TbEntity 资源 id
+    private int _heroEntityId;
+    private int _enemyEntityId;
+    private int _boltEntityId;
+    private int _boltHitEffectId;
+    private int _damageTextEntityId;
+    private int _gemEntityId;
 
     private CinemachineVirtualCamera _vcam; // 玩家跟随虚拟相机
     private Camera _brainCamera;            // 本战斗为其添加 CinemachineBrain 的相机（退出时移除）
@@ -39,7 +50,18 @@ public class VampireView : BattleView
         
         var seed = GenerateSeed();
         _logic = new VampireLogic(seed);
-        _driver = new LocalDriver(_logic); 
+        _driver = new LocalDriver(_logic);
+
+        // 表现实体 id 反查（表链：角色→实体、关卡→怪种/飘字→实体、角色初始武器→弹体/命中特效实体）
+        var characterCfg = GameMgr.DataTable.TbVSCharacter.Get(VampireLogic.HeroCfgId);
+        var stageCfg = GameMgr.DataTable.TbVSStage.Get(VampireLogic.StageId);
+        _heroEntityId = characterCfg.EntityId;
+        _enemyEntityId = GameMgr.DataTable.TbVSEnemy.Get(stageCfg.EnemyId).EntityId;
+        var weaponCfg = GameMgr.DataTable.TbVSWeapon.Get(characterCfg.StartWeaponId);
+        _boltEntityId = weaponCfg.EntityId;
+        _boltHitEffectId = weaponCfg.HitEffectId;
+        _damageTextEntityId = stageCfg.DamageTextEntityId;
+        _gemEntityId = GameMgr.DataTable.TbVSEnemy.Get(stageCfg.EnemyId).DropId;
 
         if (GameMgr.Battle.Joystick != null)
             BindJoystickInput(GameMgr.Battle.Joystick);
@@ -49,19 +71,69 @@ public class VampireView : BattleView
             p => p.Id, SpawnHeroView, RefreshHeroView, DespawnHeroView);
         _enemyViews = new ViewSync<LogicEnemy, EnemyView>(
             e => e.Id, SpawnEnemyView, RefreshEnemyView, DespawnEnemyView);
+        _boltViews = new ViewSync<LogicProjectile, ProjectileView>(
+            b => b.Id, SpawnBoltView, RefreshBoltView, DespawnBoltView);
+        _dropViews = new ViewSync<LogicDrop, DropView>(
+            d => d.Id, SpawnDropView, RefreshDropView, DespawnDropView);
         
         _driver.OnFrame += OnFrame;
+        _driver.OnRenderFrame += OnRenderFrame; // 渲染帧插值驱动（表现帧率与逻辑帧率解耦）
 
         InitFollowCamera();
 
         Log.Info("[吸血鬼] 进入战斗, 种子:", seed);
     }
 
-    /// <summary>逻辑帧推进：视图对账</summary>
+    /// <summary>逻辑帧推进：视图对账（帧状态推进 PushFrame）+ 消费命中事件（飘字+特效；致死敌人已被清扫，按死亡位置触发）</summary>
     private void OnFrame(int frame)
     {
         _playerViews.Sync(_logic.Heroes);
         _enemyViews.Sync(_logic.Enemies);
+        _boltViews.Sync(_logic.Projectiles);
+        _dropViews.Sync(_logic.Drops);
+
+        var hits = _logic.HitEvents;
+        for (int i = 0; i < hits.Count; i++)
+        {
+            var x = hits[i].X.AsFloat;
+            var y = hits[i].Y.AsFloat;
+            SpawnHitEffect(x, y);
+            SpawnDamageText(x, y, hits[i].Damage);
+        }
+    }
+
+    /// <summary>渲染帧推进：按逻辑帧推进进度插值实体位置 + 飘字动画</summary>
+    private void OnRenderFrame(float alpha, float deltaSeconds)
+    {
+        var heroes = _playerViews.ViewList;
+        for (int i = 0; i < heroes.Count; i++)
+            heroes[i].ApplyInterpolation(alpha);
+
+        var enemies = _enemyViews.ViewList;
+        for (int i = 0; i < enemies.Count; i++)
+            enemies[i].ApplyInterpolation(alpha);
+
+        var bolts = _boltViews.ViewList;
+        for (int i = 0; i < bolts.Count; i++)
+            bolts[i].ApplyInterpolation(alpha);
+
+        var drops = _dropViews.ViewList;
+        for (int i = 0; i < drops.Count; i++)
+            drops[i].ApplyInterpolation(alpha);
+
+        // 飘字动画（倒序：到期回池移除）
+        for (int i = _activeTexts.Count - 1; i >= 0; i--)
+        {
+            var text = _activeTexts[i];
+            text.Tick(deltaSeconds);
+            _textLifes[i] -= deltaSeconds;
+            if (_textLifes[i] > 0f)
+                continue;
+
+            GameMgr.EntityPool.Release(text.EntityId, text.gameObject);
+            _activeTexts.RemoveAt(i);
+            _textLifes.RemoveAt(i);
+        }
     }
 
     private void OnVsJoystickReady(GameJoystick joystick)
@@ -84,12 +156,19 @@ public class VampireView : BattleView
     public override void Dispose()
     {
         _driver.OnFrame -= OnFrame;
+        _driver.OnRenderFrame -= OnRenderFrame;
         GameMgr.Event.UnRegister<GameJoystick>(GameEvent.VsJoystickReady, OnVsJoystickReady);
         _playerViews?.Clear(); // 销毁全部玩家视图
         _playerViews = null;
         _enemyViews?.Clear(); // 归还全部敌人视图（走 DespawnEnemyView 进入死亡计时）
         _enemyViews = null;
         CancelDyingEnemies(); // 取消剩余死亡计时并立即归还
+        CancelActiveEffects(); // 取消命中特效计时并立即归还
+        CancelActiveTexts(); // 飘字全部立即归还
+        _boltViews?.Clear(); // 归还全部弹幕视图（走 DespawnBoltView 回实体池）
+        _boltViews = null;
+        _dropViews?.Clear(); // 归还全部掉落视图（走 DespawnDropView 回实体池）
+        _dropViews = null;
 
         // 清理 Cinemachine：销毁虚拟相机，移除本战斗添加的 Brain（避免污染共享相机）
         if (_vcam != null)
@@ -157,24 +236,28 @@ public class VampireView : BattleView
 
     // ---- 玩家视图 ----
 
-    private const int HeroEntityId = 101001; // 英雄实体配置 Id（#Entity.xlsx）
-
-    private HeroView SpawnHeroView(int id)
+    private HeroView SpawnHeroView(LogicHero p)
     {
-        GameMgr.EntityPool.Acquire(HeroEntityId, _entityRoot, (go) =>
+        var id = p.Id;              // 快照实体 id（异步加载期间实体可能被清扫/池化复用）
+        var entityId = _heroEntityId;
+        var px = p.X.AsFloat;       // 快照位置（Attach 前推一帧，避免异步加载期间视图停在原点被插值渲染）
+        var py = p.Y.AsFloat;
+        GameMgr.EntityPool.Acquire(entityId, _entityRoot, (go) =>
         {
             if (go == null)
             {
-                Log.Error("[吸血鬼] 英雄实体加载失败, 实体Id:", HeroEntityId);
+                Log.Error("[吸血鬼] 英雄实体加载失败, 实体Id:", entityId);
                 return;
             }
             var view = go.GetComponent<HeroView>();
             if (view == null)
             {
-                Log.Error("[吸血鬼] 英雄预制体缺少 HeroView 组件, 实体Id:", HeroEntityId, "，已销毁");
+                Log.Error("[吸血鬼] 英雄预制体缺少 HeroView 组件, 实体Id:", entityId, "，已销毁");
                 Object.Destroy(go);
                 return;
             }
+            view.SetEntityId(entityId); // 记录实体配置 Id（Despawn 归还时作池 key）
+            view.PushFrame(px, py);
             _playerViews.Attach(id, view);
             // 英雄视图就绪后作为相机跟随目标（单机单人：首个英雄）
             if (_vcam != null && _vcam.Follow == null)
@@ -184,48 +267,55 @@ public class VampireView : BattleView
         return null;
     }
 
-    private static void RefreshHeroView(LogicHero p, HeroView view)
+    private void RefreshHeroView(LogicHero p, HeroView view)
     {
-        view.SetPosition(p.X.AsFloat, p.Y.AsFloat);
+        view.PushFrame(p.X.AsFloat, p.Y.AsFloat);
         view.SetFlip(p.FacingX.AsFloat);
     }
 
     /// <summary>英雄视图消亡：归还实体池（复用，而非销毁）</summary>
     private void DespawnHeroView(HeroView view)
     {
-        GameMgr.EntityPool.Release(HeroEntityId, view.gameObject);
+        GameMgr.EntityPool.Release(view.EntityId, view.gameObject);
     }
 
     // ---- 敌人视图 ----
 
-    private const int EnemyEntityId = 201001; // 敌人实体配置 Id（#Entity.xlsx）
-
-    private EnemyView SpawnEnemyView(int id)
+    private EnemyView SpawnEnemyView(LogicEnemy e)
     {
-        GameMgr.EntityPool.Acquire(EnemyEntityId, _entityRoot, (go) =>
+        var id = e.Id;             // 快照实体 id（异步加载期间实体可能被清扫/池化复用）
+        var entityId = _enemyEntityId;
+        var px = e.X.AsFloat;      // 快照位置（Attach 前推一帧，避免异步加载期间视图停在原点被插值渲染）
+        var py = e.Y.AsFloat;
+        GameMgr.EntityPool.Acquire(entityId, _entityRoot, (go) =>
         {
             if (go == null)
             {
-                Log.Error("[吸血鬼] 敌人实体加载失败, 实体Id:", EnemyEntityId);
+                Log.Error("[吸血鬼] 敌人实体加载失败, 实体Id:", entityId);
                 return;
             }
             var view = go.GetComponent<EnemyView>();
             if (view == null)
             {
-                Log.Error("[吸血鬼] 敌人预制体缺少 EnemyView 组件, 实体Id:", EnemyEntityId, "，已销毁");
+                Log.Error("[吸血鬼] 敌人预制体缺少 EnemyView 组件, 实体Id:", entityId, "，已销毁");
                 Object.Destroy(go);
                 return;
             }
+            view.SetEntityId(entityId); // 记录实体配置 Id（Despawn 归还时作池 key）
+            view.PushFrame(px, py);
             _enemyViews.Attach(id, view);
         });
 
         return null;
     }
 
-    private static void RefreshEnemyView(LogicEnemy e, EnemyView view)
+    private void RefreshEnemyView(LogicEnemy e, EnemyView view)
     {
-        view.SetPosition(e.X.AsFloat, e.Y.AsFloat);
+        view.PushFrame(e.X.AsFloat, e.Y.AsFloat);
         view.SetFlip(e.FacingX.AsFloat);
+        if (view.OnHitFrame(e.LastHitFrame))
+            SpawnHitEffect(e.X.AsFloat, e.Y.AsFloat); // 新受击：在受击敌人位置触发命中特效
+        view.TickFlash();
     }
 
     /// <summary>敌人视图消亡：播死亡动画，Timer 计时播完（0.5s）后回池</summary>
@@ -235,8 +325,175 @@ public class VampireView : BattleView
         _dyingViews[view] = CoreMgr.Timer.StartSecondDelay(EnemyDieAnimSeconds, () =>
         {
             _dyingViews.Remove(view);
-            GameMgr.EntityPool.Release(EnemyEntityId, view.gameObject);
+            GameMgr.EntityPool.Release(view.EntityId, view.gameObject);
         });
+    }
+
+    // ---- 弹幕视图 ----
+
+    private ProjectileView SpawnBoltView(LogicProjectile b)
+    {
+        var id = b.Id;
+        var entityId = _boltEntityId;
+        var dirX = b.DirX.AsFloat; // 快照方向（弹体池化复用后字段会被 Reset）
+        var dirY = b.DirY.AsFloat;
+        var px = b.X.AsFloat;      // 快照位置（Attach 前推一帧，避免异步加载期间视图停在原点被插值渲染）
+        var py = b.Y.AsFloat;
+        GameMgr.EntityPool.Acquire(entityId, _entityRoot, (go) =>
+        {
+            if (go == null)
+            {
+                Log.Error("[吸血鬼] 弹幕实体加载失败, 实体Id:", entityId);
+                return;
+            }
+            var view = go.GetComponent<ProjectileView>();
+            if (view == null)
+            {
+                Log.Error("[吸血鬼] 弹幕预制体缺少 ProjectileView 组件, 实体Id:", entityId, "，已销毁");
+                Object.Destroy(go);
+                return;
+            }
+            view.SetEntityId(entityId); // 记录实体配置 Id（Despawn 归还时作池 key）
+            view.PushFrame(px, py);
+            view.SetDirection(dirX, dirY); // 创建时朝向飞行目标（直线飞行，仅此一次）
+            _boltViews.Attach(id, view);
+        });
+
+        return null;
+    }
+
+    private static void RefreshBoltView(LogicProjectile b, ProjectileView view)
+    {
+        view.PushFrame(b.X.AsFloat, b.Y.AsFloat);
+    }
+
+    /// <summary>弹幕视图消亡：归还实体池（复用，而非销毁；池 key 用创建时记录的实体配置 Id）</summary>
+    private void DespawnBoltView(ProjectileView view)
+    {
+        GameMgr.EntityPool.Release(view.EntityId, view.gameObject);
+    }
+
+    // ---- 掉落物视图 ----
+
+    private DropView SpawnDropView(LogicDrop d)
+    {
+        var id = d.Id;             // 快照实体 id（异步加载期间实体可能被清扫/池化复用）
+        var entityId = _gemEntityId;
+        var px = d.X.AsFloat;      // 快照位置（Attach 前推一帧）
+        var py = d.Y.AsFloat;
+        GameMgr.EntityPool.Acquire(entityId, _entityRoot, (go) =>
+        {
+            if (go == null)
+            {
+                Log.Error("[吸血鬼] 掉落实体加载失败, 实体Id:", entityId);
+                return;
+            }
+            var view = go.GetComponent<DropView>();
+            if (view == null)
+            {
+                Log.Error("[吸血鬼] 掉落预制体缺少 DropView 组件, 实体Id:", entityId, "，已销毁");
+                Object.Destroy(go);
+                return;
+            }
+            view.SetEntityId(entityId);
+            view.PushFrame(px, py);
+            _dropViews.Attach(id, view);
+        });
+
+        return null;
+    }
+
+    private static void RefreshDropView(LogicDrop d, DropView view)
+    {
+        view.PushFrame(d.X.AsFloat, d.Y.AsFloat);
+    }
+
+    /// <summary>掉落视图消亡（被拾取，2-7）：归还实体池</summary>
+    private void DespawnDropView(DropView view)
+    {
+        GameMgr.EntityPool.Release(view.EntityId, view.gameObject);
+    }
+
+    // ---- 伤害飘字（一次性表现：命中时 Acquire → 上浮淡出（渲染帧驱动）→ 到期回池，不走 ViewSync）----
+
+    private const float DamageTextLifeSeconds = 0.6f;
+    private readonly List<DamageTextView> _activeTexts = new();
+    private readonly List<float> _textLifes = new();
+
+    private void SpawnDamageText(float x, float y, long damage)
+    {
+        var entityId = _damageTextEntityId;
+        GameMgr.EntityPool.Acquire(entityId, _entityRoot, (go) =>
+        {
+            if (go == null)
+            {
+                Log.Error("[吸血鬼] 飘字实体加载失败, 实体Id:", entityId);
+                return;
+            }
+            var view = go.GetComponent<DamageTextView>();
+            if (view == null)
+            {
+                Log.Error("[吸血鬼] 飘字预制体缺少 DamageTextView 组件, 实体Id:", entityId, "，已销毁");
+                Object.Destroy(go);
+                return;
+            }
+            view.SetEntityId(entityId);
+            view.Show(x, y, damage);
+            _activeTexts.Add(view);
+            _textLifes.Add(DamageTextLifeSeconds);
+        });
+    }
+
+    /// <summary>退出战斗：飘字全部立即归还（无 Timer，无需取消）</summary>
+    private void CancelActiveTexts()
+    {
+        for (int i = 0; i < _activeTexts.Count; i++)
+            GameMgr.EntityPool.Release(_activeTexts[i].EntityId, _activeTexts[i].gameObject);
+        _activeTexts.Clear();
+        _textLifes.Clear();
+    }
+
+    // ---- 命中特效（一次性表现：命中时 Acquire → 播放 → Timer 计时回池，不走 ViewSync——逻辑层无特效实体）----
+
+    private const float HitEffectSeconds = 0.3f; // 特效存活时长（对齐特效资产动画时长）
+    private readonly Dictionary<EffectView, CancellationTokenSource> _activeEffects = new();
+
+    private void SpawnHitEffect(float x, float y)
+    {
+        var entityId = _boltHitEffectId;
+        GameMgr.EntityPool.Acquire(entityId, _entityRoot, (go) =>
+        {
+            if (go == null)
+            {
+                Log.Error("[吸血鬼] 命中特效实体加载失败, 实体Id:", entityId);
+                return;
+            }
+            var view = go.GetComponent<EffectView>();
+            if (view == null)
+            {
+                Log.Error("[吸血鬼] 特效预制体缺少 EffectView 组件, 实体Id:", entityId, "，已销毁");
+                Object.Destroy(go);
+                return;
+            }
+            view.SetEntityId(entityId);
+            view.SetPosition(x, y);
+            _activeEffects[view] = CoreMgr.Timer.StartSecondDelay(HitEffectSeconds, () =>
+            {
+                _activeEffects.Remove(view);
+                GameMgr.EntityPool.Release(view.EntityId, view.gameObject);
+            });
+        });
+    }
+
+    /// <summary>退出战斗：取消特效回池计时并立即归还</summary>
+    private void CancelActiveEffects()
+    {
+        foreach (var kv in _activeEffects)
+        {
+            CoreMgr.Timer.Stop(kv.Value);
+            GameMgr.EntityPool.Release(kv.Key.EntityId, kv.Key.gameObject);
+        }
+        _activeEffects.Clear();
     }
 
     // ---- 敌人死亡动画回池计时 ----
@@ -250,7 +507,7 @@ public class VampireView : BattleView
         foreach (var kv in _dyingViews)
         {
             CoreMgr.Timer.Stop(kv.Value);
-            GameMgr.EntityPool.Release(EnemyEntityId, kv.Key.gameObject);
+            GameMgr.EntityPool.Release(kv.Key.EntityId, kv.Key.gameObject);
         }
         _dyingViews.Clear();
     }

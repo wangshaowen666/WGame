@@ -18,9 +18,8 @@ public class GameLaunch
     public static void StartGame()
     {
         // 强制横屏显示(真机清单为fullUser会跟随手持方向, 这里锁定为横屏)
-        Screen.orientation = ScreenOrientation.LandscapeLeft;
-
-        Application.targetFrameRate = 120;
+        //Screen.orientation = ScreenOrientation.LandscapeLeft;
+        //Application.targetFrameRate = 120;
         GameMgr.Init();
 
         ReplenishMeta();

@@ -23,17 +23,18 @@ using System.Collections.Generic;
 public sealed class ViewSync<TLogic, TView> where TView : class
 {
     private readonly Func<TLogic, int> _getId;
-    private readonly Func<int, TView> _spawn;
+    private readonly Func<TLogic, TView> _spawn; // 传逻辑实体（创建所需上下文由实体携带，如弹幕的表现实体 id）
     private readonly Action<TLogic, TView> _refresh;
     private readonly Action<TView> _despawn;
 
     private readonly Dictionary<int, TView> _views = new();
+    private readonly List<TView> _viewList = new(); // 存活视图列表（与 _views 同步增删，渲染帧插值遍历用）
     private readonly HashSet<int> _pending = new(); // 异步加载中的 id
     private readonly HashSet<int> _alive = new();   // 本帧存活 id（复用容器，对账 O(n)）
     private readonly List<int> _scratch = new();    // 待删除 id 收集（避免遍历中修改字典）
     private bool _cleared;
 
-    public ViewSync(Func<TLogic, int> getId, Func<int, TView> spawn,
+    public ViewSync(Func<TLogic, int> getId, Func<TLogic, TView> spawn,
         Action<TLogic, TView> refresh, Action<TView> despawn)
     {
         _getId = getId;
@@ -44,6 +45,9 @@ public sealed class ViewSync<TLogic, TView> where TView : class
 
     /// <summary>当前存活视图数</summary>
     public int Count => _views.Count;
+
+    /// <summary>存活视图列表（只读遍历用；表现层渲染帧驱动，如位置插值）</summary>
+    public List<TView> ViewList => _viewList;
 
     /// <summary>按实体 Id 查视图（如受击闪白等表现层单点访问）</summary>
     public bool TryGet(int id, out TView view) => _views.TryGetValue(id, out view);
@@ -71,13 +75,14 @@ public sealed class ViewSync<TLogic, TView> where TView : class
 
             if (_pending.Contains(id)) continue; // 加载中，等 Attach
 
-            view = _spawn(id);
+            view = _spawn(logic);
             if (view == null)
             {
                 _pending.Add(id);
                 continue;
             }
             _views[id] = view;
+            _viewList.Add(view);
             _refresh(logic, view);
         }
 
@@ -90,7 +95,10 @@ public sealed class ViewSync<TLogic, TView> where TView : class
                     _scratch.Add(kv.Key);
             for (int i = 0; i < _scratch.Count; i++)
                 if (_views.Remove(_scratch[i], out var view))
+                {
+                    _viewList.Remove(view);
                     _despawn(view);
+                }
         }
 
         // 3. 解除已死亡实体的加载登记（其视图晚到后由上面的销毁对账自动回收）
@@ -121,6 +129,7 @@ public sealed class ViewSync<TLogic, TView> where TView : class
 
         _pending.Remove(id);
         _views[id] = view;
+        _viewList.Add(view);
     }
 
     /// <summary>清空全部视图与加载登记（战斗 Dispose 时调用；之后本实例不可再用）</summary>
@@ -132,6 +141,7 @@ public sealed class ViewSync<TLogic, TView> where TView : class
         foreach (var kv in _views)
             _despawn(kv.Value);
         _views.Clear();
+        _viewList.Clear();
         _pending.Clear();
         _alive.Clear();
         _scratch.Clear();

@@ -66,7 +66,7 @@ public sealed partial class DVSEnemy : Luban.BeanBase
     /// </summary>
     public readonly int Exp;
     /// <summary>
-    /// 掉落id
+    /// 掉落实体id(#Entity)
     /// </summary>
     public readonly int DropId;
     /// <summary>
