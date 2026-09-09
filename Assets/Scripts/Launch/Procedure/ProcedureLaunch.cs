@@ -56,7 +56,11 @@ public class ProcedureLaunch : ProcedureBase
         
         var uiRoot = new GameObject { name = LaunchConfig.UIRoot, layer = _layer };
         uiRoot.transform.SetParent(obj.transform, false);
-        uiRoot.AddComponent<RectTransform>();
+        var rt = uiRoot.AddComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
         _uiRoot = uiRoot.transform;
         
         InitCanvasScaler(obj);

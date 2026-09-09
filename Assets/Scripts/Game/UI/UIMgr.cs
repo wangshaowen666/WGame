@@ -158,8 +158,11 @@ public class UIMgr : ManagerBase
             layer = _uiLayerId
         };
 
-        obj.AddComponent<RectTransform>();
-        var tr = obj.transform;
+        var tr = obj.AddComponent<RectTransform>();
+        tr.anchorMin = Vector2.zero;
+        tr.anchorMax = Vector2.one;
+        tr.offsetMin = Vector2.zero;
+        tr.offsetMax = Vector2.zero;
         tr.SetParent(_uiRoot, false);
         tr.SetSiblingIndex((int)groupId - 1);
         

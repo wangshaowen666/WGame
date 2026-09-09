@@ -17,6 +17,11 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 96c191e0e08964aa6a2282b99c640bda
   m_SerializeEntries:
+  - m_GUID: 0a6cb9e16f7a74f9b9487ed3b26a7d61
+    m_Address: LevelUpPanel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8dfd7a9aee72344d894d37f1e2c28912
     m_Address: BattlePanel
     m_ReadOnly: 0

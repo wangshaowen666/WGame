@@ -25,16 +25,27 @@ public class LogicPlayerStats
     private readonly LogicHero _hero;
     private readonly Fix[] _baseValues = new Fix[14];  // 基础值（角色表），下标 = (int)VSAttrType
     private readonly Fix[] _bonusValues = new Fix[14]; // 被动修改器叠加值
+    private readonly Fix _baseMagnetRadius;            // 磁吸基础半径（角色表，非 13 项属性，被动 Magnet 按 ×(1+Magnet) 加成）
     private Fix _regenAccum;                           // 回复小数累积（Regen 为 HP/秒，满 1 点入账）
 
     /// <summary>已持有被动（有序 List，确定性遍历）</summary>
     public readonly List<LogicPassive> Passives = new();
+
+    /// <summary>查找已持有被动（未持有返回 null；选牌池/表现层展示用）</summary>
+    public LogicPassive FindPassive(int passiveId)
+    {
+        for (int i = 0; i < Passives.Count; i++)
+            if (Passives[i].PassiveId == passiveId)
+                return Passives[i];
+        return null;
+    }
 
     public LogicPlayerStats(LogicHero hero, DVSCharacter cfg)
     {
         _hero = hero;
         _baseValues[(int)VSAttrType.MaxHp] = Fix.FromInt((int)cfg.MaxHp);
         _baseValues[(int)VSAttrType.MoveSpeed] = Fix.FromDouble(cfg.MoveSpeed);
+        _baseMagnetRadius = Fix.FromDouble(cfg.MagnetRadius);
         Recalculate();
     }
 
@@ -72,6 +83,7 @@ public class LogicPlayerStats
         if (_hero.Hp > _hero.MaxHp)
             _hero.Hp = _hero.MaxHp;
         _hero.MoveSpeed = Get(VSAttrType.MoveSpeed);
+        _hero.MagnetRadius = _baseMagnetRadius * (Fix.One + Get(VSAttrType.Magnet)); // 2-7 拾取消费点
     }
 
     /// <summary>每逻辑帧回复：Regen（HP/秒）逐帧累积，满 1 点入账并 clamp 上限（无被动时恒 0 早退）</summary>

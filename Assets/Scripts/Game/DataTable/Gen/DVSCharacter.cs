@@ -22,6 +22,7 @@ public sealed partial class DVSCharacter : Luban.BeanBase
         MaxHp = _buf.ReadInt();
         MoveSpeed = _buf.ReadFloat();
         Radius = _buf.ReadFloat();
+        MagnetRadius = _buf.ReadFloat();
         StartWeaponId = _buf.ReadInt();
     }
 
@@ -55,6 +56,10 @@ public sealed partial class DVSCharacter : Luban.BeanBase
     /// </summary>
     public readonly float Radius;
     /// <summary>
+    /// 磁吸半径(基础,被动 Magnet 加成叠加)
+    /// </summary>
+    public readonly float MagnetRadius;
+    /// <summary>
     /// 初始武器id
     /// </summary>
     public readonly int StartWeaponId;
@@ -75,6 +80,7 @@ public sealed partial class DVSCharacter : Luban.BeanBase
         + "maxHp:" + MaxHp + ","
         + "moveSpeed:" + MoveSpeed + ","
         + "radius:" + Radius + ","
+        + "magnetRadius:" + MagnetRadius + ","
         + "startWeaponId:" + StartWeaponId + ","
         + "}";
     }

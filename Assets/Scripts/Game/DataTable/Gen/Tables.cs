@@ -20,6 +20,7 @@ public partial class Tables
     public TbVSEnemy TbVSEnemy {get; }
     public TbVSWeaponLevel TbVSWeaponLevel {get; }
     public TbVSPassive TbVSPassive {get; }
+    public TbVSWave TbVSWave {get; }
     public TbUIPanel TbUIPanel {get; }
     public TbVSPickup TbVSPickup {get; }
     public TbVSCharacter TbVSCharacter {get; }
@@ -34,6 +35,7 @@ public partial class Tables
         TbVSEnemy = new TbVSEnemy(loader("tbvsenemy"));
         TbVSWeaponLevel = new TbVSWeaponLevel(loader("tbvsweaponlevel"));
         TbVSPassive = new TbVSPassive(loader("tbvspassive"));
+        TbVSWave = new TbVSWave(loader("tbvswave"));
         TbUIPanel = new TbUIPanel(loader("tbuipanel"));
         TbVSPickup = new TbVSPickup(loader("tbvspickup"));
         TbVSCharacter = new TbVSCharacter(loader("tbvscharacter"));
@@ -50,6 +52,7 @@ public partial class Tables
         TbVSEnemy.ResolveRef(this);
         TbVSWeaponLevel.ResolveRef(this);
         TbVSPassive.ResolveRef(this);
+        TbVSWave.ResolveRef(this);
         TbUIPanel.ResolveRef(this);
         TbVSPickup.ResolveRef(this);
         TbVSCharacter.ResolveRef(this);

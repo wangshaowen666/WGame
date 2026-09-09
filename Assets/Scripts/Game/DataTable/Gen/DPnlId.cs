@@ -29,6 +29,10 @@ namespace cfg
         /// 加载界面
         /// </summary>
         LoadingPanel = 4,
+        /// <summary>
+        /// 升级选牌面板
+        /// </summary>
+        LevelUpPanel = 5,
     }
 
 } 

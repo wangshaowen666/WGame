@@ -25,10 +25,10 @@ public class ProjectileView : EntityViewBase
         ResetInterpolation();
     }
 
-    /// <summary>创建时朝向飞行方向（绕实体根局部 Z 轴旋转，即俯视水平面内；素材基准朝向约定 +X）。由 SpawnBoltView 在创建回调中调用一次</summary>
+    /// <summary>创建时朝向飞行方向（绕实体根局部 Z 轴旋转，即俯视水平面内；素材基准朝向实测为 -X，故补 180°）。由 SpawnBoltView 在创建回调中调用一次</summary>
     public void SetDirection(float dirX, float dirY)
     {
-        var angle = Mathf.Atan2(dirY, dirX) * Mathf.Rad2Deg;
+        var angle = Mathf.Atan2(dirY, dirX) * Mathf.Rad2Deg + 180f;
         transform.localEulerAngles = new Vector3(0f, 0f, angle);
     }
 }

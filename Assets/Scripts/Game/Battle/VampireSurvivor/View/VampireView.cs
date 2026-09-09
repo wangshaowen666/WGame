@@ -6,6 +6,7 @@
  */
 
 using Cinemachine;
+using cfg;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -27,13 +28,13 @@ public class VampireView : BattleView
     private ViewSync<LogicProjectile, ProjectileView> _boltViews;
     private ViewSync<LogicDrop, DropView> _dropViews;
     private bool _inputBound;
+    private bool _levelUpPanelOpen; // 选牌面板是否打开（暂停期间防重复 PanelOn）
 
     private Transform _entityRoot;
 
     // ---- 表现实体 id（Init 读配置表派生，逻辑实体不携带表现字段）----
-    // 英雄/关卡怪种/弹体/命中特效锚点：VampireLogic 公开常量 → 角色/关卡/武器表 → TbEntity 资源 id
+    // 英雄/弹体/命中特效锚点：VampireLogic 公开常量 → 角色/武器表 → TbEntity 资源 id；敌人按敌种 CfgId 反查
     private int _heroEntityId;
-    private int _enemyEntityId;
     private int _boltEntityId;
     private int _boltHitEffectId;
     private int _damageTextEntityId;
@@ -42,6 +43,9 @@ public class VampireView : BattleView
     private CinemachineVirtualCamera _vcam; // 玩家跟随虚拟相机
     private Camera _brainCamera;            // 本战斗为其添加 CinemachineBrain 的相机（退出时移除）
     private GameObject _ground;             // 地面（大平面覆盖移动范围）
+
+    private BattlePanel _hud;          // 战斗 HUD（BattlePanel 上 VS 部分，2-10；面板异步加载，逐帧拉取直至就绪）
+    private float _stageDurationSec;   // 关卡存活时长上限（0=无限，HUD 据此显示倒计时/正计时）
 
     public override void Init()
     {
@@ -52,20 +56,30 @@ public class VampireView : BattleView
         _logic = new VampireLogic(seed);
         _driver = new LocalDriver(_logic);
 
-        // 表现实体 id 反查（表链：角色→实体、关卡→怪种/飘字→实体、角色初始武器→弹体/命中特效实体）
+        // 表现实体 id 反查（表链：角色→实体、关卡→飘字→实体、角色初始武器→弹体/命中特效实体、波次→敌种→宝石）
         var characterCfg = GameMgr.DataTable.TbVSCharacter.Get(VampireLogic.HeroCfgId);
         var stageCfg = GameMgr.DataTable.TbVSStage.Get(VampireLogic.StageId);
         _heroEntityId = characterCfg.EntityId;
-        _enemyEntityId = GameMgr.DataTable.TbVSEnemy.Get(stageCfg.EnemyId).EntityId;
         var weaponCfg = GameMgr.DataTable.TbVSWeapon.Get(characterCfg.StartWeaponId);
         _boltEntityId = weaponCfg.EntityId;
         _boltHitEffectId = weaponCfg.HitEffectId;
         _damageTextEntityId = stageCfg.DamageTextEntityId;
-        _gemEntityId = GameMgr.DataTable.TbVSEnemy.Get(stageCfg.EnemyId).DropId;
+        _stageDurationSec = stageCfg.DurationSec;
+
+        // 宝石实体：取本关首个波次行敌种的掉落实体（当前各敌种共用同款宝石，分档 7-3 治理）
+        var waves = GameMgr.DataTable.TbVSWave.DataList;
+        for (int i = 0; i < waves.Count; i++)
+        {
+            if (waves[i].StageId != VampireLogic.StageId)
+                continue;
+            _gemEntityId = GameMgr.DataTable.TbVSEnemy.Get(waves[i].EnemyId).DropId;
+            break;
+        }
 
         if (GameMgr.Battle.Joystick != null)
             BindJoystickInput(GameMgr.Battle.Joystick);
         GameMgr.Event.Register<GameJoystick>(GameEvent.VsJoystickReady, OnVsJoystickReady);
+        GameMgr.Event.Register<int>(GameEvent.VsLevelUpChosen, OnVsLevelUpChosen);
 
         _playerViews = new ViewSync<LogicHero, HeroView>(
             p => p.Id, SpawnHeroView, RefreshHeroView, DespawnHeroView);
@@ -100,6 +114,81 @@ public class VampireView : BattleView
             SpawnHitEffect(x, y);
             SpawnDamageText(x, y, hits[i].Damage);
         }
+
+        RefreshHud();
+
+        // 升级选牌（2-8）：有待选项则暂停驱动并弹出选牌面板（面板异步加载，选项数据经 userData 传入）
+        if (_logic.HasPendingChoice && !_levelUpPanelOpen)
+        {
+            _driver.Pause();
+            GameMgr.UI.PanelOn(DPnlId.LevelUpPanel, BuildLevelUpCards());
+            _levelUpPanelOpen = true;
+        }
+    }
+
+    /// <summary>刷新战斗 HUD（2-10，逻辑帧驱动；选牌暂停期间驱动停步进，HUD 自然冻结）。倒计时 = 关卡表 DurationSec（0=无限则显示存活正计时）</summary>
+    private void RefreshHud()
+    {
+        if (_hud == null)
+            _hud = GameMgr.UI.HasPanel(DPnlId.BattlePanel) as BattlePanel;
+        if (_hud == null)
+            return;
+
+        var hero = _logic.Heroes[0]; // 单机单人；联机 HUD 归属 5-3 拍板
+        var elapsed = _logic.LastTickFrame * (VampireLogic.LogicFrameMs / 1000f);
+        var countdown = _stageDurationSec > 0f;
+        var timeSec = countdown ? System.Math.Max(0f, _stageDurationSec - elapsed) : elapsed;
+        _hud.UpdateHud(hero.Hp, hero.MaxHp, hero.Level, hero.Xp, hero.XpToNext, _logic.KillCount, timeSec, countdown);
+    }
+
+    /// <summary>选牌面板确认：应用选择；仍有排队升级组则推送新选项换题（面板保持打开），否则关面板恢复战斗</summary>
+    private void OnVsLevelUpChosen(int index)
+    {
+        _logic.ApplyChoice(index);
+        if (_logic.HasPendingChoice)
+        {
+            GameMgr.Event.Send(GameEvent.VsLevelUpChoicesChanged, BuildLevelUpCards());
+            return;
+        }
+
+        _levelUpPanelOpen = false;
+        GameMgr.UI.PanelOff(DPnlId.LevelUpPanel);
+        _driver.Resume();
+    }
+
+    /// <summary>组装当前选项的展示数据（表现层查表取名/描述 + 持有状态，下标对齐 CurrentChoices）</summary>
+    private List<VsLevelUpCard> BuildLevelUpCards()
+    {
+        var cards = new List<VsLevelUpCard>();
+        var hero = _logic.Heroes[0]; // 单机单人；联机选牌归属 5-3 拍板
+        var choices = _logic.CurrentChoices;
+        for (int i = 0; i < choices.Count; i++)
+        {
+            string title;
+            string desc;
+            if (choices[i].IsWeapon)
+            {
+                var cfg = GameMgr.DataTable.TbVSWeapon.Get(choices[i].ItemId);
+                var owned = hero.FindWeapon(choices[i].ItemId);
+                title = owned == null
+                    ? $"{cfg.Name}（新武器）"
+                    : $"{cfg.Name}  Lv.{owned.Level}→Lv.{owned.Level + 1}";
+                desc = cfg.Desc;
+            }
+            else
+            {
+                var cfg = GameMgr.DataTable.TbVSPassive.Get(choices[i].ItemId);
+                var owned = hero.Stats.FindPassive(choices[i].ItemId);
+                title = owned == null
+                    ? $"{cfg.Name}（新被动）"
+                    : $"{cfg.Name}  Lv.{owned.Level}→Lv.{owned.Level + 1}";
+                desc = $"[{cfg.AttrType}] 每级 +{cfg.PerLevelValue}（最高 {cfg.MaxLevel} 级）";
+            }
+
+            cards.Add(new VsLevelUpCard { Title = title, Desc = desc });
+        }
+
+        return cards;
     }
 
     /// <summary>渲染帧推进：按逻辑帧推进进度插值实体位置 + 飘字动画</summary>
@@ -158,6 +247,13 @@ public class VampireView : BattleView
         _driver.OnFrame -= OnFrame;
         _driver.OnRenderFrame -= OnRenderFrame;
         GameMgr.Event.UnRegister<GameJoystick>(GameEvent.VsJoystickReady, OnVsJoystickReady);
+        GameMgr.Event.UnRegister<int>(GameEvent.VsLevelUpChosen, OnVsLevelUpChosen);
+        if (_levelUpPanelOpen) // 选牌中退出战斗：关面板（幂等），避免面板残留
+        {
+            _levelUpPanelOpen = false;
+            GameMgr.UI.PanelOff(DPnlId.LevelUpPanel);
+        }
+        _hud = null;
         _playerViews?.Clear(); // 销毁全部玩家视图
         _playerViews = null;
         _enemyViews?.Clear(); // 归还全部敌人视图（走 DespawnEnemyView 进入死亡计时）
@@ -228,7 +324,7 @@ public class VampireView : BattleView
         go.transform.rotation = Quaternion.Euler(90f, 0f, 0f); // 对齐原相机俯视朝向
         var body = _vcam.AddCinemachineComponent<CinemachineTransposer>();
         body.m_BindingMode = CinemachineTransposer.BindingMode.WorldSpace;
-        body.m_FollowOffset = new Vector3(0f, 10f, 5f); // 相对英雄的固定偏移（对齐原相机坐标 0,10,5）
+        body.m_FollowOffset = new Vector3(0f, 10f, 0f); // 正俯视下偏移必须纯垂直（WorldSpace 不随相机旋转换算），英雄居中；带 Z 分量会让英雄偏出屏幕中心
         body.m_XDamping = 2f; // 平滑跟随（相机本地 X/Y = 世界水平面）
         body.m_YDamping = 2f;
         body.m_ZDamping = 0f; // 高度方向无阻尼，保持恒定偏移
@@ -284,7 +380,7 @@ public class VampireView : BattleView
     private EnemyView SpawnEnemyView(LogicEnemy e)
     {
         var id = e.Id;             // 快照实体 id（异步加载期间实体可能被清扫/池化复用）
-        var entityId = _enemyEntityId;
+        var entityId = GameMgr.DataTable.TbVSEnemy.Get(e.CfgId).EntityId; // 按敌种反查表现实体（敌种随波次变化）
         var px = e.X.AsFloat;      // 快照位置（Attach 前推一帧，避免异步加载期间视图停在原点被插值渲染）
         var py = e.Y.AsFloat;
         GameMgr.EntityPool.Acquire(entityId, _entityRoot, (go) =>

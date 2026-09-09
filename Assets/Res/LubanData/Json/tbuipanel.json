@@ -26,5 +26,12 @@
     "group": 8,
     "allowMult": false,
     "hideCovered": false
+  },
+  {
+    "id": 5,
+    "name": "LevelUpPanel",
+    "group": 4,
+    "allowMult": false,
+    "hideCovered": false
   }
 ]

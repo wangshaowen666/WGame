@@ -16,6 +16,8 @@ public class DataTableMgr : ManagerBase
     // 导表工具自动补全下列属性
     private cfg.Tables _tables;
 
+    public TbVSWave TbVSWave => _tables.TbVSWave;
+
     public TbVSStage TbVSStage => _tables.TbVSStage;
     public TbVSEnemy TbVSEnemy => _tables.TbVSEnemy;
     public TbVSWeapon TbVSWeapon => _tables.TbVSWeapon;

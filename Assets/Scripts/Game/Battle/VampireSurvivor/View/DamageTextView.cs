@@ -16,7 +16,8 @@ public class DamageTextView : MonoBehaviour
 {
     [SerializeField] private TextMeshPro _text; // prefab 上配置（TMP 3D 文本，MiSans SDF）
 
-    private float _riseSpeed = 0.8f;   // 上浮速度（单位/秒，纯视觉）
+    private const float SpawnYOffset = 0.5f; // 生成点偏移（局部 +Y = 世界 +Z = 屏幕上方），从怪物中心移到头顶
+    private float _riseSpeed = 0.8f;   // 上浮速度（单位/秒，纯视觉，沿屏幕上方）
     private float _life;
     private float _totalLife = 0.6f;   // 存活时长（秒，纯视觉）
 
@@ -32,7 +33,9 @@ public class DamageTextView : MonoBehaviour
     /// <summary>落点与内容（创建时设置一次）</summary>
     public void Show(float x, float y, long damage)
     {
-        transform.localPosition = new Vector3(x, y, 0.4f); // 高于实体层，避免遮挡
+        // EntityRoot 绕 X 旋转 90°（俯视投影），局部 Z 越小 = 世界高度越高：
+        // 实体层统一在局部 z=0.25，飘字取 0 = 比实体高 0.25，避免被敌人/掉落物遮挡
+        transform.localPosition = new Vector3(x, y + SpawnYOffset, 0f);
         _life = _totalLife;
         if (_text != null)
         {
@@ -45,7 +48,9 @@ public class DamageTextView : MonoBehaviour
     public void Tick(float deltaSeconds)
     {
         var pos = transform.localPosition;
-        pos.z += _riseSpeed * deltaSeconds; // 实体根局部 Z = 世界高度方向
+        // 俯视相机正对世界 ±Y 轴，沿局部 Z（世界高度）移动屏幕上几乎不可见；
+        // 屏幕上方 = 世界 +Z = 局部 +Y，上浮沿该轴移动
+        pos.y += _riseSpeed * deltaSeconds;
         transform.localPosition = pos;
 
         _life -= deltaSeconds;

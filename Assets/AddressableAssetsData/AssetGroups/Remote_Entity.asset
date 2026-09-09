@@ -37,6 +37,21 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9e96c27624dcb4a3aadeb03687039001
+    m_Address: DamageText_500002
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a15f444ff01604892b69d6fdd8a096c7
+    m_Address: Enemy_201002
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ebec5bf10024641789b83030cfacbf8f
+    m_Address: Enemy_201003
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f1a3ee091cc9c4a219096410a54d8d6f
     m_Address: Effect_701001
     m_ReadOnly: 0

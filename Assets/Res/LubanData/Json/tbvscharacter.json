@@ -6,6 +6,7 @@
     "maxHp": 100,
     "moveSpeed": 0.225,
     "radius": 0.4,
+    "magnetRadius": 2,
     "startWeaponId": 1
   }
 ]

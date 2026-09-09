@@ -20,11 +20,10 @@ public sealed partial class DVSStage : Luban.BeanBase
         Name = _buf.ReadString();
         DurationSec = _buf.ReadFloat();
         KillTarget = _buf.ReadInt();
-        SpawnIntervalSec = _buf.ReadFloat();
-        SpawnCountPerWave = _buf.ReadInt();
         SpawnRadius = _buf.ReadFloat();
-        EnemyId = _buf.ReadInt();
         DamageTextEntityId = _buf.ReadInt();
+        ExpBase = _buf.ReadInt();
+        ExpStep = _buf.ReadInt();
     }
 
     public static DVSStage DeserializeDVSStage(ByteBuf _buf)
@@ -49,25 +48,21 @@ public sealed partial class DVSStage : Luban.BeanBase
     /// </summary>
     public readonly int KillTarget;
     /// <summary>
-    /// 刷怪间隔(秒)
-    /// </summary>
-    public readonly float SpawnIntervalSec;
-    /// <summary>
-    /// 每批刷怪数
-    /// </summary>
-    public readonly int SpawnCountPerWave;
-    /// <summary>
     /// 刷怪半径
     /// </summary>
     public readonly float SpawnRadius;
     /// <summary>
-    /// 本关刷的敌人id(#VSEnemy)
-    /// </summary>
-    public readonly int EnemyId;
-    /// <summary>
     /// 伤害飘字实体id(#Entity)
     /// </summary>
     public readonly int DamageTextEntityId;
+    /// <summary>
+    /// 升级经验曲线基数(1级-&gt;2级所需)
+    /// </summary>
+    public readonly int ExpBase;
+    /// <summary>
+    /// 升级经验曲线步长(每级递增)
+    /// </summary>
+    public readonly int ExpStep;
    
     public const int __ID__ = -275652227;
     public override int GetTypeId() => __ID__;
@@ -83,11 +78,10 @@ public sealed partial class DVSStage : Luban.BeanBase
         + "name:" + Name + ","
         + "durationSec:" + DurationSec + ","
         + "killTarget:" + KillTarget + ","
-        + "spawnIntervalSec:" + SpawnIntervalSec + ","
-        + "spawnCountPerWave:" + SpawnCountPerWave + ","
         + "spawnRadius:" + SpawnRadius + ","
-        + "enemyId:" + EnemyId + ","
         + "damageTextEntityId:" + DamageTextEntityId + ","
+        + "expBase:" + ExpBase + ","
+        + "expStep:" + ExpStep + ","
         + "}";
     }
 }
