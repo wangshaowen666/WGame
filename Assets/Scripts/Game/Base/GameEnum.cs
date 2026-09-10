@@ -16,6 +16,7 @@ public enum GameEvent
     
     // 流程相关
     ProcedureExitMain = 100,
+    ProcedureExitBattle = 101, // 战斗内请求退战斗回主界面（2-11 死亡结算按钮 -> ProcedureBattle 切 ProcedureChangeScene）
     
     ResUpdateFinish = 200,
     

@@ -29,6 +29,9 @@ public class JoystickInput : IBattleInput
     public void Sample(out Fix dirX, out Fix dirY)
     {
         var dir = _joystick.Direction;
+        var mag = dir.magnitude;
+        if (mag > 1e-5f)
+            dir /= mag; // 只取方向：拖拽距离不影响速度（死区内 Direction=0 保持不动；20Hz 采样，开销可忽略）
         dirX = Fix.FromDouble(dir.x);
         dirY = Fix.FromDouble(dir.y);
     }

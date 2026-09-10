@@ -22,6 +22,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 21492923c7eab44b0853db688a845653
+    m_Address: SettlePanel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8dfd7a9aee72344d894d37f1e2c28912
     m_Address: BattlePanel
     m_ReadOnly: 0

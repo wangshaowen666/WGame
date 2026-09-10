@@ -33,6 +33,10 @@ namespace cfg
         /// 升级选牌面板
         /// </summary>
         LevelUpPanel = 5,
+        /// <summary>
+        /// 死亡结算面板
+        /// </summary>
+        SettlePanel = 6,
     }
 
 } 

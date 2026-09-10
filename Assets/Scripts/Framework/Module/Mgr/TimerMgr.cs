@@ -125,11 +125,6 @@ public class TimerMgr : ManagerBase
         }
     }
 
-    public override void OnSceneExit()
-    {
-        StopAll();
-    }
-
     #endregion
 
     private CancellationTokenSource CreateCts(CancellationToken linkedToken)

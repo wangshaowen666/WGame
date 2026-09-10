@@ -5,7 +5,7 @@
     "level": 1,
     "damage": 10,
     "cooldownSec": 1,
-    "projSpeed": 8,
+    "projSpeed": 6,
     "area": 1,
     "amount": 1,
     "durationSec": 2,

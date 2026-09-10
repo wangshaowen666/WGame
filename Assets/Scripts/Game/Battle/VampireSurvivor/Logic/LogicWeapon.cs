@@ -14,6 +14,9 @@ using cfg;
 /// </summary>
 public class LogicWeapon
 {
+    // ---- 手感数值（暂放常量区，频繁调整再挪表）----
+    private static readonly Fix s_spreadHalfTan = Fix.FromDouble(0.131652); // 散射半步长 = tan(7.5°)：相邻弹偏转 15°，中心对称布局
+
     public readonly int WeaponId;
     public readonly DVSWeapon Cfg; // 模板（范式/目标策略，只读）
 
@@ -90,7 +93,7 @@ public class LogicWeapon
         return best;
     }
 
-    /// <summary>直线弹幕：伤害×(1+Might)、弹数+Amount、弹速换算每帧位移；多弹同向连发（MVP 重叠结算，扇形/间隔阶段 3-1）</summary>
+    /// <summary>直线弹幕：伤害×(1+Might)、弹数=等级 Amount+属性 Amount；多弹围绕目标方向中心对称散射（相邻弹偏转 15°，见 s_spreadHalfTan）</summary>
     private void FireProjectile(VampireLogic logic, LogicHero owner, LogicEnemy target)
     {
         var stats = owner.Stats;
@@ -109,8 +112,24 @@ public class LogicWeapon
         var life = (Fix.FromDouble(_levelCfg.DurationSec) * Fix.FromInt(1000) / Fix.FromInt(VampireLogic.LogicFrameMs)).Int;
         var amount = _levelCfg.Amount + stats.Get(VSAttrType.Amount).Int;
 
+        // 单位目标方向与垂直向量（散射基向量）
+        var nx = dirX / len;
+        var ny = dirY / len;
+        var perpX = -ny;
+        var perpY = nx;
+
         for (int i = 0; i < amount; i++)
-            logic.SpawnProjectile(owner, dirX / len, dirY / len, speed, damage, _levelCfg.Pierce, life, Fix.FromDouble(Cfg.Knockback));
+        {
+            // 中心对称散射：k = -m…0…+m（偶数弹时无中心弹，±半步起）。
+            // 旋转公式 rot(d,θ) ∝ d + tan(θ)·perp（归一化后精确等于旋转 θ，免 sin/cos 表）；
+            // t 线性步进在小角度下近似等角，数量很大时两端角度略收拢（精确三角表 3-1 视需求引入）
+            var k = 2 * i - (amount - 1);
+            var t = Fix.FromInt(k) * s_spreadHalfTan;
+            var rx = nx + t * perpX;
+            var ry = ny + t * perpY;
+            var rLen = Fix.Sqrt(rx * rx + ry * ry); // = √(1+t²) 恒 > 0（n 为单位向量），除法安全
+            logic.SysProjectile.Spawn(owner, rx / rLen, ry / rLen, speed, damage, _levelCfg.Pierce, life, Fix.FromDouble(Cfg.Knockback));
+        }
     }
 
     /// <summary>冷却帧数：CooldownSec×(1-Cooldown 属性)，秒→帧向下取整，最少 1 帧防零冷却连发</summary>
