@@ -38,6 +38,8 @@ public class VampireLogic
     public readonly VsLevelUpSystem SysLevelUp;       // 经验/升级选牌（2-8）
 
     private readonly Fix _playerRadius;
+    private readonly Fix _fieldHalfW; // 场地半宽（移动边界 X，#VSStage fieldWidth）
+    private readonly Fix _fieldHalfH; // 场地半高（移动边界 Y=世界Z，#VSStage fieldHeight）
 
     public bool GameOver { get; private set; }
     public int LastTickFrame { get; private set; }
@@ -67,6 +69,11 @@ public class VampireLogic
 
         var character = GameMgr.DataTable.TbVSCharacter.Get(HeroCfgId);
         _playerRadius = Fix.FromDouble(character.Radius);
+
+        // 场地移动边界（构造期读表转定点，Tick 零开销）
+        var stage = GameMgr.DataTable.TbVSStage.Get(StageId);
+        _fieldHalfW = Fix.FromDouble(stage.FieldWidth * 0.5);
+        _fieldHalfH = Fix.FromDouble(stage.FieldHeight * 0.5);
 
         // 系统装配：各系统构造期读各自表数据（波次/关卡曲线），Tick 内零分配
         SysWave = new VsWaveSystem(this, StageId);
@@ -188,6 +195,13 @@ public class VampireLogic
 
         hero.X += dirX * hero.MoveSpeed;
         hero.Y += dirY * hero.MoveSpeed;
+
+        // 场地边界夹取：超出移动范围则停在边界（位置进 StateHash，夹取本身为确定性纯算术）
+        if (hero.X < -_fieldHalfW) hero.X = -_fieldHalfW;
+        else if (hero.X > _fieldHalfW) hero.X = _fieldHalfW;
+        if (hero.Y < -_fieldHalfH) hero.Y = -_fieldHalfH;
+        else if (hero.Y > _fieldHalfH) hero.Y = _fieldHalfH;
+
         hero.FacingX = dirX;
         hero.FacingY = dirY;
     }

@@ -7,6 +7,8 @@
     "spawnRadius": 15,
     "damageTextEntityId": 500002,
     "expBase": 5,
-    "expStep": 3
+    "expStep": 3,
+    "fieldWidth": 48,
+    "fieldHeight": 68
   }
 ]

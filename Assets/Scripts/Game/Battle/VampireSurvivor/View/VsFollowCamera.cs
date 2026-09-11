@@ -16,8 +16,13 @@ using Object = UnityEngine.Object;
 /// </summary>
 public sealed class VsFollowCamera
 {
+    /// <summary>场地视觉边界（与 Battle 场景 Background scale 保持一致）：Confiner 据此约束视口不出边界</summary>
+    private const float FieldW = 48f;
+    private const float FieldH = 68f;
+
     private CinemachineVirtualCamera _vcam; // 玩家跟随虚拟相机
     private Camera _brainCamera;            // 本战斗为其添加 CinemachineBrain 的相机（退出时移除）
+    private BoxCollider _fieldBounds;       // 场地边界盒（Confine3D 视口约束用，退出时随节点销毁）
 
     /// <summary>初始化 Cinemachine 相机跟随：主相机挂 Brain，创建虚拟相机（Transposer 俯视跟随，保持原相机视角）</summary>
     public void Init()
@@ -49,6 +54,20 @@ public sealed class VsFollowCamera
         body.m_XDamping = 2f; // 平滑跟随（相机本地 X/Y = 世界水平面）
         body.m_YDamping = 2f;
         body.m_ZDamping = 0f; // 高度方向无阻尼，保持恒定偏移
+
+        // 边界约束（Confine3D + 视口四边）：视口四角不超出场地盒——相机快到边界即停步，
+        // 人物继续移动偏离画面中心直至被逻辑层夹取在场地边缘。
+        // 本项目为俯视正交相机（世界 XZ 平面），必须用 3D 盒（Confine2D 的多边形数学只支持 XY 平面相机）；
+        // 盒 Y 向覆盖相机高度，使约束只作用于水平 XZ
+        var boundsGo = new GameObject("VsFieldBounds");
+        _fieldBounds = boundsGo.AddComponent<BoxCollider>();
+        _fieldBounds.size = new Vector3(FieldW, 30f, FieldH); // 中心在世界原点，Y ∈ [-15,15] 包含相机高度
+        var confiner = go.AddComponent<CinemachineConfiner>();
+        confiner.m_ConfineMode = CinemachineConfiner.Mode.Confine3D;
+        confiner.m_BoundingVolume = _fieldBounds;
+        confiner.m_Damping = 0f; // 硬约束，视口不许出界
+        // m_ConfineScreenEdges 默认 true：正交相机下按 OrthographicSize 取视口四角做约束
+        // 旧版 Confiner 挂在 vcam 同物体上即自动 ConnectToVcam，无需显式注册
     }
 
     /// <summary>英雄视图就绪后作为跟随目标（仅首个英雄生效，单机单人）</summary>
@@ -61,6 +80,11 @@ public sealed class VsFollowCamera
     /// <summary>清理：销毁虚拟相机，移除本战斗添加的 Brain（避免污染共享相机）</summary>
     public void Dispose()
     {
+        if (_fieldBounds != null)
+        {
+            Object.Destroy(_fieldBounds.gameObject);
+            _fieldBounds = null;
+        }
         if (_vcam != null)
         {
             Object.Destroy(_vcam.gameObject);

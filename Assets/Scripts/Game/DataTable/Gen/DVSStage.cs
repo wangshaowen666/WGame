@@ -24,6 +24,8 @@ public sealed partial class DVSStage : Luban.BeanBase
         DamageTextEntityId = _buf.ReadInt();
         ExpBase = _buf.ReadInt();
         ExpStep = _buf.ReadInt();
+        FieldWidth = _buf.ReadFloat();
+        FieldHeight = _buf.ReadFloat();
     }
 
     public static DVSStage DeserializeDVSStage(ByteBuf _buf)
@@ -63,6 +65,14 @@ public sealed partial class DVSStage : Luban.BeanBase
     /// 升级经验曲线步长(每级递增)
     /// </summary>
     public readonly int ExpStep;
+    /// <summary>
+    /// 场地宽度(移动边界,世界单位,X)
+    /// </summary>
+    public readonly float FieldWidth;
+    /// <summary>
+    /// 场地高度(移动边界,世界单位,Z)
+    /// </summary>
+    public readonly float FieldHeight;
    
     public const int __ID__ = -275652227;
     public override int GetTypeId() => __ID__;
@@ -82,6 +92,8 @@ public sealed partial class DVSStage : Luban.BeanBase
         + "damageTextEntityId:" + DamageTextEntityId + ","
         + "expBase:" + ExpBase + ","
         + "expStep:" + ExpStep + ","
+        + "fieldWidth:" + FieldWidth + ","
+        + "fieldHeight:" + FieldHeight + ","
         + "}";
     }
 }
