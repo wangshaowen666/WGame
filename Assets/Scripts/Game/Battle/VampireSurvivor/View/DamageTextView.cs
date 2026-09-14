@@ -20,6 +20,7 @@ public class DamageTextView : MonoBehaviour
     private float _riseSpeed = 0.8f;   // 上浮速度（单位/秒，纯视觉，沿屏幕上方）
     private float _life;
     private float _totalLife = 0.6f;   // 存活时长（秒，纯视觉）
+    private Color _color = new(1f, 0.9f, 0.2f, 1f); // 文案颜色（淡出时仅调 alpha）
 
     /// <summary>表现实体配置 Id（创建时写入，归还实体池时用作池 key）</summary>
     public int EntityId { get; private set; }
@@ -30,17 +31,24 @@ public class DamageTextView : MonoBehaviour
         EntityId = entityId;
     }
 
-    /// <summary>落点与内容（创建时设置一次）</summary>
+    /// <summary>落点与内容（创建时设置一次）：伤害数字，默认金黄色</summary>
     public void Show(float x, float y, long damage)
+    {
+        ShowText(x, y, damage.ToString(), new Color(1f, 0.9f, 0.2f, 1f));
+    }
+
+    /// <summary>任意文案飘字（宝箱奖励公告 3-6 等）：内容与颜色由表现层组装传入</summary>
+    public void ShowText(float x, float y, string content, Color color)
     {
         // EntityRoot 绕 X 旋转 90°（俯视投影），局部 Z 越小 = 世界高度越高：
         // 实体层统一在局部 z=0.25，飘字取 0 = 比实体高 0.25，避免被敌人/掉落物遮挡
         transform.localPosition = new Vector3(x, y + SpawnYOffset, 0f);
         _life = _totalLife;
+        _color = color;
         if (_text != null)
         {
-            _text.text = damage.ToString();
-            _text.color = new Color(1f, 0.9f, 0.2f, 1f);
+            _text.text = content;
+            _text.color = color;
         }
     }
 
@@ -57,7 +65,7 @@ public class DamageTextView : MonoBehaviour
         if (_text != null)
         {
             var alpha = Mathf.Clamp01(_life / (_totalLife * 0.5f)); // 后半程淡出
-            _text.color = new Color(1f, 0.9f, 0.2f, alpha);
+            _text.color = new Color(_color.r, _color.g, _color.b, alpha);
         }
     }
 }

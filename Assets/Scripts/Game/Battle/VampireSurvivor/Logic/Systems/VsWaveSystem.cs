@@ -22,11 +22,14 @@ public sealed class VsWaveSystem
         public int IntervalFrames;  // 刷怪间隔（帧，≥1）
         public int PerWave;         // 每批数量
         public int CfgId;           // 敌种（#VSEnemy）
+        public int Behavior;        // 行为类型（敌表 Behavior，3-4：追击/直线横穿）
         public long Hp;             // 敌表基础血量 × HpMul
         public Fix MoveSpeed;       // 敌表基础移速 × SpeedMul
-        public Fix Radius;          // 碰撞半径（敌表基础）
+        public Fix Radius;          // 碰撞半径（敌表基础 × ViewScale，3-5 精英放大）
         public long Damage;         // 碰撞伤害（敌表基础，碰到英雄时扣除；0=纯自爆不扣血）
         public long Exp;            // 击杀经验（敌表基础，经验不随时间膨胀：成长靠敌种换档）
+        public bool IsElite;        // 精英行（3-5：到点一次性刷一批，死亡掉宝箱）
+        public bool Done;           // 精英行已刷出标记（一次性；普通行不使用）
     }
 
     private readonly VampireLogic _logic;
@@ -40,16 +43,19 @@ public sealed class VsWaveSystem
         BuildWaves(stageId);
     }
 
-    /// <summary>波次推进：到期波次行各刷一批（按行序遍历，确定性）。由 VampireLogic.Tick 步骤 4 调用</summary>
+    /// <summary>波次推进：到期波次行各刷一批（按行序遍历，确定性）。精英行只刷一次（3-5）。由 VampireLogic.Tick 步骤 4 调用</summary>
     public void Tick(int absFrame)
     {
         for (int i = 0; i < _waves.Count; i++)
         {
             var row = _waves[i];
-            if (absFrame < row.NextSpawnFrame)
+            if (row.Done || absFrame < row.NextSpawnFrame)
                 continue;
             SpawnEnemies(row);
-            row.NextSpawnFrame += row.IntervalFrames;
+            if (row.IsElite)
+                row.Done = true; // 精英行：指定波次一次性刷出，不重复
+            else
+                row.NextSpawnFrame += row.IntervalFrames;
         }
     }
 
@@ -73,11 +79,13 @@ public sealed class VsWaveSystem
                 IntervalFrames = System.Math.Max(1, (int)System.Math.Round(cfg.SpawnIntervalSec * 1000 / VampireLogic.LogicFrameMs)),
                 PerWave = cfg.SpawnCountPerWave,
                 CfgId = enemy.Id,
+                Behavior = (int)enemy.Behavior,
                 Hp = (Fix.FromInt(enemy.Hp) * Fix.FromDouble(cfg.HpMul)).Int,
                 MoveSpeed = Fix.FromDouble(enemy.MoveSpeed) * Fix.FromDouble(cfg.SpeedMul),
-                Radius = Fix.FromDouble(enemy.Radius),
+                Radius = Fix.FromDouble(enemy.Radius) * Fix.FromDouble(cfg.ViewScale), // 精英行放大系数同步碰撞半径（3-5）
                 Damage = enemy.Damage,
                 Exp = enemy.Exp,
+                IsElite = cfg.IsElite,
             });
         }
 
@@ -98,7 +106,10 @@ public sealed class VsWaveSystem
             Log.Error("[吸血鬼] 波次表无本关行，本局不会刷怪，检查 #VSWave.xlsx stageId:", stageId);
     }
 
-    /// <summary>环形刷一批：以最近玩家为圆心、视野外半径处的随机方向生成（随机方向向量代替角度，避免引入 sin/cos）</summary>
+    /// <summary>
+    /// 环形刷一批：以最近玩家为圆心、视野外半径处的随机方向生成（随机方向向量代替角度，避免引入 sin/cos）。
+    /// Linear 怪（3-4）：出生方向 = 指向圆心 ± 随机偏移（穿越感：斜穿而非正对圆心）。
+    /// </summary>
     private void SpawnEnemies(WaveRow row)
     {
         var cx = Fix.Zero;
@@ -121,6 +132,7 @@ public sealed class VsWaveSystem
             var enemy = CoreMgr.ClassPool.Get<LogicEnemy>(); // 池取（Recycle 时 Reset，字段必然干净）
             enemy.Id = _logic.AllocId();
             enemy.CfgId = row.CfgId;
+            enemy.Behavior = row.Behavior;
             enemy.X = cx + dx / len * _spawnRadius;
             enemy.Y = cy + dy / len * _spawnRadius;
             enemy.MoveSpeed = row.MoveSpeed;
@@ -129,6 +141,21 @@ public sealed class VsWaveSystem
             enemy.Hp = row.Hp;
             enemy.Damage = row.Damage;
             enemy.Exp = row.Exp;
+            enemy.IsElite = row.IsElite ? 1 : 0; // 精英死亡掉宝箱（VsDropSystem.Spawn 分支，3-5）
+
+            if (row.Behavior == (int)cfg.VSEnemyBehavior.Linear)
+            {
+                // 横穿方向：指向圆心 + 随机侧偏（±0.5 单位向量），归一化后即航向（出生方向一次性确定）
+                var offX = _logic.Rng.NextFix(-5, 5) / Fix.FromInt(10); // [−0.5, 0.5)
+                var offY = _logic.Rng.NextFix(-5, 5) / Fix.FromInt(10);
+                var tdx = cx - enemy.X + offX;
+                var tdy = cy - enemy.Y + offY;
+                var tLen = Fix.Sqrt(tdx * tdx + tdy * tdy);
+                if (tLen == Fix.Zero) { tdx = Fix.One; tLen = Fix.One; }
+                enemy.FacingX = tdx / tLen;
+                enemy.FacingY = tdy / tLen;
+            }
+
             _logic.Enemies.Add(enemy);
         }
     }

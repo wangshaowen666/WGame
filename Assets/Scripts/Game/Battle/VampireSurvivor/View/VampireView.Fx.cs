@@ -57,6 +57,35 @@ public partial class VampireView
         _textLifes.Clear();
     }
 
+    // ---- 奖励公告飘字（3-6 宝箱开启）：复用飘字实体与生命周期列表，存活更久便于阅读 ----
+
+    private const float RewardTextLifeSeconds = 1.4f;
+    private static readonly Color RewardTextColor = new(1f, 0.82f, 0.25f, 1f); // 暖金色，区别于伤害数字
+
+    private void SpawnRewardText(float x, float y, string content)
+    {
+        var entityId = _damageTextEntityId;
+        GameMgr.EntityPool.Acquire(entityId, _entityRoot, (go) =>
+        {
+            if (go == null)
+            {
+                Log.Error("[吸血鬼] 奖励飘字实体加载失败, 实体Id:", entityId);
+                return;
+            }
+            var view = go.GetComponent<DamageTextView>();
+            if (view == null)
+            {
+                Log.Error("[吸血鬼] 奖励飘字预制体缺少 DamageTextView 组件, 实体Id:", entityId, "，已销毁");
+                Object.Destroy(go);
+                return;
+            }
+            view.SetEntityId(entityId);
+            view.ShowText(x, y, content, RewardTextColor);
+            _activeTexts.Add(view);
+            _textLifes.Add(RewardTextLifeSeconds);
+        });
+    }
+
     // ---- 命中特效（命中时 Acquire → 播放 → Timer 计时回池——逻辑层无特效实体）----
 
     private const float HitEffectSeconds = 0.3f; // 特效存活时长（对齐特效资产动画时长）

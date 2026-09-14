@@ -80,7 +80,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93ed545e1317840cfa2af8d7486da5fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _asset: {fileID: 11400000, guid: 0e93de0d18db64186817a6044bb9d856, type: 2}
+  _asset: {fileID: 11400000, guid: 5d2631f439b7646298449cf13ba5ac92, type: 2}
   _renderer: {fileID: 2403018659697979207}
   _perInstance: 1
   _defaultClipNm: run
@@ -149,7 +149,7 @@ GameObject:
   - component: {fileID: 2189153778800530952}
   m_Layer: 0
   m_HasEditorInfo: 1
-  m_Name: Enemy_201002
+  m_Name: Enemy_201004
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

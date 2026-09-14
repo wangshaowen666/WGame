@@ -66,7 +66,8 @@ public class LogicPlayerStats
         Recalculate();
     }
 
-    /// <summary>统一结算：基础值 + Σ(被动每级加成 × 等级)，加法叠加；写回宿主 MaxHp/MoveSpeed（MaxHp 提升只抬高上限并 clamp，不回血）</summary>
+    /// <summary>统一结算：基础值 + Σ(被动每级加成 × 等级)，加法叠加；写回宿主 MaxHp/MoveSpeed。
+    /// MaxHp 提升（3-3 调整）：上限增量同步回补当前血量（升级血上限被动不白亏已扣的血），上限降低则 clamp</summary>
     public void Recalculate()
     {
         for (int i = 0; i < _bonusValues.Length; i++)
@@ -79,7 +80,10 @@ public class LogicPlayerStats
             _bonusValues[(int)cfg.AttrType] += Fix.FromDouble(cfg.PerLevelValue) * Fix.FromInt(slot.Level);
         }
 
-        _hero.MaxHp = Get(VSAttrType.MaxHp).Int;
+        var newMaxHp = Get(VSAttrType.MaxHp).Int;
+        if (newMaxHp > _hero.MaxHp)
+            _hero.Hp += newMaxHp - _hero.MaxHp; // 上限增量回补当前血量
+        _hero.MaxHp = newMaxHp;
         if (_hero.Hp > _hero.MaxHp)
             _hero.Hp = _hero.MaxHp;
         _hero.MoveSpeed = Get(VSAttrType.MoveSpeed);

@@ -54,5 +54,19 @@
     "attrType": 9,
     "perLevelValue": 0.5,
     "maxLevel": 5
+  },
+  {
+    "id": 9,
+    "name": "范围扩大",
+    "attrType": 5,
+    "perLevelValue": 0.12,
+    "maxLevel": 5
+  },
+  {
+    "id": 10,
+    "name": "弹速提升",
+    "attrType": 7,
+    "perLevelValue": 0.1,
+    "maxLevel": 5
   }
 ]

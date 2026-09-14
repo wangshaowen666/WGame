@@ -40,5 +40,12 @@
     "group": 4,
     "allowMult": false,
     "hideCovered": true
+  },
+  {
+    "id": 7,
+    "name": "WeaponChoosePanel",
+    "group": 4,
+    "allowMult": false,
+    "hideCovered": true
   }
 ]

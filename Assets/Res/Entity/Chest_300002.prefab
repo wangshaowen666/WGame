@@ -80,10 +80,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93ed545e1317840cfa2af8d7486da5fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _asset: {fileID: 11400000, guid: 0e93de0d18db64186817a6044bb9d856, type: 2}
+  _asset: {fileID: 11400000, guid: e0bb3bdc1a8aa491fb238b14402838b7, type: 2}
   _renderer: {fileID: 2403018659697979207}
   _perInstance: 1
-  _defaultClipNm: run
+  _defaultClipNm: idle
 --- !u!23 &2403018659697979207
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -146,10 +146,10 @@ GameObject:
   serializedVersion: 7
   m_Component:
   - component: {fileID: 5279383203753106776}
-  - component: {fileID: 2189153778800530952}
+  - component: {fileID: 5091638882898804061}
   m_Layer: 0
   m_HasEditorInfo: 1
-  m_Name: Enemy_201002
+  m_Name: Chest_300002
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -171,7 +171,7 @@ Transform:
   - {fileID: 5726432984995833880}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2189153778800530952
+--- !u!114 &5091638882898804061
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -180,6 +180,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 6656046028993263464}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 17e72ff5bcd9a4c82b822f6c450fd121, type: 3}
+  m_Script: {fileID: 11500000, guid: 131b0ba7d6a3e433e841328b456afd45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

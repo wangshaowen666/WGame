@@ -22,6 +22,7 @@ public sealed class VsLevelUpSystem
     private readonly VampireLogic _logic;
     private readonly int _expBase; // 升级经验曲线基数（1级->2级所需，关卡表）
     private readonly int _expStep; // 升级经验曲线步长（每级递增，关卡表）
+    private readonly long _chestHeal; // 宝箱保底治疗量（#VSPickup 宝箱行 value，3-6：无可升级项时回复生命）
 
     /// <summary>待选择组数（含当前展示组；连升多级逐组选择）</summary>
     public int PendingLevelUpCount { get; private set; }
@@ -38,6 +39,14 @@ public sealed class VsLevelUpSystem
         var stage = GameMgr.DataTable.TbVSStage.Get(stageId);
         _expBase = stage.ExpBase;
         _expStep = stage.ExpStep;
+
+        var pickups = GameMgr.DataTable.TbVSPickup.DataList;
+        for (int i = 0; i < pickups.Count; i++)
+            if (pickups[i].PickupType == VSPickupType.Chest)
+            {
+                _chestHeal = pickups[i].Value;
+                break;
+            }
     }
 
     /// <summary>经验入账并结算升级：获取量 ×(1+Growth 成长属性)；可连升多级，每级产出一条升级事件（2-8 选牌消费）</summary>
@@ -148,6 +157,47 @@ public sealed class VsLevelUpSystem
             DrawChoices();
         else
             CurrentChoices.Clear();
+    }
+
+    /// <summary>
+    /// 开启宝箱（3-6，拾取即结算不弹面板）：复用选牌池抽 1 项直接应用——武器升级/新增或被动升级/新增（应用语义与 ApplyChoice 一致）；
+    /// 保底规则：池为空（全持有且满级）时按宝箱行 value 回复生命。产出 VsChestEvent 供表现层飘奖励公告。
+    /// </summary>
+    public void OpenChest(LogicHero hero)
+    {
+        BuildChoicePool();
+        if (_choicePool.Count == 0)
+        {
+            // 保底：无可升级项 → 回复生命（实际回复量受 MaxHp 截断）
+            var before = hero.Hp;
+            hero.Hp += _chestHeal;
+            if (hero.Hp > hero.MaxHp) hero.Hp = hero.MaxHp;
+            _logic.ChestEvents.Add(new VsChestEvent(hero.Id, false, 0, 0, 0, hero.Hp - before));
+            return;
+        }
+
+        // 随机抽 1 项直接应用（XRng 确定性；BuildChoicePool 每次重建，无需洗牌）
+        var choice = _choicePool[_logic.Rng.NextInt(_choicePool.Count)];
+        int oldLevel;
+        int newLevel;
+        if (choice.IsWeapon)
+        {
+            var owned = hero.FindWeapon(choice.ItemId);
+            oldLevel = owned != null ? owned.Level : 0;
+            if (owned != null)
+                owned.LevelUp();
+            else
+                hero.Weapons.Add(new LogicWeapon(choice.ItemId));
+            newLevel = hero.FindWeapon(choice.ItemId).Level;
+        }
+        else
+        {
+            var owned = hero.Stats.FindPassive(choice.ItemId);
+            oldLevel = owned != null ? owned.Level : 0;
+            hero.Stats.AddPassive(choice.ItemId);
+            newLevel = hero.Stats.FindPassive(choice.ItemId).Level;
+        }
+        _logic.ChestEvents.Add(new VsChestEvent(hero.Id, choice.IsWeapon, choice.ItemId, oldLevel, newLevel, 0));
     }
 
     /// <summary>选牌状态进哈希（应用选择影响后续演算；字段与顺序与拆分前一致）</summary>

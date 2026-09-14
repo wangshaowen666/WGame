@@ -26,6 +26,8 @@ public class EnemyView : EntityViewBase
     private bool _facingRight;
     private int _lastSeenHitFrame; // 上次已处理的受击帧（0=无；与逻辑层 LastHitFrame 比对发现新受击）
     private float _flash;          // 当前闪白量（0~1，逐逻辑帧衰减）
+    private Vector3 _baseScale = Vector3.one; // 预制体原始缩放（Awake 捕获；精英缩放的还原基准，防池化复用残留放大）
+    private float _scale = 1f;     // 当前整体缩放（3-5 精英 = 碰撞半径比例，普通怪恒 1）
 
     // 头顶血条数据（2-12，逻辑帧 SetHp 写入，渲染帧由 EnemyHpBarRenderer 读取合并绘制）
     private long _hp;
@@ -42,6 +44,7 @@ public class EnemyView : EntityViewBase
 
     private void Awake()
     {
+        _baseScale = transform.localScale; // 池化复用同一实例，基准只捕获一次
         _flip = transform.Find("Flip");
         if (_flip == null)
             Log.Error("EnemyView 未找到子节点 Flip，无法翻转朝向（检查预制体节点名/层级）");
@@ -52,12 +55,23 @@ public class EnemyView : EntityViewBase
     private void OnEnable()
     {
         ResetInterpolation();
+        transform.localScale = _baseScale * _scale; // 还原/保持整体缩放（精英放大，3-5）
         _facingRight = false;
         _lastSeenHitFrame = 0;
         _flash = 0f;
         _hp = 0;
         _maxHp = 0;
     }
+
+    /// <summary>设置整体缩放（3-5 精英怪：SpawnEnemyView 按碰撞半径比例传入；头顶血条随 bounds 自适应）</summary>
+    public void SetScale(float scale)
+    {
+        _scale = scale;
+        transform.localScale = _baseScale * scale;
+    }
+
+    /// <summary>整体缩放系数（3-5：血条渲染器按此同步放大血条宽度，普通怪恒 1）</summary>
+    public float ScaleFactor => _scale;
 
     /// <summary>写入血量（逻辑帧由 VampireView 调用；满血/死亡时血条渲染器不写顶点即隐藏）</summary>
     public void SetHp(long hp, long maxHp)

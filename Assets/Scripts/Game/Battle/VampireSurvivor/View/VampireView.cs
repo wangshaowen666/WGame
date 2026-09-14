@@ -25,6 +25,7 @@ public partial class VampireView : BattleView
     private ViewSync<LogicEnemy, EnemyView> _enemyViews;
     private ViewSync<LogicProjectile, ProjectileView> _boltViews;
     private ViewSync<LogicDrop, DropView> _dropViews;
+    private ViewSync<LogicField, FieldView> _fieldViews; // 持续区域（环绕体/光环，3-1）
     private bool _inputBound;
 
     private VsHudPresenter _presenter; // HUD 与选牌/结算面板流程
@@ -33,12 +34,12 @@ public partial class VampireView : BattleView
     private Transform _entityRoot;
 
     // ---- 表现实体 id（Init 读配置表派生，逻辑实体不携带表现字段）----
-    // 英雄/弹体/命中特效锚点：VampireLogic 公开常量 → 角色/武器表 → TbEntity 资源 id；敌人按敌种 CfgId 反查
+    // 英雄/弹体/命中特效锚点：VampireLogic 公开常量 → 角色/武器表 → TbEntity 资源 id；
+    // 敌人按敌种 CfgId 反查；掉落物按 PickupId 反查（#VSPickup.entityId，3-6）
     private int _heroEntityId;
     private int _boltEntityId;
     private int _boltHitEffectId;
     private int _damageTextEntityId;
-    private int _gemEntityId;
 
     private EnemyHpBarRenderer _hpBars; // 敌人头顶血条合并渲染器（2-12，挂 EntityRoot 下）
 
@@ -55,7 +56,7 @@ public partial class VampireView : BattleView
         _presenter = new VsHudPresenter(_logic, _driver);
         _camera = new VsFollowCamera();
 
-        // 表现实体 id 反查（表链：角色→实体、关卡→飘字→实体、角色初始武器→弹体/命中特效实体、波次→敌种→宝石）
+        // 表现实体 id 反查（表链：角色→实体、关卡→飘字→实体、角色初始武器→弹体/命中特效实体）
         var characterCfg = GameMgr.DataTable.TbVSCharacter.Get(VampireLogic.HeroCfgId);
         var stageCfg = GameMgr.DataTable.TbVSStage.Get(VampireLogic.StageId);
         _heroEntityId = characterCfg.EntityId;
@@ -63,16 +64,6 @@ public partial class VampireView : BattleView
         _boltEntityId = weaponCfg.EntityId;
         _boltHitEffectId = weaponCfg.HitEffectId;
         _damageTextEntityId = stageCfg.DamageTextEntityId;
-
-        // 宝石实体：取本关首个波次行敌种的掉落实体（当前各敌种共用同款宝石，分档 7-3 治理）
-        var waves = GameMgr.DataTable.TbVSWave.DataList;
-        for (int i = 0; i < waves.Count; i++)
-        {
-            if (waves[i].StageId != VampireLogic.StageId)
-                continue;
-            _gemEntityId = GameMgr.DataTable.TbVSEnemy.Get(waves[i].EnemyId).DropId;
-            break;
-        }
 
         if (GameMgr.Battle.Joystick != null)
             BindJoystickInput(GameMgr.Battle.Joystick);
@@ -87,6 +78,8 @@ public partial class VampireView : BattleView
             b => b.Id, SpawnBoltView, RefreshBoltView, DespawnBoltView);
         _dropViews = new ViewSync<LogicDrop, DropView>(
             d => d.Id, SpawnDropView, RefreshDropView, DespawnDropView);
+        _fieldViews = new ViewSync<LogicField, FieldView>(
+            f => f.Id, SpawnFieldView, RefreshFieldView, DespawnFieldView);
 
         _driver.OnFrame += OnFrame;
         _driver.OnRenderFrame += OnRenderFrame; // 渲染帧插值驱动（表现帧率与逻辑帧率解耦）
@@ -103,6 +96,7 @@ public partial class VampireView : BattleView
         _enemyViews.Sync(_logic.Enemies);
         _boltViews.Sync(_logic.Projectiles);
         _dropViews.Sync(_logic.Drops);
+        _fieldViews.Sync(_logic.SysField.Fields);
 
         var hits = _logic.HitEvents;
         for (int i = 0; i < hits.Count; i++)
@@ -113,7 +107,36 @@ public partial class VampireView : BattleView
             SpawnDamageText(x, y, hits[i].Damage);
         }
 
+        // 宝箱开启公告（3-6）：奖励文案飘在开启者头顶（文案由表组装，逻辑事件只携带 id/等级/数值）
+        var chests = _logic.ChestEvents;
+        for (int i = 0; i < chests.Count; i++)
+        {
+            var ce = chests[i];
+            var heroes = _logic.Heroes;
+            var hx = 0f;
+            var hy = 0f;
+            for (int h = 0; h < heroes.Count; h++)
+                if (heroes[h].Id == ce.HeroId)
+                {
+                    hx = heroes[h].X.AsFloat;
+                    hy = heroes[h].Y.AsFloat;
+                    break;
+                }
+            SpawnRewardText(hx, hy, BuildChestRewardText(in ce));
+        }
+
         _presenter.OnFrame(); // HUD 刷新 + 升级选牌（2-8）/死亡结算（2-11）面板流程
+    }
+
+    /// <summary>宝箱奖励文案（3-6，表现层查表组装）：保底治疗 / 武器名·等级 / 被动名·等级</summary>
+    private static string BuildChestRewardText(in VsChestEvent ce)
+    {
+        if (ce.Heal > 0)
+            return "+" + ce.Heal + " 生命";
+        var name = ce.IsWeapon
+            ? GameMgr.DataTable.TbVSWeapon.Get(ce.ItemId).Name
+            : GameMgr.DataTable.TbVSPassive.Get(ce.ItemId).Name;
+        return name + " Lv." + ce.NewLevel;
     }
 
     /// <summary>渲染帧推进：按逻辑帧推进进度插值实体位置 + 飘字动画</summary>
@@ -136,6 +159,10 @@ public partial class VampireView : BattleView
         var drops = _dropViews.ViewList;
         for (int i = 0; i < drops.Count; i++)
             drops[i].ApplyInterpolation(alpha);
+
+        var fields = _fieldViews.ViewList;
+        for (int i = 0; i < fields.Count; i++)
+            fields[i].ApplyField(alpha);
 
         // 飘字动画（倒序：到期回池移除）
         for (int i = _activeTexts.Count - 1; i >= 0; i--)
@@ -187,6 +214,8 @@ public partial class VampireView : BattleView
         _boltViews = null;
         _dropViews?.Clear(); // 归还全部掉落视图（走 DespawnDropView 回实体池）
         _dropViews = null;
+        _fieldViews?.Clear(); // 归还全部区域视图（走 DespawnFieldView 回实体池）
+        _fieldViews = null;
 
         _camera?.Dispose(); // 清理 Cinemachine：销毁虚拟相机，移除本战斗添加的 Brain
         _camera = null;

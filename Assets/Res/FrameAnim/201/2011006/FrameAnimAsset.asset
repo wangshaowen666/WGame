@@ -1,5 +1,5 @@
 %YAML 1.1
-%TAG !u! tag:unity3d.com,2011:
+%TAG !u! tag:yousandi.cn,2023:
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9,11 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2823414cb17c4125a77565884c4e24d, type: 3}
-  m_Name: aframe_2011006_1
+  m_Script: {fileID: 11500000, guid: 02ea2bed296b144cb8766c3714e3c814, type: 3}
+  m_Name: FrameAnimAsset
   m_EditorClassIdentifier: 
-  items:
-  - anim: run
+  clips:
+  - clipName: run
     sprites:
     - {fileID: 620742096, guid: 8caaae02feec04914808837931488d79, type: 3}
     - {fileID: -1484587171, guid: 8caaae02feec04914808837931488d79, type: 3}
@@ -31,9 +31,9 @@ MonoBehaviour:
     - {fileID: -453075312, guid: 8caaae02feec04914808837931488d79, type: 3}
     - {fileID: 317545058, guid: 8caaae02feec04914808837931488d79, type: 3}
     - {fileID: 1693385653, guid: 8caaae02feec04914808837931488d79, type: 3}
-    time: 1
+    duration: 0.8
     loop: 1
-  - anim: die
+  - clipName: die
     sprites:
     - {fileID: 208121851, guid: 8caaae02feec04914808837931488d79, type: 3}
     - {fileID: 145255921, guid: 8caaae02feec04914808837931488d79, type: 3}
@@ -47,9 +47,5 @@ MonoBehaviour:
     - {fileID: 129305702, guid: 8caaae02feec04914808837931488d79, type: 3}
     - {fileID: 596275711, guid: 8caaae02feec04914808837931488d79, type: 3}
     - {fileID: 1123528982, guid: 8caaae02feec04914808837931488d79, type: 3}
-    time: 1
+    duration: 0.5
     loop: 0
-  textureArrayType: 0
-  singleArraySize: 512
-  configName: aframe_2011006_1.asset
-  sprConfig: {fileID: 0}

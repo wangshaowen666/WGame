@@ -20,6 +20,7 @@ public sealed partial class DVSPickup : Luban.BeanBase
         Name = _buf.ReadString();
         PickupType = (VSPickupType)_buf.ReadInt();
         Value = _buf.ReadInt();
+        EntityId = _buf.ReadInt();
     }
 
     public static DVSPickup DeserializeDVSPickup(ByteBuf _buf)
@@ -43,6 +44,10 @@ public sealed partial class DVSPickup : Luban.BeanBase
     /// 效果值(经验/治疗量等)
     /// </summary>
     public readonly int Value;
+    /// <summary>
+    /// 表现实体id(#Entity,0=暂未实现)
+    /// </summary>
+    public readonly int EntityId;
    
     public const int __ID__ = -51266595;
     public override int GetTypeId() => __ID__;
@@ -58,6 +63,7 @@ public sealed partial class DVSPickup : Luban.BeanBase
         + "name:" + Name + ","
         + "pickupType:" + PickupType + ","
         + "value:" + Value + ","
+        + "entityId:" + EntityId + ","
         + "}";
     }
 }

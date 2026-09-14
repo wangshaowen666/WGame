@@ -7,7 +7,9 @@
     "spawnIntervalSec": 1,
     "spawnCountPerWave": 2,
     "hpMul": 1,
-    "speedMul": 1
+    "speedMul": 1,
+    "isElite": false,
+    "viewScale": 1
   },
   {
     "id": 2,
@@ -17,7 +19,9 @@
     "spawnIntervalSec": 1,
     "spawnCountPerWave": 3,
     "hpMul": 1.2,
-    "speedMul": 1
+    "speedMul": 1,
+    "isElite": false,
+    "viewScale": 1
   },
   {
     "id": 3,
@@ -27,7 +31,9 @@
     "spawnIntervalSec": 0.8,
     "spawnCountPerWave": 3,
     "hpMul": 1.5,
-    "speedMul": 1.1
+    "speedMul": 1.1,
+    "isElite": false,
+    "viewScale": 1
   },
   {
     "id": 4,
@@ -37,7 +43,9 @@
     "spawnIntervalSec": 2,
     "spawnCountPerWave": 2,
     "hpMul": 0.8,
-    "speedMul": 1.8
+    "speedMul": 1.8,
+    "isElite": false,
+    "viewScale": 1
   },
   {
     "id": 5,
@@ -47,7 +55,9 @@
     "spawnIntervalSec": 0.6,
     "spawnCountPerWave": 4,
     "hpMul": 2,
-    "speedMul": 1.2
+    "speedMul": 1.2,
+    "isElite": false,
+    "viewScale": 1
   },
   {
     "id": 6,
@@ -57,7 +67,9 @@
     "spawnIntervalSec": 3,
     "spawnCountPerWave": 1,
     "hpMul": 3,
-    "speedMul": 0.8
+    "speedMul": 0.8,
+    "isElite": false,
+    "viewScale": 1
   },
   {
     "id": 7,
@@ -67,7 +79,9 @@
     "spawnIntervalSec": 0.5,
     "spawnCountPerWave": 4,
     "hpMul": 2.5,
-    "speedMul": 1.3
+    "speedMul": 1.3,
+    "isElite": false,
+    "viewScale": 1
   },
   {
     "id": 8,
@@ -77,7 +91,9 @@
     "spawnIntervalSec": 1.5,
     "spawnCountPerWave": 3,
     "hpMul": 1.2,
-    "speedMul": 2
+    "speedMul": 2,
+    "isElite": false,
+    "viewScale": 1
   },
   {
     "id": 9,
@@ -87,7 +103,9 @@
     "spawnIntervalSec": 2.5,
     "spawnCountPerWave": 2,
     "hpMul": 4,
-    "speedMul": 0.9
+    "speedMul": 0.9,
+    "isElite": false,
+    "viewScale": 1
   },
   {
     "id": 10,
@@ -97,6 +115,104 @@
     "spawnIntervalSec": 0.4,
     "spawnCountPerWave": 5,
     "hpMul": 3,
-    "speedMul": 1.4
+    "speedMul": 1.4,
+    "isElite": false,
+    "viewScale": 1
+  },
+  {
+    "id": 11,
+    "stageId": 1,
+    "startMinute": 2,
+    "enemyId": 201005,
+    "spawnIntervalSec": 2.5,
+    "spawnCountPerWave": 3,
+    "hpMul": 1,
+    "speedMul": 1,
+    "isElite": false,
+    "viewScale": 1
+  },
+  {
+    "id": 12,
+    "stageId": 1,
+    "startMinute": 4,
+    "enemyId": 201004,
+    "spawnIntervalSec": 0.4,
+    "spawnCountPerWave": 8,
+    "hpMul": 1,
+    "speedMul": 1,
+    "isElite": false,
+    "viewScale": 1
+  },
+  {
+    "id": 13,
+    "stageId": 1,
+    "startMinute": 5,
+    "enemyId": 201005,
+    "spawnIntervalSec": 2,
+    "spawnCountPerWave": 4,
+    "hpMul": 1.2,
+    "speedMul": 1.1,
+    "isElite": false,
+    "viewScale": 1
+  },
+  {
+    "id": 14,
+    "stageId": 1,
+    "startMinute": 7,
+    "enemyId": 201004,
+    "spawnIntervalSec": 0.3,
+    "spawnCountPerWave": 10,
+    "hpMul": 1.5,
+    "speedMul": 1.1,
+    "isElite": false,
+    "viewScale": 1
+  },
+  {
+    "id": 15,
+    "stageId": 1,
+    "startMinute": 8,
+    "enemyId": 201005,
+    "spawnIntervalSec": 1.5,
+    "spawnCountPerWave": 5,
+    "hpMul": 1.5,
+    "speedMul": 1.2,
+    "isElite": false,
+    "viewScale": 1
+  },
+  {
+    "id": 16,
+    "stageId": 1,
+    "startMinute": 3,
+    "enemyId": 201001,
+    "spawnIntervalSec": 1,
+    "spawnCountPerWave": 1,
+    "hpMul": 15,
+    "speedMul": 0.9,
+    "isElite": true,
+    "viewScale": 1.5
+  },
+  {
+    "id": 17,
+    "stageId": 1,
+    "startMinute": 6,
+    "enemyId": 201003,
+    "spawnIntervalSec": 1,
+    "spawnCountPerWave": 1,
+    "hpMul": 10,
+    "speedMul": 0.9,
+    "isElite": true,
+    "viewScale": 1.6
+  },
+  {
+    "id": 18,
+    "stageId": 1,
+    "startMinute": 9,
+    "enemyId": 201002,
+    "spawnIntervalSec": 1,
+    "spawnCountPerWave": 1,
+    "hpMul": 25,
+    "speedMul": 1.1,
+    "isElite": true,
+    "viewScale": 1.5
   }
 ]

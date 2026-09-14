@@ -66,7 +66,10 @@ public partial class VampireView
     private EnemyView SpawnEnemyView(LogicEnemy e)
     {
         var id = e.Id;             // 快照实体 id（异步加载期间实体可能被清扫/池化复用）
-        var entityId = GameMgr.DataTable.TbVSEnemy.Get(e.CfgId).EntityId; // 按敌种反查表现实体（敌种随波次变化）
+        var enemyCfg = GameMgr.DataTable.TbVSEnemy.Get(e.CfgId);
+        var entityId = enemyCfg.EntityId; // 按敌种反查表现实体（敌种随波次变化）
+        // 整体缩放 = 逻辑半径 / 敌表基准半径（3-5 精英波 ViewScale 同步放大碰撞半径，由此比例还原视觉放大；普通怪恒 1）
+        var scale = enemyCfg.Radius > 0f ? e.Radius.AsFloat / enemyCfg.Radius : 1f;
         var px = e.X.AsFloat;      // 快照位置（Attach 前推一帧，避免异步加载期间视图停在原点被插值渲染）
         var py = e.Y.AsFloat;
         GameMgr.EntityPool.Acquire(entityId, _entityRoot, (go) =>
@@ -84,6 +87,7 @@ public partial class VampireView
                 return;
             }
             view.SetEntityId(entityId); // 记录实体配置 Id（Despawn 归还时作池 key）
+            view.SetScale(scale);       // 精英放大（3-5；池化复用由 OnEnable 还原基准）
             view.PushFrame(px, py);
             _enemyViews.Attach(id, view);
         });
@@ -163,7 +167,13 @@ public partial class VampireView
     private DropView SpawnDropView(LogicDrop d)
     {
         var id = d.Id;             // 快照实体 id（异步加载期间实体可能被清扫/池化复用）
-        var entityId = _gemEntityId;
+        var pickupCfg = GameMgr.DataTable.TbVSPickup.Get(d.PickupId);
+        var entityId = pickupCfg.EntityId; // 按拾取种类反查表现实体（宝石/宝箱，3-6 表驱动）
+        if (entityId <= 0)
+        {
+            Log.Error("[吸血鬼] 拾取物未配表现实体, PickupId:", d.PickupId);
+            return null;
+        }
         var px = d.X.AsFloat;      // 快照位置（Attach 前推一帧）
         var py = d.Y.AsFloat;
         GameMgr.EntityPool.Acquire(entityId, _entityRoot, (go) =>
@@ -195,6 +205,58 @@ public partial class VampireView
 
     /// <summary>掉落视图消亡（被拾取，2-7）：归还实体池</summary>
     private void DespawnDropView(DropView view)
+    {
+        GameMgr.EntityPool.Release(view.EntityId, view.gameObject);
+    }
+
+    // ---- 区域效果视图（3-1：环绕体/光环）----
+
+    /// <summary>区域表现实体 id：按来源武器反查（武器表 EntityId；环绕体/光环共用弹体表现，正式资源 3-1 验收后替换）</summary>
+    private int ResolveFieldEntityId(LogicField f)
+    {
+        var weaponCfg = GameMgr.DataTable.TbVSWeapon.Get(f.WeaponId);
+        return weaponCfg != null ? weaponCfg.EntityId : _boltEntityId;
+    }
+
+    private FieldView SpawnFieldView(LogicField f)
+    {
+        var id = f.Id;             // 快照实体 id（异步加载期间实体可能被清扫/池化复用）
+        var entityId = ResolveFieldEntityId(f);
+        var isOrbit = f.Type == VSFieldType.Orbit;
+        var amount = f.Amount;
+        var px = f.X.AsFloat;      // 快照位置（Attach 前推一帧，避免异步加载期间视图停在原点被插值渲染）
+        var py = f.Y.AsFloat;
+        GameMgr.EntityPool.Acquire(entityId, _entityRoot, (go) =>
+        {
+            if (go == null)
+            {
+                Log.Error("[吸血鬼] 区域实体加载失败, 实体Id:", entityId);
+                return;
+            }
+            var view = go.GetComponent<FieldView>();
+            if (view == null)
+            {
+                Log.Error("[吸血鬼] 区域预制体缺少 FieldView 组件, 实体Id:", entityId, "，已销毁");
+                Object.Destroy(go);
+                return;
+            }
+            view.SetEntityId(entityId);
+            view.SetField(isOrbit, amount); // 环绕体 = 旋转容器；光环 = 静态圈
+            view.PushFrame(px, py);
+            _fieldViews.Attach(id, view);
+        });
+
+        return null;
+    }
+
+    private static void RefreshFieldView(LogicField f, FieldView view)
+    {
+        view.PushFrame(f.X.AsFloat, f.Y.AsFloat);
+        view.PushAngle(f.Angle.Int); // 自转相位（渲染帧 ApplyField 换算旋转）
+    }
+
+    /// <summary>区域视图消亡（到期/战斗结束）：归还实体池</summary>
+    private void DespawnFieldView(FieldView view)
     {
         GameMgr.EntityPool.Release(view.EntityId, view.gameObject);
     }

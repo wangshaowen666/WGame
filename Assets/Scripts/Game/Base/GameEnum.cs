@@ -32,5 +32,6 @@ public enum GameEvent
     // 吸血鬼升级选牌（解耦：LevelUpPanel 与 VampireView 经事件交互，互不持有引用）
     VsLevelUpChosen = 2102,        // 玩家在选牌面板确认，携带 int 选项下标（面板 -> 战斗）
     VsLevelUpChoicesChanged = 2103, // 选项组刷新（连升多组时换题），携带 List<VsLevelUpCard>（战斗 -> 面板；首开走 userData）
+    VsStartWeaponChosen = 2104,     // 开局武器选择确认，携带 int 武器表 id（WeaponChoosePanel -> 战斗）
 }
 

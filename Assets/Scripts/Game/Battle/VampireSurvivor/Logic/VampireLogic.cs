@@ -34,6 +34,7 @@ public class VampireLogic
     public readonly VsWaveSystem SysWave;             // 波次刷怪（2-9）
     public readonly VsEnemySystem SysEnemy;           // 敌人移动/自爆
     public readonly VsProjectileSystem SysProjectile; // 弹幕飞行/命中
+    public readonly VsFieldSystem SysField;           // 持续区域（环绕体/光环，3-1）
     public readonly VsDropSystem SysDrop;             // 掉落磁吸/拾取（2-7）
     public readonly VsLevelUpSystem SysLevelUp;       // 经验/升级选牌（2-8）
 
@@ -60,6 +61,11 @@ public class VampireLogic
     /// </summary>
     public readonly List<VsLevelUpEvent> LevelUpEvents = new();
 
+    /// <summary>
+    /// 本帧宝箱开启事件（拾取宝箱触发，3-6 随机升级/保底治疗）：表现层消费飘奖励公告；Tick 开头清上一帧事件。
+    /// </summary>
+    public readonly List<VsChestEvent> ChestEvents = new();
+
     private readonly XRng _rng;
     private int _nextId = 1; // 实体稳定自增 ID（视图对账按此 ID 增删）
 
@@ -79,6 +85,7 @@ public class VampireLogic
         SysWave = new VsWaveSystem(this, StageId);
         SysEnemy = new VsEnemySystem(this);
         SysProjectile = new VsProjectileSystem(this);
+        SysField = new VsFieldSystem(this, SysProjectile.HitDirect); // 区域命中复用弹幕结算语义（事件/击杀/掉落一致）
         SysDrop = new VsDropSystem(this);
         SysLevelUp = new VsLevelUpSystem(this, StageId);
 
@@ -93,8 +100,22 @@ public class VampireLogic
         hero.Hp = hero.MaxHp; // 满血出生
         hero.Level = 1;
         hero.XpToNext = SysLevelUp.CalcXpToNext(hero.Level);
-        hero.Weapons.Add(new LogicWeapon(character.StartWeaponId)); // 初始武器（角色表）
+        // 初始武器延迟装备（开局武器选择面板，3-1 扩展）：构造时不再读 startWeaponId，
+        // 由表现层弹出 WeaponChoosePanel，玩家选择后经 EquipStartWeapon 装备并恢复驱动；
+        // 面板打开前驱动保持暂停（Tick 不推进，无武器空转问题不存在）
         Heroes.Add(hero);
+    }
+
+    /// <summary>是否待开局选武器（构造后未装备初始武器；表现层据此弹出 WeaponChoosePanel 并暂停驱动）</summary>
+    public bool PendingStartWeapon { get; private set; } = true;
+
+    /// <summary>装备开局武器（WeaponChoosePanel 确认时调用）：表id来自武器表任意行，装备后恢复可推进</summary>
+    public void EquipStartWeapon(int weaponId)
+    {
+        if (!PendingStartWeapon)
+            return;
+        PendingStartWeapon = false;
+        Heroes[0].Weapons.Add(new LogicWeapon(weaponId));
     }
 
     /// <summary>分配实体稳定自增 ID（各系统生成实体时调用，保证全局唯一且确定性）</summary>
@@ -116,6 +137,7 @@ public class VampireLogic
         LastTickFrame = absFrame;
         HitEvents.Clear(); // 清上一帧命中事件（OnFrame 在 Tick 后同步消费，不会跨帧残留）
         LevelUpEvents.Clear(); // 清上一帧升级事件
+        ChestEvents.Clear(); // 清上一帧宝箱事件（3-6）
 
         // 1. 应用输入：玩家移动
         for (int p = 0; p < Heroes.Count; p++)
@@ -145,6 +167,9 @@ public class VampireLogic
         // 7. 弹幕飞行与命中判定
         SysProjectile.Tick();
 
+        // 7.5 持续区域（环绕体/光环，3-1）：跟随宿主 + 范围结算
+        SysField.Tick();
+
         // 8. 掉落物磁吸与拾取（经验入账 + 升级结算）
         SysDrop.Tick();
 
@@ -165,6 +190,16 @@ public class VampireLogic
                 continue;
             CoreMgr.ClassPool.Recycle(b);
             Projectiles.RemoveAt(i);
+        }
+
+        // 区域到期回收（3-1：环绕体周期结束/光环战斗结束才回收）
+        for (int i = SysField.Fields.Count - 1; i >= 0; i--)
+        {
+            var f = SysField.Fields[i];
+            if (f.LifeFrames > 0)
+                continue;
+            CoreMgr.ClassPool.Recycle(f);
+            SysField.Fields.RemoveAt(i);
         }
 
         // 10. 失败判定：玩家全灭
@@ -232,6 +267,7 @@ public class VampireLogic
         SysLevelUp.HashState(ref h); // 选牌状态进哈希（应用选择影响后续演算）
         SysEnemy.HashState(ref h);
         SysProjectile.HashState(ref h);
+        SysField.HashState(ref h);
         SysDrop.HashState(ref h);
         return h;
     }
@@ -249,5 +285,6 @@ public class VampireLogic
         Projectiles.Clear();
         Drops.Clear();
         Heroes.Clear();
+        SysField.Dispose(); // 区域实体回池 + 旋转状态复位（3-1）
     }
 }

@@ -26,6 +26,10 @@ public sealed partial class DVSWeaponLevel : Luban.BeanBase
         Amount = _buf.ReadInt();
         DurationSec = _buf.ReadFloat();
         Pierce = _buf.ReadInt();
+        SpreadDeg = _buf.ReadFloat();
+        OrbitRadius = _buf.ReadFloat();
+        AuraRadius = _buf.ReadFloat();
+        Gravity = _buf.ReadFloat();
     }
 
     public static DVSWeaponLevel DeserializeDVSWeaponLevel(ByteBuf _buf)
@@ -73,6 +77,22 @@ public sealed partial class DVSWeaponLevel : Luban.BeanBase
     /// 穿透数
     /// </summary>
     public readonly int Pierce;
+    /// <summary>
+    /// 扇形相邻弹夹角(度,0=同向散射用旧逻辑)
+    /// </summary>
+    public readonly float SpreadDeg;
+    /// <summary>
+    /// 环绕半径(区域型Orbit用,0=不适用)
+    /// </summary>
+    public readonly float OrbitRadius;
+    /// <summary>
+    /// 光环半径(区域型Aura用,0=不适用)
+    /// </summary>
+    public readonly float AuraRadius;
+    /// <summary>
+    /// 重力加速度(单位/秒^2,0=直线弹道)
+    /// </summary>
+    public readonly float Gravity;
    
     public const int __ID__ = -393093625;
     public override int GetTypeId() => __ID__;
@@ -94,6 +114,10 @@ public sealed partial class DVSWeaponLevel : Luban.BeanBase
         + "amount:" + Amount + ","
         + "durationSec:" + DurationSec + ","
         + "pierce:" + Pierce + ","
+        + "spreadDeg:" + SpreadDeg + ","
+        + "orbitRadius:" + OrbitRadius + ","
+        + "auraRadius:" + AuraRadius + ","
+        + "gravity:" + Gravity + ","
         + "}";
     }
 }

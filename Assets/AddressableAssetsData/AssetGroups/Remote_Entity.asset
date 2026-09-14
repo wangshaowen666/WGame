@@ -17,6 +17,11 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 73919f9b31dac44a9a5dd7a025c98248
   m_SerializeEntries:
+  - m_GUID: 2f2e8c499f24941968c0a2ed7a88901b
+    m_Address: Enemy_201004
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3d7b987cf517d4e5e920842db46e877b
     m_Address: Hero_101001
     m_ReadOnly: 0
@@ -37,6 +42,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 827edcd5372c1487c8546204f11a0395
+    m_Address: Chest_300002
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9e96c27624dcb4a3aadeb03687039001
     m_Address: DamageText_500002
     m_ReadOnly: 0
@@ -47,8 +57,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ce57816be4d6a401c9e215b2ce815e36
+    m_Address: Enemy_201005
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ebec5bf10024641789b83030cfacbf8f
     m_Address: Enemy_201003
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ec885f28325e84e07af1505aab7f1507
+    m_Address: Orbit_500003
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

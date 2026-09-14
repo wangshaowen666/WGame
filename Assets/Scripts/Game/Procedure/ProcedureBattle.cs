@@ -30,6 +30,7 @@ public class ProcedureBattle : ProcedureBase
     {
         base.OnExit();
         GameMgr.Event.UnRegister(GameEvent.ProcedureExitBattle, RunProcedure);
+        GameMgr.UI.PanelOff(DPnlId.BattlePanel); // 对称 OnEnter 的 PanelOn：离开战斗流程即关战斗界面（含 HUD/摇杆）
     }
 
     private void RunProcedure()

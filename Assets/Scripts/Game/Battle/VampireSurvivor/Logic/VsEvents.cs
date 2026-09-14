@@ -55,6 +55,30 @@ public readonly struct VsLevelUpChoice
     }
 }
 
+/// <summary>
+/// 宝箱开启事件（逻辑层产出、表现层消费，3-6）：拾取宝箱即结算随机升级/保底治疗，
+/// 事件供表现层飘奖励公告（文案由表现层查表组装，逻辑层不产字符串）。
+/// </summary>
+public readonly struct VsChestEvent
+{
+    public readonly int HeroId;
+    public readonly bool IsWeapon; // true=武器 false=被动（保底治疗时无意义）
+    public readonly int ItemId;    // 武器/被动表 id（保底治疗时无意义）
+    public readonly int OldLevel;  // 升级前等级（新增项=0）
+    public readonly int NewLevel;  // 升级后等级（新增项=1）
+    public readonly long Heal;     // 保底治疗量（>0 = 本次为保底治疗）
+
+    public VsChestEvent(int heroId, bool isWeapon, int itemId, int oldLevel, int newLevel, long heal)
+    {
+        HeroId = heroId;
+        IsWeapon = isWeapon;
+        ItemId = itemId;
+        OldLevel = oldLevel;
+        NewLevel = newLevel;
+        Heal = heal;
+    }
+}
+
 /// <summary>状态哈希混合工具（FNV-1a 64）：VampireLogic 与各系统的 HashState 共用；混合顺序即确定性，调用方不得重排</summary>
 public static class VsHash
 {

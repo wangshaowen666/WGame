@@ -24,6 +24,8 @@ public sealed partial class DVSWave : Luban.BeanBase
         SpawnCountPerWave = _buf.ReadInt();
         HpMul = _buf.ReadFloat();
         SpeedMul = _buf.ReadFloat();
+        IsElite = _buf.ReadBool();
+        ViewScale = _buf.ReadFloat();
     }
 
     public static DVSWave DeserializeDVSWave(ByteBuf _buf)
@@ -63,6 +65,14 @@ public sealed partial class DVSWave : Luban.BeanBase
     /// 移速系数(敌人表基础移速x此值)
     /// </summary>
     public readonly float SpeedMul;
+    /// <summary>
+    /// 是否精英(true=到点一次性刷一批,死亡掉宝箱)
+    /// </summary>
+    public readonly bool IsElite;
+    /// <summary>
+    /// 放大系数(视觉与碰撞半径同步放大)
+    /// </summary>
+    public readonly float ViewScale;
    
     public const int __ID__ = -1532811110;
     public override int GetTypeId() => __ID__;
@@ -82,6 +92,8 @@ public sealed partial class DVSWave : Luban.BeanBase
         + "spawnCountPerWave:" + SpawnCountPerWave + ","
         + "hpMul:" + HpMul + ","
         + "speedMul:" + SpeedMul + ","
+        + "isElite:" + IsElite + ","
+        + "viewScale:" + ViewScale + ","
         + "}";
     }
 }

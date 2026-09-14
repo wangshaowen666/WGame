@@ -101,12 +101,13 @@ public class EnemyHpBarRenderer : MonoBehaviour
             var p = v.transform.localPosition;  // (x, y)=艺术面坐标，z=层级（与精灵同层）
             float y0 = v.HeadTopLocalY + _headPad; // 头顶上方（局部 +y = 画面上方）
             float y1 = y0 + _barHeight;
-            float left = p.x - _barWidth * 0.5f;
-            float right = left + _barWidth;
+            var w = _barWidth * v.ScaleFactor;  // 精英放大血条宽度（3-5，与体型同步）
+            float left = p.x - w * 0.5f;
+            float right = left + w;
             float z = p.z;
 
             WriteQuad(bar * 8, left, right, y0, y1, z, BgColor);
-            WriteQuad(bar * 8 + 4, left, left + _barWidth * Mathf.Clamp01(v.HpRatio), y0, y1, z, FgColor);
+            WriteQuad(bar * 8 + 4, left, left + w * Mathf.Clamp01(v.HpRatio), y0, y1, z, FgColor);
             bar++;
         }
         return bar;

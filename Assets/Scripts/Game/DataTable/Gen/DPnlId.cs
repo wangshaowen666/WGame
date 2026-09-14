@@ -37,6 +37,10 @@ namespace cfg
         /// 死亡结算面板
         /// </summary>
         SettlePanel = 6,
+        /// <summary>
+        /// 开局武器选择面板
+        /// </summary>
+        WeaponChoosePanel = 7,
     }
 
 } 

@@ -8,5 +8,55 @@
     "hitEffectId": 701001,
     "knockback": 0.1,
     "desc": "自动索敌最近敌人，发射穿透弹"
+  },
+  {
+    "id": 2,
+    "name": "小刀",
+    "behavior": 1,
+    "targetStrategy": 4,
+    "entityId": 500001,
+    "hitEffectId": 701001,
+    "knockback": 0.1,
+    "desc": "朝移动方向连发穿透小刀，可多向扇形"
+  },
+  {
+    "id": 3,
+    "name": "鞭子",
+    "behavior": 2,
+    "targetStrategy": 3,
+    "entityId": 500001,
+    "hitEffectId": 701001,
+    "knockback": 0.3,
+    "desc": "面朝方向弧形横扫，瞬时判定"
+  },
+  {
+    "id": 4,
+    "name": "圣经",
+    "behavior": 3,
+    "targetStrategy": 1,
+    "entityId": 500003,
+    "hitEffectId": 701001,
+    "knockback": 0.2,
+    "desc": "经书环绕自身旋转，持续击退"
+  },
+  {
+    "id": 5,
+    "name": "大蒜",
+    "behavior": 3,
+    "targetStrategy": 1,
+    "entityId": 500003,
+    "hitEffectId": 701001,
+    "knockback": 0.4,
+    "desc": "光环持续灼烧周围敌人"
+  },
+  {
+    "id": 6,
+    "name": "斧头",
+    "behavior": 1,
+    "targetStrategy": 4,
+    "entityId": 500001,
+    "hitEffectId": 701001,
+    "knockback": 0.5,
+    "desc": "上抛穿透下落，抛物线弹道"
   }
 ]
