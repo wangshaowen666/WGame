@@ -7,6 +7,7 @@
  */
 
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using cfg;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -63,12 +64,18 @@ public class UIMgr : ManagerBase
         {
             _loadingPanelIdMap.Add(loadingId, id);
             var info = LoadPanelArg.Create(loadingId, cfg, group, userData);
-            CoreMgr.Res.LoadAsync<GameObject>(cfg.Name, OnLoadFinish, info);
+            LoadPanelAsync(cfg.Name, info).Forget();
         }
         else
         {
             group.AddPanel(panel, userData);
         }
+    }
+
+    private async UniTaskVoid LoadPanelAsync(string name, LoadPanelArg arg)
+    {
+        var obj = await CoreMgr.Res.LoadAsync<GameObject>(name);
+        OnLoadFinish(obj, arg);
     }
     
     // 幂等关闭，允许多次调用
@@ -125,12 +132,8 @@ public class UIMgr : ManagerBase
         return null;
     }
     
-    private void OnLoadFinish(GameObject obj, object userData)
+    private void OnLoadFinish(GameObject obj, LoadPanelArg arg)
     {
-        LoadPanelArg arg = userData as LoadPanelArg;
-        if (arg == null)
-            throw new System.Exception("打开界面参数无效");
-
         _loadingPanelIdMap.Remove(arg.LoadingId, out var pnlId);
         // 加载的过程中被关闭了
         if (pnlId == 0)

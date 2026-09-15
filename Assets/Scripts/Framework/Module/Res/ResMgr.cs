@@ -13,9 +13,6 @@ using UnityEngine;
 using UnityEngine.U2D;
 using Object = UnityEngine.Object;
 
-// in关键字指定泛型类型参数T是逆变的，这意味着委托之间的赋值兼容性方向与类型继承方向相反，不加in需要类型完全匹配
-public delegate void LoadAssetCallback<in T>(T asset, object userData);
-
 public class ResMgr : ManagerBase
 {
     private IResLoader _resLoader;
@@ -28,8 +25,11 @@ public class ResMgr : ManagerBase
 
     public T LoadSync<T>(string key) => _resLoader.LoadSync<T>(key);
 
-    public void LoadAsync<T>(string key, LoadAssetCallback<T> callback = null, object userData = null)
-        => _resLoader.LoadAsync(key, callback, userData);
+    public UniTask<T> LoadAsync<T>(string key)
+        => _resLoader.LoadAsync<T>(key);
+
+    public UniTask<IList<T>> PreloadWithLabel<T>(string label)
+        => _resLoader.PreloadWithLabel(label);
 
     public void LoadSceneAsync(string sceneName, Action<float> onProgress = null, Action onComplete = null)
         => _resLoader.LoadSceneAsync(sceneName, onProgress, onComplete);

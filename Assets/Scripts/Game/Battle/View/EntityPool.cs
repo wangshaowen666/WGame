@@ -7,6 +7,7 @@
  */
 
 using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -32,7 +33,7 @@ public class EntityPool : ManagerBase
         var obj = _pool.GetObj(key);
         if (obj == null)
         {
-            CoreMgr.Res.LoadAsync<GameObject>(key, OnLoadFinish, LoadEntityArg.Create(key, parent, callback));
+            AcquireAsync(key, parent, callback).Forget();
             return;
         }
 
@@ -40,6 +41,12 @@ public class EntityPool : ManagerBase
         obj.transform.localPosition = Vector3.zero;
         obj.SetActive(true);
         callback?.Invoke(obj);
+    }
+
+    private async UniTaskVoid AcquireAsync(string key, Transform parent, Action<GameObject> callback)
+    {
+        var prefab = await CoreMgr.Res.LoadAsync<GameObject>(key);
+        OnLoadFinish(prefab, LoadEntityArg.Create(key, parent, callback));
     }
 
     /// <summary>按实体配置 Id 归还实体</summary>
@@ -87,12 +94,8 @@ public class EntityPool : ManagerBase
         }
     }
 
-    private void OnLoadFinish(GameObject obj, object userData)
+    private void OnLoadFinish(GameObject obj, LoadEntityArg arg)
     {
-        var arg = userData as LoadEntityArg;
-        if (arg == null)
-            throw new Exception("实体加载参数无效");
-
         // 加载期间父节点已被销毁（战斗结束/切场景）：放弃实例化，直接卸载
         if (arg.Parent == null)
         {

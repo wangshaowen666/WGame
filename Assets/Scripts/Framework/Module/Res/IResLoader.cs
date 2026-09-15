@@ -7,6 +7,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 
 public interface IResLoader
@@ -17,9 +18,14 @@ public interface IResLoader
     T LoadSync<T>(string key);
 
     /// <summary>
-    /// 异步加载资源
+    /// 异步加载资源：可 await 顺序编排；失败时 Log.Error + 返回 default，不抛异常
     /// </summary>
-    void LoadAsync<T>(string key, LoadAssetCallback<T> callback, object userData = null);
+    UniTask<T> LoadAsync<T>(string key);
+
+    /// <summary>
+    /// 按标签预载一组资源（小游戏平台异步预载后，LoadSync 可直接命中已完成的句柄）；失败返回 default
+    /// </summary>
+    UniTask<IList<T>> PreloadWithLabel<T>(string label);
 
     /// <summary>
     /// 异步加载场景

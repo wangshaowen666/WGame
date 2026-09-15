@@ -194,8 +194,15 @@ public partial class ToolBox
         string stateBinPath = $"Assets/AddressableAssetsData/{EditorUserBuildSettings.activeBuildTarget.ToString()}/addressables_content_state.bin";
         if (!File.Exists(stateBinPath))
         {
-            AddLogInfo($"State文件不存在: {stateBinPath}");
-            return;
+            // 团结引擎微信小游戏: activeBuildTarget 枚举名是 MiniGame, 而 Addressables 的目录名是 WeixinMiniGame
+            string fallbackPath = "Assets/AddressableAssetsData/WeixinMiniGame/addressables_content_state.bin";
+            if (File.Exists(fallbackPath))
+                stateBinPath = fallbackPath;
+            else
+            {
+                AddLogInfo($"State文件不存在: {stateBinPath}");
+                return;
+            }
         }
 
         var settings = AddressableAssetSettingsDefaultObject.Settings;

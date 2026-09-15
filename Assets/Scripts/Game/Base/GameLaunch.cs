@@ -2,18 +2,17 @@
  * File: GameStart.cs
  * Author: Wsw
  * Feedback: 614270423@qq.com
- * Time: 2026/01/04 18:41:15 
+ * Time: 2026/01/04 18:41:17
  *--------------------------------------------------------------
  */
 
-using System.Collections.Generic;
-using HybridCLR;
 using UnityEngine;
 
 /// <summary>
 /// 可热更的C#代码启动入口，热更后通过反射调用的
+/// （补充AOT元数据已挪到AOT侧 ProcedureLoadDll.ReplenishMeta，在加载热更程序集之前执行）
 /// </summary>
-public class GameLaunch 
+public class GameLaunch
 {
     public static void StartGame()
     {
@@ -22,7 +21,6 @@ public class GameLaunch
         //Application.targetFrameRate = 120;
         GameMgr.Init();
 
-        ReplenishMeta();
         InitGameProcedure();
     }
 
@@ -36,27 +34,7 @@ public class GameLaunch
         CoreMgr.Procedure.AddProcedure(new ProcedureMain());
         CoreMgr.Procedure.AddProcedure(new ProcedureBattle());
         CoreMgr.Procedure.AddProcedure(new ProcedureTest());
-        
-        CoreMgr.Procedure.ChangeProcedure<ProcedurePreload>();
-    }
-    
-    /// <summary>
-    /// 补充元数据
-    /// </summary>
-    private static void ReplenishMeta()
-    {
-        List<string> aotDllList = new List<string>
-        {
-            "mscorlib.dll",
-            "UniTask.dll",
-            "Unity.Netcode.Runtime.dll",
-        };
 
-        foreach (var aotDllName in aotDllList)
-        {
-            byte[] dllBytes = CoreMgr.Res.LoadSync<TextAsset>(aotDllName).bytes;
-            RuntimeApi.LoadMetadataForAOTAssembly(dllBytes, HomologousImageMode.SuperSet);
-            Log.Info("补充元数据dll:", aotDllName);
-        }
+        CoreMgr.Procedure.ChangeProcedure<ProcedurePreload>();
     }
 }

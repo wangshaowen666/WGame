@@ -6,6 +6,8 @@
  *--------------------------------------------------------------
  */
 
+using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using cfg;
 using Luban;
 using UnityEngine;
@@ -53,8 +55,33 @@ public class DataTableMgr : ManagerBase
         LoadTable();
     }
     
-    private static ByteBuf LoadByteBuf(string file)
+    // 小游戏(WebGL)下 LoadSync 加载远程bundle会死锁，表bytes必须先经 PreloadTableBytesAsync 异步预载
+    private readonly Dictionary<string, byte[]> _preloadedTableBytes = new Dictionary<string, byte[]>();
+
+    /// <summary>
+    /// 配置表统一标签：在 Addressables Groups 中给所有 Bin/*.bytes 打上此标签，新增表打上同标签即可
+    /// </summary>
+    public const string TableLabel = "datatable";
+
+    /// <summary>
+    /// 异步预载所有配置表bytes（按标签统一加载，无需维护文件列表；键为 TextAsset.name，与 Luban loader 的文件名一致）
+    /// </summary>
+    public async UniTask PreloadTableBytesAsync()
     {
+        var assets = await CoreMgr.Res.PreloadWithLabel<TextAsset>(TableLabel);
+        if (assets == null)
+            throw new System.Exception($"配置表预载失败: {TableLabel}");
+
+        foreach (var ta in assets)
+            _preloadedTableBytes[ta.name] = ta.bytes;
+    }
+
+    private ByteBuf LoadByteBuf(string file)
+    {
+        if (_preloadedTableBytes.TryGetValue(file, out var bytes))
+            return new ByteBuf(bytes);
+
+        // 兜底：其他平台走同步加载
         var cfg = CoreMgr.Res.LoadSync<TextAsset>($"Bin/{file}.bytes");
         return new ByteBuf(cfg.bytes);
     }

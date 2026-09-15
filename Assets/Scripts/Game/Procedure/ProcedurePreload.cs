@@ -29,7 +29,8 @@ public class ProcedurePreload : ProcedureBase
         _loginPanel = _fsm.GetData<LoginPanel>(LaunchConfig.LoginPanel);
         _loginPanel.SetTip("编译着色器中...", 0.9f);
 
-        // 加载配置表
+        // 加载配置表（小游戏(WebGL)下 LoadSync 会死锁，必须先异步预载表bytes）
+        await GameMgr.DataTable.PreloadTableBytesAsync();
         GameMgr.DataTable.LoadTable();
         
         await UniTask.Yield();

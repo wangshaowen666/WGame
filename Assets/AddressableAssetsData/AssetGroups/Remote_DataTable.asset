@@ -20,7 +20,8 @@ MonoBehaviour:
   - m_GUID: c8f969201f3a54e26bd9f292ebba9ec6
     m_Address: Bin
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - datatable
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 887a2619f93d5433294a38258012af01, type: 2}

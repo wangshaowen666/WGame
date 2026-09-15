@@ -26,5 +26,5 @@ MonoBehaviour:
   patchAOTAssemblies: []
   outputLinkFile: HybridCLRGenerate/link.xml
   outputAOTGenericReferenceFile: HybridCLRGenerate/AOTGenericReferences.cs
-  maxGenericReferenceIteration: 10
+  maxGenericReferenceIteration: 30
   maxMethodBridgeGenericIteration: 10

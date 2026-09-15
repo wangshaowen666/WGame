@@ -63,7 +63,9 @@ public class AddressableHelper
                     // {
                     //     await UniTask.NextFrame();
                     // }
+#if !UNITY_WEBGL
                     ClearCache();
+#endif
                 }
                 finally { Addressables.Release(updateHandle); }
             }
@@ -131,7 +133,9 @@ public class AddressableHelper
 
     /// <summary>
     /// 移除本地不在catalog中的旧Bundle
+    /// WebGL(小游戏)平台没有 Caching API，缓存由适配层虚拟文件系统管理，无需清理
     /// </summary>
+#if !UNITY_WEBGL
     private void ClearCache()
     {
         var activeBundleHashes = new HashSet<string>();
@@ -170,7 +174,8 @@ public class AddressableHelper
             }
         }
     }
-    
+#endif
+
     /// <summary>
     /// 从资源键中提取哈希值。
     /// 例如：从 "RemoteABPrefix_1234567890abc.bundle" 中提取 "1234567890abc"。
