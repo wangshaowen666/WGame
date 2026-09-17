@@ -12,7 +12,6 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.SceneManagement;
 
 public class AddressableLoader : IResLoader
@@ -20,36 +19,6 @@ public class AddressableLoader : IResLoader
     private readonly Dictionary<string, AsyncOperationHandle> _handleMap = new();
     // Addressable内部也会引用计数，但是没有忽略计数直接卸载的方法，我们也拿不到它的内部计数，所以自己维护了一个计数
     private readonly Dictionary<string, int> _refMap = new();
-
-    public T LoadSync<T>(string key)
-    {
-#if STATS_ON && UNITY_EDITOR
-        UpdateStats(key,1);
-#endif
-
-        if (_handleMap.TryGetValue(key, out AsyncOperationHandle tempHandle))
-        {
-            _refMap.TryGetValue(key, out int c);
-            _refMap[key] = c + 1;
-            if (!tempHandle.IsDone)
-                tempHandle.WaitForCompletion();
-            return (T)tempHandle.Result;
-        }
-
-        var handle = Addressables.LoadAssetAsync<T>(key);
-        T ret = handle.WaitForCompletion();
-        if (handle.Status != AsyncOperationStatus.Succeeded)
-        {
-            Addressables.Release(handle);
-            Log.Error($"资源同步加载失败: {key}", handle.OperationException);
-            return default;
-        }
-        _handleMap[key] = handle;
-        _refMap.TryGetValue(key, out int count);
-        _refMap[key] = count + 1;
-
-        return ret;
-    }
 
     public async UniTask<T> LoadAsync<T>(string key)
     {
@@ -99,59 +68,31 @@ public class AddressableLoader : IResLoader
         }
     }
 
-    public void LoadSceneAsync(string sceneName, Action<float> onProgress = null, Action onComplete = null)
+    public async UniTask LoadSceneAsync(string sceneName, Action<float> onProgress = null)
     {
-        LoadScene(sceneName, onProgress, onComplete).Forget();
-    }
-
-    public void Unload(string key)
-    {
-        if (!_handleMap.TryGetValue(key, out var handle))
+        try
         {
-            Log.Error("要卸载的资源不存在", key);
-            return;
-        }
+            var handle = Addressables.LoadSceneAsync(sceneName, LoadSceneMode.Single);
 
-        if (!_refMap.TryGetValue(key, out int refCount))
-        {
-            Log.Error("要卸载的资源引用计数不存在", key);
-            return;
-        }
-
-#if STATS_ON && UNITY_EDITOR
-        UpdateStats(key,2, 1);
-#endif
-
-        int count = refCount - 1;
-        if (count <= 0)
-        {
-            _handleMap.Remove(key);
-            _refMap.Remove(key);
-            Addressables.Release(handle);
-        }
-        else
-        {
-            _refMap[key] = count;
-        }
-    }
-
-    public void UnloadAll()
-    {
-        foreach (var kv in _handleMap)
-        {
-            if (kv.Value.IsValid())
+            while (!handle.IsDone)
             {
-                _refMap.TryGetValue(kv.Key, out int count);
-#if STATS_ON && UNITY_EDITOR
-                if (count > 0)
-                    UpdateStats(kv.Key,2, count);
-#endif
-                Addressables.Release(kv.Value);
+                onProgress?.Invoke(handle.PercentComplete);
+                await UniTask.Yield();
             }
-        }
 
-        _handleMap.Clear();
-        _refMap.Clear();
+            if (handle.Status != AsyncOperationStatus.Succeeded)
+            {
+                Addressables.Release(handle);
+                Log.Error("场景加载失败:", sceneName);
+                return;
+            }
+
+            onProgress?.Invoke(1f);
+        }
+        catch (Exception e)
+        {
+            Log.Error("场景加载异常:", sceneName, e.Message, e.StackTrace);
+        }
     }
 
     public async UniTask<IList<T>> PreloadWithLabel<T>(string label)
@@ -182,38 +123,60 @@ public class AddressableLoader : IResLoader
         }
     }
     
+    public void Unload(string key)
+    {
+        if (!_handleMap.TryGetValue(key, out var handle))
+        {
+            Log.Error("要卸载的资源不存在", key);
+            return;
+        }
+
+        if (!_refMap.TryGetValue(key, out int refCount))
+        {
+            Log.Error("要卸载的资源引用计数不存在", key);
+            return;
+        }
+
+#if STATS_ON && UNITY_EDITOR
+        UpdateStats(key,2, 1);
+#endif
+
+        int count = refCount - 1;
+        if (count <= 0)
+        {
+            _handleMap.Remove(key);
+            _refMap.Remove(key);
+            Addressables.Release(handle);
+        }
+        else
+        {
+            _refMap[key] = count;
+        }
+    }
+    
+    public void UnloadAll()
+    {
+        foreach (var kv in _handleMap)
+        {
+            if (kv.Value.IsValid())
+            {
+                _refMap.TryGetValue(kv.Key, out int count);
+#if STATS_ON && UNITY_EDITOR
+                if (count > 0)
+                    UpdateStats(kv.Key,2, count);
+#endif
+                Addressables.Release(kv.Value);
+            }
+        }
+
+        _handleMap.Clear();
+        _refMap.Clear();
+    }
+    
     public int GetLoadedCount(string key)
     {
         _refMap.TryGetValue(key, out int count);
         return count;
-    }
-
-    private async UniTask LoadScene(string sceneName, Action<float> onProgress = null, Action onComplete = null)
-    {
-        try
-        {
-            var handle = Addressables.LoadSceneAsync(sceneName, LoadSceneMode.Single);
-
-            while (!handle.IsDone)
-            {
-                onProgress?.Invoke(handle.PercentComplete);
-                await UniTask.Yield();
-            }
-
-            if (handle.Status != AsyncOperationStatus.Succeeded)
-            {
-                Addressables.Release(handle);
-                Log.Error("场景加载失败:", sceneName);
-                return;
-            }
-
-            onProgress?.Invoke(1f);
-            onComplete?.Invoke();
-        }
-        catch (Exception e)
-        {
-            Log.Error("场景加载异常:", sceneName, e.Message, e.StackTrace);
-        }
     }
     
 #if STATS_ON && UNITY_EDITOR

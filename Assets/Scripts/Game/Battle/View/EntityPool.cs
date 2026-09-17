@@ -46,7 +46,20 @@ public class EntityPool : ManagerBase
     private async UniTaskVoid AcquireAsync(string key, Transform parent, Action<GameObject> callback)
     {
         var prefab = await CoreMgr.Res.LoadAsync<GameObject>(key);
-        OnLoadFinish(prefab, LoadEntityArg.Create(key, parent, callback));
+        // 加载期间父节点已被销毁（战斗结束/切场景）：放弃实例化，直接卸载
+        if (parent == null)
+        {
+            Log.Warning("[EntityPool] 加载完成时父节点已销毁，丢弃实体：", key);
+            if (prefab != null)
+                CoreMgr.Res.Unload(key);
+            return;
+        }
+
+        var entity = prefab != null ? Object.Instantiate(prefab, parent) : null;
+        if (entity == null)
+            Log.Error("[EntityPool] 实体实例化失败：", prefab == null ? "<加载失败>" : prefab.name);
+
+        callback?.Invoke(entity);
     }
 
     /// <summary>按实体配置 Id 归还实体</summary>
@@ -93,47 +106,5 @@ public class EntityPool : ManagerBase
             return _root;
         }
     }
-
-    private void OnLoadFinish(GameObject obj, LoadEntityArg arg)
-    {
-        // 加载期间父节点已被销毁（战斗结束/切场景）：放弃实例化，直接卸载
-        if (arg.Parent == null)
-        {
-            Log.Warning("[EntityPool] 加载完成时父节点已销毁，丢弃实体：", arg.Key);
-            if (obj != null)
-                CoreMgr.Res.Unload(arg.Key);
-            CoreMgr.ClassPool.Recycle(arg);
-            return;
-        }
-
-        var entity = obj != null ? Object.Instantiate(obj, arg.Parent) : null;
-        if (entity == null)
-            Log.Error("[EntityPool] 实体实例化失败：", obj == null ? "<加载失败>" : obj.name);
-
-        arg.Callback?.Invoke(entity);
-        CoreMgr.ClassPool.Recycle(arg);
-    }
 }
 
-public sealed class LoadEntityArg : IResetable
-{
-    public string Key;
-    public Transform Parent;
-    public Action<GameObject> Callback;
-
-    public static LoadEntityArg Create(string key, Transform parent, Action<GameObject> callback)
-    {
-        var arg = CoreMgr.ClassPool.Get<LoadEntityArg>();
-        arg.Key = key;
-        arg.Parent = parent;
-        arg.Callback = callback;
-        return arg;
-    }
-
-    public void Reset()
-    {
-        Key = null;
-        Parent = null;
-        Callback = null;
-    }
-}

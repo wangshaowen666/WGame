@@ -131,11 +131,11 @@ public class AddressableHelper
         Log.Info("下载成功");
     }
 
+#if !UNITY_WEBGL
     /// <summary>
     /// 移除本地不在catalog中的旧Bundle
     /// WebGL(小游戏)平台没有 Caching API，缓存由适配层虚拟文件系统管理，无需清理
     /// </summary>
-#if !UNITY_WEBGL
     private void ClearCache()
     {
         var activeBundleHashes = new HashSet<string>();

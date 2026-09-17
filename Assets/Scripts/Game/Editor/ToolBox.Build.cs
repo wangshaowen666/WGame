@@ -159,7 +159,13 @@ public partial class ToolBox
             Debug.LogError($"构建安装包失败：{ex}");
         }
     }
-    
+
+    [HorizontalGroup("打包工具/水平布局", width: 100)]
+    [Button("微信小游戏包", ButtonSizes.Large)]
+    public void BuildVXPackage()
+    {
+        EditorApplication.ExecuteMenuItem("微信小游戏/转换小游戏");
+    }
     
     /// <summary>
     /// 构建新包

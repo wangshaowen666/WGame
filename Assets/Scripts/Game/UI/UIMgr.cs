@@ -63,19 +63,12 @@ public class UIMgr : ManagerBase
         if (panel == null)
         {
             _loadingPanelIdMap.Add(loadingId, id);
-            var info = LoadPanelArg.Create(loadingId, cfg, group, userData);
-            LoadPanelAsync(cfg.Name, info).Forget();
+            LoadPanelAsync(loadingId, cfg, group, userData).Forget();
         }
         else
         {
             group.AddPanel(panel, userData);
         }
-    }
-
-    private async UniTaskVoid LoadPanelAsync(string name, LoadPanelArg arg)
-    {
-        var obj = await CoreMgr.Res.LoadAsync<GameObject>(name);
-        OnLoadFinish(obj, arg);
     }
     
     // 幂等关闭，允许多次调用
@@ -132,25 +125,24 @@ public class UIMgr : ManagerBase
         return null;
     }
     
-    private void OnLoadFinish(GameObject obj, LoadPanelArg arg)
+    private async UniTaskVoid LoadPanelAsync(uint loadingId, DUIPanel cfg, UIGroup group, object userData)
     {
-        _loadingPanelIdMap.Remove(arg.LoadingId, out var pnlId);
+        var obj = await CoreMgr.Res.LoadAsync<GameObject>(cfg.Name);
+        _loadingPanelIdMap.Remove(loadingId, out var pnlId);
         // 加载的过程中被关闭了
         if (pnlId == 0)
         {
             // todo 这里加载到内存，但没有实例化，卸载的时候要注意
-            CoreMgr.ClassPool.Recycle(arg);
             return;
         }
 
-        var prefab =Object.Instantiate(obj, arg.Group.Trans);
+        var prefab = Object.Instantiate(obj, group.Trans);
         var panel = prefab.GetComponent<UIPanelBase>();
         if (panel == null)
             throw new System.Exception("预制体上缺少UIPanelBase脚本");
-        
-        panel.OnInit(arg.Cfg);
-        arg.Group.AddPanel(panel, arg.UserData);
-        CoreMgr.ClassPool.Recycle(arg);
+
+        panel.OnInit(cfg);
+        group.AddPanel(panel, userData);
     }
 
     private UIGroup CreateUIGroup(DUIGroup groupId)
@@ -172,32 +164,5 @@ public class UIMgr : ManagerBase
         var group = new UIGroup(tr);
         _layerGroupMap.Add(groupId, group);
         return group;
-    } 
-}
-
-public sealed class LoadPanelArg : IResetable
-{
-    public uint LoadingId { get; private set; }
-    public DUIPanel Cfg { get; private set; }
-    public UIGroup Group { get; private set; }
-    public object UserData { get; private set; }
-
-    public static LoadPanelArg Create(uint loadingId, DUIPanel cfg, UIGroup group, object userData)
-    {
-        var info = CoreMgr.ClassPool.Get<LoadPanelArg>();
-        info.LoadingId = loadingId;
-        info.Cfg = cfg;
-        info.Group = group;
-        info.UserData = userData;
-        
-        return info;
-    }
-    
-    public void Reset()
-    {
-        LoadingId = 0;
-        Cfg = null;
-        Group = null;
-        UserData = null;
     }
 }

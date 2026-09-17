@@ -23,16 +23,14 @@ public class ResMgr : ManagerBase
         _resLoader = new AddressableLoader();
     }
 
-    public T LoadSync<T>(string key) => _resLoader.LoadSync<T>(key);
-
     public UniTask<T> LoadAsync<T>(string key)
         => _resLoader.LoadAsync<T>(key);
 
     public UniTask<IList<T>> PreloadWithLabel<T>(string label)
-        => _resLoader.PreloadWithLabel(label);
+        => _resLoader.PreloadWithLabel<T>(label);
 
-    public void LoadSceneAsync(string sceneName, Action<float> onProgress = null, Action onComplete = null)
-        => _resLoader.LoadSceneAsync(sceneName, onProgress, onComplete);
+    public UniTask LoadSceneAsync(string sceneName, Action<float> onProgress = null)
+        => _resLoader.LoadSceneAsync(sceneName, onProgress);
 
     public void Unload(string key) => _resLoader.Unload(key);
 

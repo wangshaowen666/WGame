@@ -73,9 +73,8 @@ public class ProcedureLoadDll : ProcedureBase
 
         foreach (var aotDllName in aotDllList)
         {
-            var handle = Addressables.LoadAssetAsync<TextAsset>(aotDllName);
-            await handle;
-            RuntimeApi.LoadMetadataForAOTAssembly(handle.Result.bytes, HomologousImageMode.SuperSet);
+            var asset = await CoreMgr.Res.LoadAsync<TextAsset>(aotDllName);
+            RuntimeApi.LoadMetadataForAOTAssembly(asset.bytes, HomologousImageMode.SuperSet);
         }
     }
 #endif

@@ -7,6 +7,7 @@
  */
 
 using cfg;
+using Cysharp.Threading.Tasks;
 
 public class ProcedureChangeScene : ProcedureBase
 {
@@ -30,14 +31,13 @@ public class ProcedureChangeScene : ProcedureBase
             CoreMgr.OnSceneExit();
         }
 
-        CoreMgr.Res.LoadSceneAsync(nm, null, OnSceneComplete);
+        LoadSceneAsync(nm).Forget();
     }
 
-    private void OnSceneComplete()
+    private async UniTaskVoid LoadSceneAsync(string nm)
     {
-        Log.Info("OnSceneComplete");
-        var nm = _fsm.GetData<string>(ProcedureKey.SceneName);
-
+        await CoreMgr.Res.LoadSceneAsync(nm);
+        
         GameMgr.UI.PanelOff(DPnlId.LoadingPanel);
         switch (nm)
         {

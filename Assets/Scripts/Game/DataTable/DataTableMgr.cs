@@ -14,7 +14,15 @@ using UnityEngine;
 
 public class DataTableMgr : ManagerBase
 {
+    private const string TableLabel = "datatable";
+    
+    private readonly Dictionary<string, byte[]> _preloadedTableBytes = new Dictionary<string, byte[]>();
     private bool _isLoaded = false;
+    /// <summary>
+    /// 检查数据表是否已加载
+    /// </summary>
+    public bool IsLoaded => _isLoaded;
+    
     // 导表工具自动补全下列属性
     private cfg.Tables _tables;
 
@@ -54,23 +62,19 @@ public class DataTableMgr : ManagerBase
         _isLoaded = false;
         LoadTable();
     }
-    
-    // 小游戏(WebGL)下 LoadSync 加载远程bundle会死锁，表bytes必须先经 PreloadTableBytesAsync 异步预载
-    private readonly Dictionary<string, byte[]> _preloadedTableBytes = new Dictionary<string, byte[]>();
 
     /// <summary>
-    /// 配置表统一标签：在 Addressables Groups 中给所有 Bin/*.bytes 打上此标签，新增表打上同标签即可
-    /// </summary>
-    public const string TableLabel = "datatable";
-
-    /// <summary>
-    /// 异步预载所有配置表bytes（按标签统一加载，无需维护文件列表；键为 TextAsset.name，与 Luban loader 的文件名一致）
+    /// 异步预载所有配置表bytes（按标签统一加载，无需维护文件列表；键为 TextAsset.name，与 Luban loader 的文件名一致）。
+    /// 必须在 LoadTable 之前完成：WebGL/小游戏无同步加载能力，未预载的表直接报错
     /// </summary>
     public async UniTask PreloadTableBytesAsync()
     {
         var assets = await CoreMgr.Res.PreloadWithLabel<TextAsset>(TableLabel);
         if (assets == null)
-            throw new System.Exception($"配置表预载失败: {TableLabel}");
+        {
+            Log.Error($"配置表预载失败: {TableLabel}");
+            return;
+        }
 
         foreach (var ta in assets)
             _preloadedTableBytes[ta.name] = ta.bytes;
@@ -81,13 +85,6 @@ public class DataTableMgr : ManagerBase
         if (_preloadedTableBytes.TryGetValue(file, out var bytes))
             return new ByteBuf(bytes);
 
-        // 兜底：其他平台走同步加载
-        var cfg = CoreMgr.Res.LoadSync<TextAsset>($"Bin/{file}.bytes");
-        return new ByteBuf(cfg.bytes);
+        throw new System.Exception($"配置表bytes未预载: {file}（检查资产是否打上 {TableLabel} 标签，且 PreloadTableBytesAsync 先于 LoadTable 执行）");
     }
-    
-    /// <summary>
-    /// 检查数据表是否已加载
-    /// </summary>
-    public bool IsLoaded => _isLoaded;
 }

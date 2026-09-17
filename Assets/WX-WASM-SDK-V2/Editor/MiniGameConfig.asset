@@ -15,7 +15,7 @@ MonoBehaviour:
   ProjectConf:
     projectName: "\u5272\u8349\u9879\u76EE\u7EC3\u4E60"
     Appid: wx258b70c8c5f5cde0
-    CDN: http://127.0.0.1:8080
+    CDN: http://192.168.14.200:8080
     assetLoadType: 0
     compressDataPackage: 0
     VideoUrl: 

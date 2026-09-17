@@ -45,8 +45,8 @@ public class ProcedureResCheckAA : ProcedureBase
         }
         catch (ResourceUpdateException e)
         {
-            // 目前服务器为内网，我希望在外网能够跳过热更直接进游戏
-            if (e.ErrorCode == 1) ChangeTo<ProcedureLoadDll>();
+            // 目前服务器为内网，我希望在外网能够跳过热更直接进游戏玩单机模式
+            ChangeTo<ProcedureLoadDll>();
             Log.Error("热更失败:", e.ErrorCode, e.Message, e.InnerException, e.StackTrace);
         }
         catch (Exception e)

@@ -7,6 +7,7 @@
  */
 
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
@@ -45,8 +46,8 @@ public static class FrameAnimGpuUtil
     public const string ShaderName = "Game/FrameAnimGpu";
 
     /// <summary>
-    /// shader 的 Addressable 地址（Remote_Common 组已配置该条目）：
-    /// 真机必须先按此地址显式加载，加载成功后 Shader.Find 才命中
+    /// shader 的 Addressable 地址（Remote_Common 组，地址不含扩展名）：
+    /// 真机必须在进战斗前调用 <see cref="PreloadShadersAsync"/> 按此地址显式加载（加载后的实例缓存在本类，运行时不依赖 Shader.Find）
     /// </summary>
     public const string ShaderAddress = "FrameAnimGpu";
 
@@ -70,40 +71,43 @@ public static class FrameAnimGpuUtil
     public static readonly int PropFrameIndex = Shader.PropertyToID("_FrameIndex");
 
     /// <summary>
-    /// 获取 shader：优先经 Addressable 显式加载，失败回退 Shader.Find。
-    /// 为什么组里包含仍找不到：Shader.Find 只能命中"已加载"的 shader，Addressable 组里"包含"只代表"可被加载"，
+    /// 预载 GPU 动画 shader（必须在进战斗前的异步阶段调用，如 ProcedurePreload）：
+    /// Shader.Find 只能命中"已加载"的 shader，Addressable 组里"包含"只代表"可被加载"，
     /// bundle 不加载时 shader 不在内存；而 new Material(字符串) 的字符串引用不构成 Addressable 依赖，
-    /// 没有材质资产引用该 shader，故永远无人触发它加载 —— 真机必须显式加载一次
+    /// 没有材质资产引用该 shader，故永远无人触发它加载 —— 真机必须显式加载一次，加载后常驻（勿 Unload）。
+    /// 注意：微信小游戏 wasm 环境下 Shader.Find 对 bundle 加载的 shader 不可靠，
+    /// 因此加载后的实例缓存在此处，运行时经 <see cref="FindShader"/> 直接取实例，不走按名查找
+    /// </summary>
+    public static async UniTask PreloadShadersAsync()
+    {
+        _loadedShader = await CoreMgr.Res.LoadAsync<Shader>(ShaderAddress);
+        _loadedShaderInstanced = await CoreMgr.Res.LoadAsync<Shader>(ShaderAddressInstanced);
+
+        if (_loadedShader == null)
+            Log.Error($"FrameAnimGpuUtil 预载 shader 失败: {ShaderAddress}");
+        if (_loadedShaderInstanced == null)
+            Log.Error($"FrameAnimGpuUtil 预载 instanced shader 失败: {ShaderAddressInstanced}");
+    }
+
+    private static Shader _loadedShader;
+    private static Shader _loadedShaderInstanced;
+
+    /// <summary>
+    /// 获取 shader：优先取 PreloadShadersAsync 缓存的实例；仅编辑器/兜底场景走 Shader.Find
     /// </summary>
     /// <param name="instanced">true = GPU Instancing 版 shader（Game/FrameAnimGpuInst，逐实例属性变体）</param>
     public static Shader FindShader(bool instanced = false)
     {
-        string address = instanced ? ShaderAddressInstanced : ShaderAddress;
+        var shader = instanced ? _loadedShaderInstanced : _loadedShader;
+        if (shader != null)
+            return shader;
+
         string name = instanced ? ShaderNameInstanced : ShaderName;
-
-        Shader shader = null;
-        try
-        {
-            // 真机：先按地址加载（Remote_Common 组，加载后 shader 常驻，材质生命周期内不卸载）
-            shader = CoreMgr.Res.LoadSync<Shader>(address);
-        }
-        catch (System.Exception e)
-        {
-            // ResMgr 未初始化（测试裸场景未走启动流程时 _resLoader 为 null）回退 Shader.Find
-            Log.Warning("FrameAnimGpuUtil 显式加载 shader 失败，回退 Shader.Find:", name, e.Message);
-        }
-
-        if (shader == null)
-        {
-            // 编辑器资产库可直接找到；或 shader 已进主包（Graphics Always Included Shaders）/已被其它材质带出
-            shader = Shader.Find(name);
-        }
-
+        shader = Shader.Find(name);
         if (shader == null)
         {
             Log.Error("FrameAnimGpuUtil 找不到 shader:", name,
-                "（真机需先经 Addressable 显式加载：Remote_Common 组地址", address,
-                "；或进 Graphics 设置 Always Included Shaders）");
+                "（真机需先调用 PreloadShadersAsync 经 Addressable 显式加载；或进 Graphics 设置 Always Included Shaders）");
         }
 
         return shader;
