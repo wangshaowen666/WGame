@@ -8,6 +8,9 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+#if UNITY_WEBGL && WEIXINMINIGAME
+using WeChatWASM;
+#endif
 
 /// <summary>
 /// 战斗 HUD 面板（TD/VS 共用载体）：
@@ -132,14 +135,34 @@ public class BattlePanel : UIPanelBase
         timeRt.sizeDelta = new Vector2(300f, 60f);
         timeRt.anchoredPosition = new Vector2(0f, -35f);
 
-        // 右上：击杀数
+        // 右上：击杀数（微信小游戏：额外下移，避开胶囊按钮——SafeArea 只含系统安全区，不含胶囊）
         _killText = CreateText(_hudRoot, "KillText", 28, Color.white);
         var killRt = _killText.rectTransform;
         killRt.anchorMin = killRt.anchorMax = new Vector2(1f, 1f);
         killRt.pivot = new Vector2(1f, 1f); // pivot 对齐右上角，pos 即边距
         killRt.sizeDelta = new Vector2(300f, 40f);
-        killRt.anchoredPosition = new Vector2(-30f, -40f);
+        killRt.anchoredPosition = new Vector2(-30f, -40f - WeChatCapsuleTopOffset());
         _killText.alignment = TextAlignmentOptions.Right;
+    }
+
+    /// <summary>
+    /// 微信小游戏：胶囊按钮底边超出安全区顶部的额外避让量（Unity 像素，含 8 逻辑像素边距）。
+    /// SafeArea 只处理系统安全区，胶囊在部分机型上低于安全区顶线，击杀数需额外下移；其他平台返回 0
+    /// </summary>
+    private static float WeChatCapsuleTopOffset()
+    {
+#if UNITY_WEBGL && WEIXINMINIGAME
+        var sys = WX.GetSystemInfoSync();
+        var menu = WX.GetMenuButtonBoundingClientRect();
+        if (sys?.safeArea == null || menu == null || sys.screenWidth <= 0 || Screen.width <= 0)
+            return 0f;
+
+        float scale = Screen.width / (float)sys.screenWidth;
+        // 胶囊底边(+8 逻辑像素边距) 与 安全区顶线 的差值，负数说明胶囊在安全区内，无需避让
+        return Mathf.Max(0f, (float)((menu.bottom + 8 - sys.safeArea.top) * scale));
+#else
+        return 0f;
+#endif
     }
 
     /// <summary>创建进度条（底 + 前景）：前景锚点 x = 比例，改 anchorMax 即缩放，零 sprite 依赖</summary>

@@ -23,8 +23,8 @@ MonoBehaviour:
     DST: /Users/wangshaowen/Desktop
     StreamCDN: 
     bundleHashLength: 32
-    bundlePathIdentifier: StreamingAssets;
-    bundleExcludeExtensions: json;
+    bundlePathIdentifier: StreamingAssets;MyServer;
+    bundleExcludeExtensions: 
     AssetsUrl: 
     MemorySize: 256
     HideAfterCallMain: 1

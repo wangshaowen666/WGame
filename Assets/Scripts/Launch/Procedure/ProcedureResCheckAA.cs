@@ -35,11 +35,12 @@ public class ProcedureResCheckAA : ProcedureBase
         try
         {
             _loginPanel.SetTip("更新资源列表...", 0.3f);
-            
-            await _helper.InitAsync();
-            await _helper.UpdateCatalog();
-            await _helper.CheckRes();
-            await _helper.Download();
+
+            // WX 桥接层请求超时后，C# 侧的 await 永远不返回——没有异常、没有失败状态
+            await _helper.InitAsync().Timeout(TimeSpan.FromSeconds(10));
+            await _helper.UpdateCatalog().Timeout(TimeSpan.FromSeconds(10));
+            await _helper.CheckRes().Timeout(TimeSpan.FromSeconds(10));
+            await _helper.Download(); 
 
             ChangeTo<ProcedureLoadDll>();
         }
@@ -49,6 +50,12 @@ public class ProcedureResCheckAA : ProcedureBase
             ChangeTo<ProcedureLoadDll>();
             Log.Error("热更失败:", e.ErrorCode, e.Message, e.InnerException, e.StackTrace);
         }
+        catch (TimeoutException e)
+        {
+            ChangeTo<ProcedureLoadDll>();
+            Log.Error("热更超时:", e.Message, e.InnerException, e.StackTrace);
+        }
+        
         catch (Exception e)
         {
             Log.Error("更新执行出错:", e.Message, e.InnerException, e.StackTrace);

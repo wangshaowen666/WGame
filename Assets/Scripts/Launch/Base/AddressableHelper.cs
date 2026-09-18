@@ -18,7 +18,7 @@ using UnityEngine.ResourceManagement.ResourceLocations;
 public class ResourceUpdateException : Exception
 {
     public int ErrorCode { get; }
-    public ResourceUpdateException(int code, string msg = null) : base(msg) 
+    public ResourceUpdateException(int code, string msg = null, Exception inner = null) : base(msg, inner)
         => ErrorCode = code;
 }
 
@@ -36,99 +36,125 @@ public class AddressableHelper
 
     public async UniTask InitAsync()
     {
-        await Addressables.InitializeAsync();
+        try
+        {
+            await Addressables.InitializeAsync();
+        }
+        catch (Exception e)
+        {
+            throw new ResourceUpdateException(0, "InitializeAsync 失败", e);
+        }
     }
 
     public async UniTask UpdateCatalog()
     {
-        var checkHandle = Addressables.CheckForCatalogUpdates(false);
-        await checkHandle;
         try
         {
-            if (checkHandle.Status != AsyncOperationStatus.Succeeded)
-                throw new ResourceUpdateException(1, "CheckForCatalogUpdates 失败");
-
-            if (checkHandle.Result is { Count: > 0 })
+            var checkHandle = Addressables.CheckForCatalogUpdates(false);
+            try
             {
-                PlayerPrefsUtil.SetInt("UpdateFlag", 0);
-                var updateHandle = Addressables.UpdateCatalogs(checkHandle.Result, false);
-                await updateHandle;
-                try
+                await checkHandle;
+                if (checkHandle.Status != AsyncOperationStatus.Succeeded)
+                    throw new ResourceUpdateException(1, "CheckForCatalogUpdates 失败");
+
+                if (checkHandle.Result is { Count: > 0 })
                 {
-                    if (updateHandle.Status != AsyncOperationStatus.Succeeded)
-                        throw new ResourceUpdateException(2, "UpdateCatalogs 失败");
-                
-                    // 这里选择清除缓存，需要等缓存系统准备好，不然会报"Cache is not ready to be accessed"
-                    // while (!Caching.ready)
-                    // {
-                    //     await UniTask.NextFrame();
-                    // }
+                    PlayerPrefsUtil.SetInt("UpdateFlag", 0);
+                    var updateHandle = Addressables.UpdateCatalogs(checkHandle.Result, false);
+                    try
+                    {
+                        await updateHandle;
+                        if (updateHandle.Status != AsyncOperationStatus.Succeeded)
+                            throw new ResourceUpdateException(2, "UpdateCatalogs 失败");
+
 #if !UNITY_WEBGL
-                    ClearCache();
+                        ClearCache();
 #endif
+                    }
+                    finally { Addressables.Release(updateHandle); }
                 }
-                finally { Addressables.Release(updateHandle); }
             }
+            finally { Addressables.Release(checkHandle); }
         }
-        finally { Addressables.Release(checkHandle); }
+        catch (ResourceUpdateException) { throw; }
+        catch (Exception e)
+        {
+            // 包住裸 await 阶段的异常（如切网时的桥接层失败），统一为可跳过的热更失败
+            throw new ResourceUpdateException(1, "catalog 检查/更新异常", e);
+        }
     }
 
     public async UniTask CheckRes()
     {
-        if (PlayerPrefsUtil.GetInt("UpdateFlag") == 1)
-            return;
-        
-        // 下载交集，同时满足所有标签的bundle才会下载
-        var locationHandle = Addressables.LoadResourceLocationsAsync(LoginDownloadLabels, Addressables.MergeMode.Intersection);
-        await locationHandle;
-        if (locationHandle.Status != AsyncOperationStatus.Succeeded)
+        try
         {
-            Addressables.Release(locationHandle);
-            throw new ResourceUpdateException(3, "LoadResourceLocationsAsync 失败");
+            if (PlayerPrefsUtil.GetInt("UpdateFlag") == 1)
+                return;
+
+            // 下载交集，同时满足所有标签的bundle才会下载
+            var locationHandle = Addressables.LoadResourceLocationsAsync(LoginDownloadLabels, Addressables.MergeMode.Intersection);
+            try
+            {
+                await locationHandle;
+                if (locationHandle.Status != AsyncOperationStatus.Succeeded)
+                    throw new ResourceUpdateException(3, "LoadResourceLocationsAsync 失败");
+
+                // 预防CheckRes意外多次执行了
+                _totalLocation.Clear();
+                _totalLocation.AddRange(locationHandle.Result);
+
+                var sizeHandle = Addressables.GetDownloadSizeAsync(_totalLocation);
+                try
+                {
+                    await sizeHandle;
+                    if (sizeHandle.Status != AsyncOperationStatus.Succeeded)
+                        throw new ResourceUpdateException(4, "GetDownloadSizeAsync 失败");
+
+                    _fileSize = sizeHandle.Result;
+                    Log.Info("热更资源总大小:", GetFileLength(_fileSize));
+                }
+                finally { Addressables.Release(sizeHandle); }
+            }
+            finally { Addressables.Release(locationHandle); }
         }
-        
-        // 预防CheckRes意外多次执行了
-        _totalLocation.Clear();
-        _totalLocation.AddRange(locationHandle.Result);
-        var sizeHandle = Addressables.GetDownloadSizeAsync(_totalLocation);
-        await sizeHandle;
-        if (sizeHandle.Status != AsyncOperationStatus.Succeeded)
+        catch (ResourceUpdateException) { throw; }
+        catch (Exception e)
         {
-            Addressables.Release(locationHandle);
-            Addressables.Release(sizeHandle);
-            throw new ResourceUpdateException(4, "GetDownloadSizeAsync 失败");
+            throw new ResourceUpdateException(4, "检查资源异常", e);
         }
-        
-        _fileSize = sizeHandle.Result;
-        Log.Info("热更资源总大小:", GetFileLength(_fileSize));
-        
-        Addressables.Release(locationHandle);
-        Addressables.Release(sizeHandle);
     }
 
     public async UniTask Download()
     {
-        if (_fileSize == 0 || _totalLocation.Count == 0)
-            return;
-        
-        AsyncOperationHandle downHandle = Addressables.DownloadDependenciesAsync(_totalLocation, false);
-        DownloadStatus state;
-        while (!downHandle.IsDone)
+        try
         {
-            state = downHandle.GetDownloadStatus();
-            OnDownloadProgress?.Invoke(state.Percent, state.DownloadedBytes, state.TotalBytes);
-            await UniTask.Yield();
+            if (_fileSize == 0 || _totalLocation.Count == 0)
+                return;
+
+            AsyncOperationHandle downHandle = Addressables.DownloadDependenciesAsync(_totalLocation, false);
+            try
+            {
+                DownloadStatus state;
+                while (!downHandle.IsDone)
+                {
+                    state = downHandle.GetDownloadStatus();
+                    OnDownloadProgress?.Invoke(state.Percent, state.DownloadedBytes, state.TotalBytes);
+                    await UniTask.Yield();
+                }
+
+                if (downHandle.Status != AsyncOperationStatus.Succeeded)
+                    throw new ResourceUpdateException(5, "DownloadDependenciesAsync 失败");
+
+                PlayerPrefsUtil.SetInt("UpdateFlag", 1);
+                Log.Info("下载成功");
+            }
+            finally { Addressables.Release(downHandle); }
         }
-        
-        if (downHandle.Status != AsyncOperationStatus.Succeeded)
+        catch (ResourceUpdateException) { throw; }
+        catch (Exception e)
         {
-            Addressables.Release(downHandle);
-            throw new ResourceUpdateException(5, "DownloadDependenciesAsync 失败");
+            throw new ResourceUpdateException(5, "下载资源异常", e);
         }
-        
-        PlayerPrefsUtil.SetInt("UpdateFlag", 1);
-        Addressables.Release(downHandle);
-        Log.Info("下载成功");
     }
 
 #if !UNITY_WEBGL
