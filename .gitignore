@@ -11,6 +11,9 @@
 HybridCLRData/
 Assets/HybridCLRGenerate
 WGame_BurstDebugInformation_DoNotShip/
+
+# 微信转换副产品（data包备份，每次转换自动重新生成）
+TextToolDatas/
 mono_crash.0.0.json
 UserSettings/Layouts/default-2022.dwlt
 
